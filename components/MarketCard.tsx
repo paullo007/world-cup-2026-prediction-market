@@ -24,7 +24,9 @@ export function MarketCard({
       <div className="flex items-start justify-between gap-3">
         <h3 className="font-semibold leading-snug group-hover:text-white">
           {index != null && (
-            <span className="mr-1.5 font-bold text-slate-500">{index}.</span>
+            <span className="mr-1.5 align-middle text-[2.5em] font-bold leading-none text-slate-500">
+              {index}.
+            </span>
           )}
           {market.question}
         </h3>

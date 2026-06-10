@@ -28,6 +28,109 @@ const winner = (team: string, p: number): SeedMarket => ({
   liquidity: 1500,
 });
 
+const slugify = (s: string) =>
+  s
+    .normalize("NFD")
+    .replace(/[^\x00-\x7f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+const longDate = (iso: string) =>
+  new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+
+// Group-stage fixtures from the Dec 2025 final draw: [date, home, away].
+// The June 11 Mexico vs South Africa opener is omitted (covered by the
+// dedicated "opening match" market below).
+const GROUP_FIXTURES: [string, string, string][] = [
+  ["2026-06-11", "South Korea", "Czechia"],
+  ["2026-06-12", "Canada", "Bosnia and Herzegovina"],
+  ["2026-06-12", "United States", "Paraguay"],
+  ["2026-06-13", "Qatar", "Switzerland"],
+  ["2026-06-13", "Brazil", "Morocco"],
+  ["2026-06-13", "Haiti", "Scotland"],
+  ["2026-06-13", "Australia", "Türkiye"],
+  ["2026-06-14", "Germany", "Curaçao"],
+  ["2026-06-14", "Netherlands", "Japan"],
+  ["2026-06-14", "Ivory Coast", "Ecuador"],
+  ["2026-06-14", "Sweden", "Tunisia"],
+  ["2026-06-15", "Spain", "Cape Verde"],
+  ["2026-06-15", "Belgium", "Egypt"],
+  ["2026-06-15", "Saudi Arabia", "Uruguay"],
+  ["2026-06-15", "Iran", "New Zealand"],
+  ["2026-06-16", "France", "Senegal"],
+  ["2026-06-16", "Iraq", "Norway"],
+  ["2026-06-16", "Argentina", "Algeria"],
+  ["2026-06-16", "Austria", "Jordan"],
+  ["2026-06-17", "Portugal", "DR Congo"],
+  ["2026-06-17", "England", "Croatia"],
+  ["2026-06-17", "Ghana", "Panama"],
+  ["2026-06-17", "Uzbekistan", "Colombia"],
+  ["2026-06-18", "Czechia", "South Africa"],
+  ["2026-06-18", "Switzerland", "Bosnia and Herzegovina"],
+  ["2026-06-18", "Canada", "Qatar"],
+  ["2026-06-18", "Mexico", "South Korea"],
+  ["2026-06-19", "United States", "Australia"],
+  ["2026-06-19", "Scotland", "Morocco"],
+  ["2026-06-19", "Brazil", "Haiti"],
+  ["2026-06-19", "Türkiye", "Paraguay"],
+  ["2026-06-20", "Netherlands", "Sweden"],
+  ["2026-06-20", "Germany", "Ivory Coast"],
+  ["2026-06-20", "Ecuador", "Curaçao"],
+  ["2026-06-20", "Tunisia", "Japan"],
+  ["2026-06-21", "Spain", "Saudi Arabia"],
+  ["2026-06-21", "Belgium", "Iran"],
+  ["2026-06-21", "Uruguay", "Cape Verde"],
+  ["2026-06-21", "New Zealand", "Egypt"],
+  ["2026-06-22", "Argentina", "Austria"],
+  ["2026-06-22", "France", "Iraq"],
+  ["2026-06-22", "Norway", "Senegal"],
+  ["2026-06-22", "Jordan", "Algeria"],
+  ["2026-06-23", "Portugal", "Uzbekistan"],
+  ["2026-06-23", "England", "Ghana"],
+  ["2026-06-23", "Panama", "Croatia"],
+  ["2026-06-23", "Colombia", "DR Congo"],
+  ["2026-06-24", "Switzerland", "Canada"],
+  ["2026-06-24", "Bosnia and Herzegovina", "Qatar"],
+  ["2026-06-24", "Scotland", "Brazil"],
+  ["2026-06-24", "Morocco", "Haiti"],
+  ["2026-06-24", "Czechia", "Mexico"],
+  ["2026-06-24", "South Africa", "South Korea"],
+  ["2026-06-25", "Ecuador", "Germany"],
+  ["2026-06-25", "Curaçao", "Ivory Coast"],
+  ["2026-06-25", "Japan", "Sweden"],
+  ["2026-06-25", "Tunisia", "Netherlands"],
+  ["2026-06-25", "Türkiye", "United States"],
+  ["2026-06-25", "Paraguay", "Australia"],
+  ["2026-06-26", "Norway", "France"],
+  ["2026-06-26", "Senegal", "Iraq"],
+  ["2026-06-26", "Cape Verde", "Saudi Arabia"],
+  ["2026-06-26", "Uruguay", "Spain"],
+  ["2026-06-26", "Egypt", "Iran"],
+  ["2026-06-26", "New Zealand", "Belgium"],
+  ["2026-06-27", "Panama", "England"],
+  ["2026-06-27", "Croatia", "Ghana"],
+  ["2026-06-27", "Colombia", "Portugal"],
+  ["2026-06-27", "DR Congo", "Uzbekistan"],
+  ["2026-06-27", "Algeria", "Austria"],
+  ["2026-06-27", "Jordan", "Argentina"],
+];
+
+const match = ([date, home, away]: [string, string, string]): SeedMarket => ({
+  slug: `${slugify(home)}-vs-${slugify(away)}-${date}`,
+  question: `Will ${home} beat ${away}?`,
+  description: `Group-stage match on ${longDate(date)}. Resolves YES if ${home} win in regulation (a draw or a ${away} win resolves NO).`,
+  category: "Matches",
+  probability: 0.4,
+  closesAt: new Date(`${date}T19:00:00Z`),
+  liquidity: 1000,
+});
+
 const MARKETS: SeedMarket[] = [
   // Tournament winner
   winner("Argentina", 0.16),
@@ -51,6 +154,8 @@ const MARKETS: SeedMarket[] = [
     probability: 0.55,
     closesAt: OPENING_KICKOFF,
   },
+  // All 72 group-stage fixtures (opener handled above)
+  ...GROUP_FIXTURES.map(match),
 
   // Props
   {

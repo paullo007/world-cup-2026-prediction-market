@@ -224,9 +224,9 @@ const MARKETS: SeedMarket[] = [
   // Matches
   {
     slug: "mexico-wins-opening-match",
-    question: "Will Mexico win the opening match on June 11?",
+    question: "Will Mexico beat South Africa?",
     description:
-      "The 2026 World Cup kicks off June 11 at Estadio Azteca, Mexico City. Resolves YES if Mexico wins in regulation.",
+      "The 2026 World Cup kicks off June 11 at Estadio Azteca, Mexico City, as Mexico face South Africa. Resolves YES if Mexico win in regulation.",
     category: "Matches",
     probability: 0.55,
     closesAt: OPENING_KICKOFF,

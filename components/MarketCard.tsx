@@ -25,21 +25,29 @@ export function MarketCard({
       className="group flex flex-col gap-3 rounded-xl border border-surface-border bg-surface-raised p-4 transition hover:border-accent/50 hover:bg-surface-hover"
     >
       <div>
-        <FitText className="font-semibold group-hover:text-accent" max={28} min={14} lines={2}>
-          {index != null && (
-            <span className="mr-1.5 font-bold text-slate-500">{index}.</span>
-          )}
-          {teams ? (
-            <span>
-              {teams[0]} <span className="align-middle">{flag(teams[0])}</span>
-              <span className="mx-1.5 text-slate-400">vs</span>
-              <span className="align-middle">{flag(teams[1])}</span> {teams[1]}
-            </span>
-          ) : (
-            market.question
-          )}
-        </FitText>
-        <div className="mt-2 flex items-baseline gap-1.5">
+        {teams ? (
+          <>
+            <FitText className="font-semibold group-hover:text-accent" max={28} min={14} lines={2}>
+              {index != null && (
+                <span className="mr-1.5 font-bold text-slate-500">{index}.</span>
+              )}
+              <span>
+                {teams[0]} <span className="align-middle">{flag(teams[0])}</span>
+                <span className="mx-1.5 text-slate-400">vs</span>
+                <span className="align-middle">{flag(teams[1])}</span> {teams[1]}
+              </span>
+            </FitText>
+            <p className="mt-1 text-sm font-semibold text-slate-300">Will {teams[0]} win?</p>
+          </>
+        ) : (
+          <FitText className="font-semibold group-hover:text-accent" max={28} min={14} lines={2}>
+            {index != null && (
+              <span className="mr-1.5 font-bold text-slate-500">{index}.</span>
+            )}
+            {market.question}
+          </FitText>
+        )}
+        <div className="mt-2 flex items-baseline justify-center gap-1.5">
           <span className="text-2xl font-extrabold text-accent">{formatPercent(p)}</span>
           <span className="text-xs text-slate-400">chance</span>
         </div>

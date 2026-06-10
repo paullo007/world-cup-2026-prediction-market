@@ -58,7 +58,7 @@ export default function LoginPage() {
       <p className="mt-4 text-sm text-slate-400">
         No account?{" "}
         <Link href="/register" className="font-semibold text-accent hover:underline">
-          Sign up and get $1,000 WCD
+          Sign up and get WC$1,000
         </Link>
       </p>
     </div>

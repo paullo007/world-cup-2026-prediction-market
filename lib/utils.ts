@@ -16,10 +16,10 @@ export function formatCoins(n: number): string {
   });
 }
 
-/** Format an amount as World Cup Currency, e.g. 1000 -> "$1,000 WCD". */
+/** Format an amount as World Cup Currency, e.g. 1000 -> "WC$1,000". */
 export function formatWCD(n: number): string {
   const neg = n < 0;
-  return `${neg ? "-" : ""}$${formatCoins(Math.abs(n))} WCD`;
+  return `${neg ? "-" : ""}WC$${formatCoins(Math.abs(n))}`;
 }
 
 export function formatDate(d: Date): string {

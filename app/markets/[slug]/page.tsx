@@ -73,7 +73,7 @@ export default async function MarketPage({ params }: { params: { slug: string } 
             <div>
               <p className="font-bold">Resolved: {market.resolvedOutcome}</p>
               <p className="text-sm text-slate-400">
-                Each winning share paid out $1 WCD.
+                Each winning share paid out WC$1.
               </p>
             </div>
           </div>

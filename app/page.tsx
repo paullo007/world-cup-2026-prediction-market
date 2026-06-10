@@ -64,8 +64,13 @@ export default async function HomePage({
         </p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {markets.map((m) => (
-            <MarketCard key={m.id} market={m} volume={volumeByMarket.get(m.id) ?? 0} />
+          {markets.map((m, i) => (
+            <MarketCard
+              key={m.id}
+              market={m}
+              volume={volumeByMarket.get(m.id) ?? 0}
+              index={i + 1}
+            />
           ))}
         </div>
       )}

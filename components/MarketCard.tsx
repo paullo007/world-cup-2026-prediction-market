@@ -4,7 +4,15 @@ import { yesPrice } from "@/lib/amm";
 import { formatCents, formatDate, formatPercent } from "@/lib/utils";
 import { Clock, CheckCircle2 } from "lucide-react";
 
-export function MarketCard({ market, volume }: { market: Market; volume: number }) {
+export function MarketCard({
+  market,
+  volume,
+  index,
+}: {
+  market: Market;
+  volume: number;
+  index?: number;
+}) {
   const p = yesPrice(market);
   const resolved = market.status === "RESOLVED";
 
@@ -15,6 +23,9 @@ export function MarketCard({ market, volume }: { market: Market; volume: number 
     >
       <div className="flex items-start justify-between gap-3">
         <h3 className="font-semibold leading-snug group-hover:text-white">
+          {index != null && (
+            <span className="mr-1.5 font-bold text-slate-500">{index}.</span>
+          )}
           {market.question}
         </h3>
         <div className="text-right">

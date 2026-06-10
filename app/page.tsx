@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-const CATEGORIES = ["All", "Tournament Winner", "Matches", "Props"];
+const CATEGORIES = ["All", "Tournament Winner", "Matches", "Knockouts", "Props"];
 
 export default async function HomePage({
   searchParams,

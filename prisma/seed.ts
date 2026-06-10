@@ -131,6 +131,42 @@ const match = ([date, home, away]: [string, string, string]): SeedMarket => ({
   liquidity: 1000,
 });
 
+// Knockout placeholders: bracket matchups aren't known until the group stage
+// finishes, so these are per-team "how far do they go?" progression markets.
+const KO_ROUNDS = [
+  { key: "quarter-finals", label: "the quarter-finals", date: "2026-07-09" },
+  { key: "semi-finals", label: "the semi-finals", date: "2026-07-14" },
+  { key: "final", label: "the final", date: "2026-07-19" },
+] as const;
+
+// [team, reach QF, reach SF, reach final]
+const KO_CONTENDERS: [string, number, number, number][] = [
+  ["Argentina", 0.68, 0.48, 0.33],
+  ["Spain", 0.66, 0.46, 0.31],
+  ["France", 0.66, 0.45, 0.3],
+  ["England", 0.62, 0.4, 0.25],
+  ["Brazil", 0.6, 0.38, 0.24],
+  ["Portugal", 0.56, 0.34, 0.2],
+  ["Germany", 0.54, 0.32, 0.18],
+  ["Netherlands", 0.5, 0.28, 0.15],
+  ["Belgium", 0.46, 0.24, 0.12],
+  ["Croatia", 0.42, 0.22, 0.11],
+  ["United States", 0.4, 0.2, 0.1],
+  ["Mexico", 0.36, 0.18, 0.09],
+  ["Canada", 0.3, 0.14, 0.07],
+];
+
+const knockout = ([team, ...probs]: [string, number, number, number]): SeedMarket[] =>
+  KO_ROUNDS.map((round, i) => ({
+    slug: `${slugify(team)}-reach-${round.key}`,
+    question: `Will ${team} reach ${round.label}?`,
+    description: `Resolves YES if ${team} reach ${round.label} of the 2026 FIFA World Cup. Knockout matchups are set once the group stage ends on June 27.`,
+    category: "Knockouts",
+    probability: probs[i],
+    closesAt: new Date(`${round.date}T19:00:00Z`),
+    liquidity: 1200,
+  }));
+
 const MARKETS: SeedMarket[] = [
   // Tournament winner
   winner("Argentina", 0.16),
@@ -156,6 +192,9 @@ const MARKETS: SeedMarket[] = [
   },
   // All 72 group-stage fixtures (opener handled above)
   ...GROUP_FIXTURES.map(match),
+
+  // Knockout-stage progression placeholders
+  ...KO_CONTENDERS.flatMap(knockout),
 
   // Props
   {

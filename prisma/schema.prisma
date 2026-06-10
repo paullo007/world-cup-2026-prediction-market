@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum MarketStatus {
+  OPEN
+  CLOSED
+  RESOLVED
+}
+
+enum Outcome {
+  YES
+  NO
+}
+
+enum TradeAction {
+  BUY
+  SELL
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  name         String
+  passwordHash String
+  role         Role       @default(USER)
+  balance      Float      @default(1000)
+  createdAt    DateTime   @default(now())
+  positions    Position[]
+  trades       Trade[]
+}
+
+model Market {
+  id              String       @id @default(cuid())
+  slug            String       @unique
+  question        String
+  description     String       @default("")
+  category        String
+  imageUrl        String?
+  status          MarketStatus @default(OPEN)
+  resolvedOutcome Outcome?
+  closesAt        DateTime
+  resolvedAt      DateTime?
+  createdAt       DateTime     @default(now())
+
+  // LMSR automated market maker state
+  liquidity Float @default(1000) // LMSR "b" parameter
+  qYes      Float @default(0) // outstanding YES shares
+  qNo       Float @default(0) // outstanding NO shares
+
+  positions Position[]
+  trades    Trade[]
+
+  @@index([status, closesAt])
+}
+
+model Position {
+  id        String @id @default(cuid())
+  userId    String
+  marketId  String
+  yesShares Float  @default(0)
+  noShares  Float  @default(0)
+  // total coins spent acquiring the current holding, for P&L display
+  costBasis Float  @default(0)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  market Market @relation(fields: [marketId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, marketId])
+}
+
+model Trade {
+  id         String      @id @default(cuid())
+  userId     String
+  marketId   String
+  outcome    Outcome
+  action     TradeAction
+  shares     Float
+  // coins paid (BUY) or received (SELL)
+  amount     Float
+  // YES probability after this trade, 0..1, for the price chart
+  priceAfter Float
+  createdAt  DateTime    @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  market Market @relation(fields: [marketId], references: [id], onDelete: Cascade)
+
+  @@index([marketId, createdAt])
+}

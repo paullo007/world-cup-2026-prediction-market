@@ -1,0 +1,74 @@
+import Link from "next/link";
+import { db } from "@/lib/db";
+import { MarketCard } from "@/components/MarketCard";
+import { cn } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
+
+const CATEGORIES = ["All", "Tournament Winner", "Matches", "Props"];
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: { category?: string };
+}) {
+  const category = searchParams.category ?? "All";
+
+  const markets = await db.market.findMany({
+    where: category === "All" ? {} : { category },
+    orderBy: [{ status: "asc" }, { closesAt: "asc" }],
+  });
+
+  const volumes = await db.trade.groupBy({
+    by: ["marketId"],
+    _sum: { amount: true },
+  });
+  const volumeByMarket = new Map(volumes.map((v) => [v.marketId, v._sum.amount ?? 0]));
+
+  return (
+    <div className="space-y-8">
+      <section className="rounded-2xl border border-surface-border bg-gradient-to-br from-surface-raised to-surface p-8">
+        <p className="text-xs font-bold uppercase tracking-widest text-amber-400">
+          FIFA World Cup · June 11 – July 19, 2026
+        </p>
+        <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">
+          Predict the World Cup. <span className="text-accent">Trade the odds.</span>
+        </h1>
+        <p className="mt-3 max-w-2xl text-slate-300">
+          Buy YES or NO shares on real tournament outcomes with play money. Prices
+          move with the crowd — every share of the winning outcome pays 1 coin.
+          New accounts start with 1,000 coins.
+        </p>
+      </section>
+
+      <div className="flex flex-wrap gap-2">
+        {CATEGORIES.map((c) => (
+          <Link
+            key={c}
+            href={c === "All" ? "/" : `/?category=${encodeURIComponent(c)}`}
+            className={cn(
+              "rounded-full px-4 py-1.5 text-sm font-semibold transition",
+              c === category
+                ? "bg-accent text-white"
+                : "bg-surface-raised text-slate-300 hover:bg-surface-hover"
+            )}
+          >
+            {c}
+          </Link>
+        ))}
+      </div>
+
+      {markets.length === 0 ? (
+        <p className="py-12 text-center text-slate-400">
+          No markets in this category yet.
+        </p>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {markets.map((m) => (
+            <MarketCard key={m.id} market={m} volume={volumeByMarket.get(m.id) ?? 0} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

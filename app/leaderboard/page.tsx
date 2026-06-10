@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { yesPrice } from "@/lib/amm";
-import { cn, formatCoins } from "@/lib/utils";
+import { cn, formatWCD } from "@/lib/utils";
 import { Medal } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -38,7 +38,7 @@ export default async function LeaderboardPage() {
       <div>
         <h1 className="text-2xl font-extrabold">Leaderboard</h1>
         <p className="mt-1 text-sm text-slate-400">
-          Net worth = cash + market value of open positions. Everyone starts with 1,000 coins.
+          Net worth = cash + market value of open positions. Everyone starts with $1,000 WCD.
         </p>
       </div>
 
@@ -61,9 +61,9 @@ export default async function LeaderboardPage() {
                 )}
               >
                 {u.profit >= 0 ? "+" : ""}
-                {formatCoins(u.profit)}
+                {formatWCD(u.profit)}
               </span>
-              <span className="w-28 text-right font-extrabold">{formatCoins(u.netWorth)}</span>
+              <span className="w-28 text-right font-extrabold">{formatWCD(u.netWorth)}</span>
             </li>
           ))}
         </ol>

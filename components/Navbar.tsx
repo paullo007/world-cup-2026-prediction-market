@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { Trophy, Coins } from "lucide-react";
-import { formatCoins } from "@/lib/utils";
+import { formatWCD } from "@/lib/utils";
 
 export function Navbar() {
   const { status } = useSession();
@@ -61,7 +61,7 @@ export function Navbar() {
               </Link>
               <span className="flex items-center gap-1.5 rounded-full bg-surface-raised px-3 py-1.5 text-sm font-semibold text-emerald-600">
                 <Coins className="h-4 w-4" />
-                {formatCoins(me.balance)}
+                {formatWCD(me.balance)}
               </span>
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { sharesForCost, costToTrade, type AmmState } from "@/lib/amm";
-import { cn, formatCoins } from "@/lib/utils";
+import { cn, formatWCD } from "@/lib/utils";
 
 interface Props {
   marketSlug: string;
@@ -63,8 +63,8 @@ export function TradePanel({ marketSlug, amm, yesShares, noShares, open }: Props
           kind: "ok",
           text:
             action === "BUY"
-              ? `Bought ${data.shares.toFixed(2)} ${outcome} shares for ${formatCoins(data.amount)} coins`
-              : `Sold ${data.shares.toFixed(2)} ${outcome} shares for ${formatCoins(data.amount)} coins`,
+              ? `Bought ${data.shares.toFixed(2)} ${outcome} shares for ${formatWCD(data.amount)}`
+              : `Sold ${data.shares.toFixed(2)} ${outcome} shares for ${formatWCD(data.amount)}`,
         });
         setInput("");
         window.dispatchEvent(new Event("balance-updated"));
@@ -175,7 +175,7 @@ export function TradePanel({ marketSlug, amm, yesShares, noShares, open }: Props
           <div className="flex justify-between text-slate-300">
             <span>{action === "BUY" ? "Payout if correct" : "You receive"}</span>
             <span className="font-semibold text-emerald-600">
-              {formatCoins(action === "BUY" ? preview.shares : preview.amount)} coins
+              {formatWCD(action === "BUY" ? preview.shares : preview.amount)}
             </span>
           </div>
         </div>

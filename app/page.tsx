@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-const CATEGORIES = ["All", "Tournament Winner", "Matches", "Knockouts", "Props"];
+const CATEGORIES = ["All", "Tournament Winner", "Matches", "Knockouts", "Crazy Predictions"];
 
 export default async function HomePage({
   searchParams,
@@ -35,9 +35,9 @@ export default async function HomePage({
           Predict the World Cup. <span className="text-accent">Trade the odds.</span>
         </h1>
         <p className="mt-3 max-w-2xl text-slate-300">
-          Buy YES or NO shares on real tournament outcomes with play money. Prices
-          move with the crowd — every share of the winning outcome pays 1 coin.
-          New accounts start with 1,000 coins.
+          Buy YES or NO shares on real tournament outcomes with World Cup Currency.
+          Prices move with the crowd — every share of the winning outcome pays $1 WCD.
+          New accounts start with $1,000 WCD.
         </p>
       </section>
 

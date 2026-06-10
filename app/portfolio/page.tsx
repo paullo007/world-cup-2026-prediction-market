@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { yesPrice } from "@/lib/amm";
-import { cn, formatCoins, formatPercent } from "@/lib/utils";
+import { cn, formatPercent, formatWCD } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -36,9 +36,9 @@ export default async function PortfolioPage() {
       <h1 className="text-2xl font-extrabold">Portfolio</h1>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Stat label="Cash balance" value={`${formatCoins(user.balance)} coins`} />
-        <Stat label="Positions value" value={`${formatCoins(totalValue)} coins`} />
-        <Stat label="Net worth" value={`${formatCoins(user.balance + totalValue)} coins`} highlight />
+        <Stat label="Cash balance" value={formatWCD(user.balance)} />
+        <Stat label="Positions value" value={formatWCD(totalValue)} />
+        <Stat label="Net worth" value={formatWCD(user.balance + totalValue)} highlight />
       </div>
 
       <section>
@@ -88,7 +88,7 @@ export default async function PortfolioPage() {
                     </td>
                     <td className="px-4 py-3 text-slate-300">{formatPercent(price)}</td>
                     <td className="px-4 py-3 text-right font-semibold">
-                      {formatCoins(value)}
+                      {formatWCD(value)}
                     </td>
                     <td
                       className={cn(
@@ -97,7 +97,7 @@ export default async function PortfolioPage() {
                       )}
                     >
                       {pnl >= 0 ? "+" : ""}
-                      {formatCoins(pnl)}
+                      {formatWCD(pnl)}
                     </td>
                   </tr>
                 ))}

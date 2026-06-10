@@ -8,12 +8,18 @@ export function formatPercent(p: number): string {
   return `${Math.round(p * 100)}%`;
 }
 
-/** Format play-money coins. */
+/** Format a raw amount of World Cup Dollars, e.g. 1000 -> "1,000". */
 export function formatCoins(n: number): string {
   return n.toLocaleString("en-US", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   });
+}
+
+/** Format an amount as World Cup Currency, e.g. 1000 -> "$1,000 WCD". */
+export function formatWCD(n: number): string {
+  const neg = n < 0;
+  return `${neg ? "-" : ""}$${formatCoins(Math.abs(n))} WCD`;
 }
 
 export function formatDate(d: Date): string {

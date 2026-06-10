@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { yesPrice } from "@/lib/amm";
-import { formatCents, formatCoins, formatDate, formatPercent } from "@/lib/utils";
+import { formatCents, formatDate, formatPercent, formatWCD } from "@/lib/utils";
 import { flag, matchTeams } from "@/lib/flags";
 import { TradePanel } from "@/components/TradePanel";
 import { PriceChart } from "@/components/PriceChart";
@@ -61,7 +61,7 @@ export default async function MarketPage({ params }: { params: { slug: string } 
                 ? `Resolved ${market.resolvedAt ? formatDate(market.resolvedAt) : ""}`
                 : `Closes ${formatDate(market.closesAt)}`}
             </span>
-            <span>{formatCoins(volume)} coins traded (last 30 trades)</span>
+            <span>{formatWCD(volume)} traded (last 30 trades)</span>
           </div>
         </div>
 
@@ -73,7 +73,7 @@ export default async function MarketPage({ params }: { params: { slug: string } 
             <div>
               <p className="font-bold">Resolved: {market.resolvedOutcome}</p>
               <p className="text-sm text-slate-400">
-                Each winning share paid out 1 coin.
+                Each winning share paid out $1 WCD.
               </p>
             </div>
           </div>
@@ -110,7 +110,7 @@ export default async function MarketPage({ params }: { params: { slug: string } 
                     </span>
                   </span>
                   <span className="text-slate-400">
-                    {formatCoins(t.amount)} coins · {formatPercent(t.priceAfter)}
+                    {formatWCD(t.amount)} · {formatPercent(t.priceAfter)}
                   </span>
                 </li>
               ))}
@@ -144,7 +144,7 @@ export default async function MarketPage({ params }: { params: { slug: string } 
             )}
             <div className="mt-2 flex justify-between border-t border-surface-border pt-2 text-slate-400">
               <span>Cost basis</span>
-              <span>{formatCoins(Math.max(position.costBasis, 0))} coins</span>
+              <span>{formatWCD(Math.max(position.costBasis, 0))}</span>
             </div>
           </div>
         )}

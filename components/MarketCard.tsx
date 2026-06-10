@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Market } from "@prisma/client";
 import { yesPrice } from "@/lib/amm";
-import { formatCents, formatDate, formatPercent } from "@/lib/utils";
+import { formatCents, formatDate, formatPercent, formatWCD } from "@/lib/utils";
 import { flag, matchTeams } from "@/lib/flags";
 import { Clock, CheckCircle2 } from "lucide-react";
 
@@ -23,26 +23,24 @@ export function MarketCard({
       href={`/markets/${market.slug}`}
       className="group flex flex-col gap-3 rounded-xl border border-surface-border bg-surface-raised p-4 transition hover:border-accent/50 hover:bg-surface-hover"
     >
-      <div className="flex items-start justify-between gap-3">
-        <h3 className="font-semibold leading-snug group-hover:text-accent">
+      <div>
+        <h3 className="text-[1.75rem] font-semibold leading-tight group-hover:text-accent">
           {index != null && (
-            <span className="mr-1.5 align-middle text-[2.5em] font-bold leading-none text-slate-500">
-              {index}.
-            </span>
+            <span className="mr-1.5 font-bold text-slate-500">{index}.</span>
           )}
           {teams ? (
             <span>
               {teams[0]} <span className="align-middle">{flag(teams[0])}</span>
-              <span className="mx-1 text-slate-400">vs</span>
+              <span className="mx-1.5 text-slate-400">vs</span>
               <span className="align-middle">{flag(teams[1])}</span> {teams[1]}
             </span>
           ) : (
             market.question
           )}
         </h3>
-        <div className="text-right">
-          <div className="text-2xl font-extrabold text-accent">{formatPercent(p)}</div>
-          <div className="text-xs text-slate-400">chance</div>
+        <div className="mt-2 flex items-baseline gap-1.5">
+          <span className="text-2xl font-extrabold text-accent">{formatPercent(p)}</span>
+          <span className="text-xs text-slate-400">chance</span>
         </div>
       </div>
 
@@ -65,7 +63,7 @@ export function MarketCard({
       )}
 
       <div className="mt-auto flex items-center justify-between text-xs text-slate-400">
-        <span>{Math.round(volume).toLocaleString()} coins traded</span>
+        <span>{formatWCD(Math.round(volume))} traded</span>
         <span className="flex items-center gap-1">
           <Clock className="h-3.5 w-3.5" />
           {resolved ? "Final" : `Closes ${formatDate(market.closesAt)}`}

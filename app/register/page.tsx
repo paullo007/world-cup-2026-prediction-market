@@ -37,7 +37,7 @@ export default function RegisterPage() {
     <div className="mx-auto max-w-sm pt-10">
       <h1 className="text-2xl font-extrabold">Create account</h1>
       <p className="mt-1 text-sm text-slate-400">
-        Start with <span className="font-bold text-emerald-600">1,000 free coins</span>.
+        Start with <span className="font-bold text-emerald-600">$1,000 WCD</span> free.
       </p>
       <form onSubmit={submit} className="mt-6 space-y-4">
         <input

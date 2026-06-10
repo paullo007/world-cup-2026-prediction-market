@@ -26,19 +26,23 @@ export function MarketCard({
     >
       <div>
         {teams ? (
-          <>
-            <FitText className="font-semibold group-hover:text-accent" max={28} min={14} lines={2}>
-              {index != null && (
-                <span className="mr-1.5 font-bold text-slate-500">{index}.</span>
-              )}
-              <span>
-                {teams[0]} <span className="align-middle">{flag(teams[0])}</span>
-                <span className="mx-1.5 text-slate-400">vs</span>
-                <span className="align-middle">{flag(teams[1])}</span> {teams[1]}
-              </span>
-            </FitText>
-            <p className="mt-1 text-sm font-semibold text-slate-300">Will {teams[0]} win?</p>
-          </>
+          <FitText
+            className="font-semibold group-hover:text-accent"
+            max={28}
+            min={14}
+            lines={2}
+            subtitle={`Will ${teams[0]} win?`}
+            subtitleClassName="mt-1 text-center font-semibold text-slate-300"
+          >
+            {index != null && (
+              <span className="mr-1.5 font-bold text-slate-500">{index}.</span>
+            )}
+            <span>
+              {teams[0]} <span className="align-middle">{flag(teams[0])}</span>
+              <span className="mx-1.5 text-slate-400">vs</span>
+              <span className="align-middle">{flag(teams[1])}</span> {teams[1]}
+            </span>
+          </FitText>
         ) : (
           <FitText className="font-semibold group-hover:text-accent" max={28} min={14} lines={2}>
             {index != null && (

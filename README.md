@@ -1,5 +1,7 @@
 # World Cup 2026 Prediction Market
 
+**🔴 Live demo: https://world-cup-2026-prediction-market.vercel.app**
+
 A Polymarket-style prediction market for the FIFA World Cup 2026 (June 11 – July 19, 2026),
 built with **play money** — no real wagering.
 

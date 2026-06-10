@@ -139,25 +139,65 @@ const KO_ROUNDS = [
   { key: "final", label: "the final", date: "2026-07-19" },
 ] as const;
 
-// [team, reach QF, reach SF, reach final]
-const KO_CONTENDERS: [string, number, number, number][] = [
-  ["Argentina", 0.68, 0.48, 0.33],
-  ["Spain", 0.66, 0.46, 0.31],
-  ["France", 0.66, 0.45, 0.3],
-  ["England", 0.62, 0.4, 0.25],
-  ["Brazil", 0.6, 0.38, 0.24],
-  ["Portugal", 0.56, 0.34, 0.2],
-  ["Germany", 0.54, 0.32, 0.18],
-  ["Netherlands", 0.5, 0.28, 0.15],
-  ["Belgium", 0.46, 0.24, 0.12],
-  ["Croatia", 0.42, 0.22, 0.11],
-  ["United States", 0.4, 0.2, 0.1],
-  ["Mexico", 0.36, 0.18, 0.09],
-  ["Canada", 0.3, 0.14, 0.07],
+// All 48 teams with a "reach the quarter-finals" strength. Reach-SF and
+// reach-final probabilities are derived from it (a team that makes the QF is
+// progressively less likely to go deeper). Placeholder odds — the crowd moves them.
+const KO_TEAMS: [string, number][] = [
+  ["Argentina", 0.66],
+  ["Spain", 0.66],
+  ["France", 0.66],
+  ["England", 0.6],
+  ["Brazil", 0.6],
+  ["Portugal", 0.55],
+  ["Germany", 0.55],
+  ["Netherlands", 0.5],
+  ["Belgium", 0.46],
+  ["Uruguay", 0.46],
+  ["Croatia", 0.44],
+  ["Colombia", 0.44],
+  ["Morocco", 0.42],
+  ["Switzerland", 0.42],
+  ["Japan", 0.42],
+  ["Senegal", 0.42],
+  ["United States", 0.4],
+  ["Mexico", 0.4],
+  ["Ecuador", 0.4],
+  ["Austria", 0.4],
+  ["Ivory Coast", 0.38],
+  ["Norway", 0.38],
+  ["Sweden", 0.38],
+  ["Egypt", 0.36],
+  ["Iran", 0.36],
+  ["South Korea", 0.36],
+  ["Australia", 0.36],
+  ["Scotland", 0.34],
+  ["Türkiye", 0.34],
+  ["Algeria", 0.34],
+  ["Paraguay", 0.34],
+  ["Canada", 0.32],
+  ["Tunisia", 0.32],
+  ["Saudi Arabia", 0.28],
+  ["Qatar", 0.28],
+  ["Cape Verde", 0.28],
+  ["DR Congo", 0.28],
+  ["Bosnia and Herzegovina", 0.26],
+  ["Uzbekistan", 0.26],
+  ["Ghana", 0.26],
+  ["Czechia", 0.24],
+  ["South Africa", 0.24],
+  ["New Zealand", 0.24],
+  ["Iraq", 0.24],
+  ["Haiti", 0.2],
+  ["Curaçao", 0.2],
+  ["Jordan", 0.2],
+  ["Panama", 0.2],
 ];
 
-const knockout = ([team, ...probs]: [string, number, number, number]): SeedMarket[] =>
-  KO_ROUNDS.map((round, i) => ({
+const round2 = (n: number) => Math.round(n * 100) / 100;
+
+const knockout = ([team, qf]: [string, number]): SeedMarket[] => {
+  const probs = [qf, round2(qf * 0.62), round2(qf * 0.46)];
+  return KO_ROUNDS.map((round, i) => ({
     slug: `${slugify(team)}-reach-${round.key}`,
     question: `Will ${team} reach ${round.label}?`,
     description: `Resolves YES if ${team} reach ${round.label} of the 2026 FIFA World Cup. Knockout matchups are set once the group stage ends on June 27.`,
@@ -166,6 +206,7 @@ const knockout = ([team, ...probs]: [string, number, number, number]): SeedMarke
     closesAt: new Date(`${round.date}T19:00:00Z`),
     liquidity: 1200,
   }));
+};
 
 const MARKETS: SeedMarket[] = [
   // Tournament winner
@@ -193,8 +234,8 @@ const MARKETS: SeedMarket[] = [
   // All 72 group-stage fixtures (opener handled above)
   ...GROUP_FIXTURES.map(match),
 
-  // Knockout-stage progression placeholders
-  ...KO_CONTENDERS.flatMap(knockout),
+  // Knockout-stage progression placeholders (all 48 teams)
+  ...KO_TEAMS.flatMap(knockout),
 
   // Props
   {

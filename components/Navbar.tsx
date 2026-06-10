@@ -52,6 +52,9 @@ export function Navbar() {
         <div className="ml-auto flex items-center gap-3">
           {me ? (
             <>
+              <span className="hidden text-sm font-medium text-slate-200 sm:inline">
+                {me.name}
+              </span>
               <span className="flex items-center gap-1.5 rounded-full bg-surface-raised px-3 py-1.5 text-sm font-semibold text-emerald-400">
                 <Coins className="h-4 w-4" />
                 {formatCoins(me.balance)}

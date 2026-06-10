@@ -73,7 +73,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 const inputClass =
   "w-full rounded-lg border border-surface-border bg-surface px-3 py-2.5 outline-none focus:border-accent";
 const buttonClass =
-  "w-full rounded-lg bg-accent py-2.5 font-bold hover:bg-accent-hover disabled:opacity-50";
+  "w-full rounded-lg bg-accent py-2.5 font-bold text-white hover:bg-accent-hover disabled:opacity-50";
 
 function ProfileForm({
   name: initialName,
@@ -122,8 +122,8 @@ function ProfileForm({
           className={inputClass}
           placeholder="Your display name"
         />
-        {error && <p className="text-sm text-red-400">{error}</p>}
-        {done && <p className="text-sm text-emerald-400">Profile updated.</p>}
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        {done && <p className="text-sm text-emerald-600">Profile updated.</p>}
         <button disabled={busy || name.trim().length < 2} className={buttonClass}>
           {busy ? "Saving…" : "Save name"}
         </button>
@@ -198,8 +198,8 @@ function PasswordForm() {
           onChange={(e) => setConfirm(e.target.value)}
           className={inputClass}
         />
-        {error && <p className="text-sm text-red-400">{error}</p>}
-        {done && <p className="text-sm text-emerald-400">Password changed.</p>}
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        {done && <p className="text-sm text-emerald-600">Password changed.</p>}
         <button disabled={busy} className={buttonClass}>
           {busy ? "Changing…" : "Change password"}
         </button>

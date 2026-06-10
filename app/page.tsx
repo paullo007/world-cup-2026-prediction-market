@@ -28,7 +28,7 @@ export default async function HomePage({
   return (
     <div className="space-y-8">
       <section className="rounded-2xl border border-surface-border bg-gradient-to-br from-surface-raised to-surface p-8">
-        <p className="text-xs font-bold uppercase tracking-widest text-amber-400">
+        <p className="text-xs font-bold uppercase tracking-widest text-amber-600">
           FIFA World Cup · June 11 – July 19, 2026
         </p>
         <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">

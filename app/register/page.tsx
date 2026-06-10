@@ -37,7 +37,7 @@ export default function RegisterPage() {
     <div className="mx-auto max-w-sm pt-10">
       <h1 className="text-2xl font-extrabold">Create account</h1>
       <p className="mt-1 text-sm text-slate-400">
-        Start with <span className="font-bold text-emerald-400">1,000 free coins</span>.
+        Start with <span className="font-bold text-emerald-600">1,000 free coins</span>.
       </p>
       <form onSubmit={submit} className="mt-6 space-y-4">
         <input
@@ -64,10 +64,10 @@ export default function RegisterPage() {
           onChange={(e) => setPassword(e.target.value)}
           className="w-full rounded-lg border border-surface-border bg-surface-raised px-3 py-2.5 outline-none focus:border-accent"
         />
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="text-sm text-red-600">{error}</p>}
         <button
           disabled={busy}
-          className="w-full rounded-lg bg-accent py-2.5 font-bold hover:bg-accent-hover disabled:opacity-50"
+          className="w-full rounded-lg bg-accent py-2.5 font-bold text-white hover:bg-accent-hover disabled:opacity-50"
         >
           {busy ? "Creating…" : "Sign up"}
         </button>

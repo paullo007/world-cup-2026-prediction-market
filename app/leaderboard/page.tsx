@@ -31,7 +31,7 @@ export default async function LeaderboardPage() {
     .sort((a, b) => b.netWorth - a.netWorth)
     .slice(0, 50);
 
-  const medals = ["text-amber-400", "text-slate-300", "text-amber-700"];
+  const medals = ["text-amber-600", "text-slate-300", "text-amber-700"];
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -57,7 +57,7 @@ export default async function LeaderboardPage() {
               <span
                 className={cn(
                   "text-sm font-semibold",
-                  u.profit >= 0 ? "text-emerald-400" : "text-red-400"
+                  u.profit >= 0 ? "text-emerald-600" : "text-red-600"
                 )}
               >
                 {u.profit >= 0 ? "+" : ""}

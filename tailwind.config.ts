@@ -8,27 +8,47 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Apple-style light surfaces
         surface: {
-          DEFAULT: "#0e1420",
-          raised: "#161e2e",
-          hover: "#1c2738",
-          border: "#243047",
+          DEFAULT: "#ffffff",
+          raised: "#f5f5f7",
+          hover: "#ececef",
+          border: "#d2d2d7",
         },
         yes: {
-          DEFAULT: "#22c55e",
-          dim: "#14532d",
+          DEFAULT: "#16a34a",
+          dim: "#dcfce7",
         },
         no: {
-          DEFAULT: "#ef4444",
-          dim: "#7f1d1d",
+          DEFAULT: "#dc2626",
+          dim: "#fee2e2",
         },
         accent: {
-          DEFAULT: "#3b82f6",
-          hover: "#2563eb",
+          DEFAULT: "#0071e3",
+          hover: "#0077ed",
+        },
+        // Remap the slate ramp to Apple greys so muted text reads on white.
+        // Lower number = more prominent (darker); higher = more muted (lighter).
+        slate: {
+          100: "#1d1d1f",
+          200: "#1d1d1f",
+          300: "#515154",
+          400: "#6e6e73",
+          500: "#86868b",
+          600: "#6e6e73",
+          900: "#1d1d1f",
         },
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
+        sans: [
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "SF Pro Display",
+          "SF Pro Text",
+          "Segoe UI",
+          "system-ui",
+          "sans-serif",
+        ],
       },
     },
   },

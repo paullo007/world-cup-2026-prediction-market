@@ -47,7 +47,7 @@ export function ResolveButtons({ marketId }: { marketId: string }) {
       >
         {confirming === "NO" ? "Confirm NO?" : "Resolve NO"}
       </button>
-      {error && <span className="text-xs text-red-400">{error}</span>}
+      {error && <span className="text-xs text-red-600">{error}</span>}
     </div>
   );
 }

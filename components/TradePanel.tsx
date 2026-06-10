@@ -91,7 +91,7 @@ export function TradePanel({ marketSlug, amm, yesShares, noShares, open }: Props
         <p className="text-sm text-slate-300">Sign in to trade this market.</p>
         <Link
           href="/login"
-          className="mt-3 inline-block rounded-lg bg-accent px-4 py-2 text-sm font-semibold hover:bg-accent-hover"
+          className="mt-3 inline-block rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent-hover"
         >
           Log in
         </Link>
@@ -129,7 +129,7 @@ export function TradePanel({ marketSlug, amm, yesShares, noShares, open }: Props
             onClick={() => setAction(a)}
             className={cn(
               "flex-1 rounded-md py-1.5 transition",
-              action === a ? "bg-surface-hover text-white" : "text-slate-400 hover:text-white"
+              action === a ? "bg-surface-hover text-slate-100" : "text-slate-400 hover:text-slate-100"
             )}
           >
             {a === "BUY" ? "Buy" : "Sell"}
@@ -174,7 +174,7 @@ export function TradePanel({ marketSlug, amm, yesShares, noShares, open }: Props
           </div>
           <div className="flex justify-between text-slate-300">
             <span>{action === "BUY" ? "Payout if correct" : "You receive"}</span>
-            <span className="font-semibold text-emerald-400">
+            <span className="font-semibold text-emerald-600">
               {formatCoins(action === "BUY" ? preview.shares : preview.amount)} coins
             </span>
           </div>
@@ -185,7 +185,7 @@ export function TradePanel({ marketSlug, amm, yesShares, noShares, open }: Props
         onClick={submit}
         disabled={busy || !preview}
         className={cn(
-          "w-full rounded-lg py-3 font-bold transition disabled:cursor-not-allowed disabled:opacity-40",
+          "w-full rounded-lg py-3 font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-40",
           outcome === "YES" ? "bg-yes hover:bg-emerald-600" : "bg-no hover:bg-red-600"
         )}
       >
@@ -196,7 +196,7 @@ export function TradePanel({ marketSlug, amm, yesShares, noShares, open }: Props
         <p
           className={cn(
             "rounded-lg px-3 py-2 text-sm font-medium",
-            message.kind === "ok" ? "bg-yes-dim/50 text-emerald-300" : "bg-no-dim/50 text-red-300"
+            message.kind === "ok" ? "bg-yes-dim/50 text-emerald-700" : "bg-no-dim/50 text-red-700"
           )}
         >
           {message.text}

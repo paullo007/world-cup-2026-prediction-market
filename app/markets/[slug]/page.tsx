@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { yesPrice } from "@/lib/amm";
 import { formatCents, formatCoins, formatDate, formatPercent } from "@/lib/utils";
+import { flag, matchTeams } from "@/lib/flags";
 import { TradePanel } from "@/components/TradePanel";
 import { PriceChart } from "@/components/PriceChart";
 import { CheckCircle2, Clock } from "lucide-react";
@@ -30,6 +31,7 @@ export default async function MarketPage({ params }: { params: { slug: string } 
     : null;
 
   const p = yesPrice(market);
+  const teams = market.category === "Matches" ? matchTeams(market.question) : null;
   const open = market.status === "OPEN" && market.closesAt > new Date();
   const volume = market.trades.reduce((s, t) => s + t.amount, 0);
 
@@ -41,10 +43,14 @@ export default async function MarketPage({ params }: { params: { slug: string } 
     <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
       <div className="space-y-6">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-amber-400">
+          <p className="text-xs font-bold uppercase tracking-widest text-amber-600">
             {market.category}
           </p>
-          <h1 className="mt-1 text-2xl font-extrabold sm:text-3xl">{market.question}</h1>
+          <h1 className="mt-1 text-2xl font-extrabold sm:text-3xl">
+            {teams
+              ? `${teams[0]} ${flag(teams[0])} vs ${flag(teams[1])} ${teams[1]}`
+              : market.question}
+          </h1>
           {market.description && (
             <p className="mt-2 text-slate-300">{market.description}</p>
           )}

@@ -93,7 +93,7 @@ export default async function PortfolioPage() {
                     <td
                       className={cn(
                         "px-4 py-3 text-right font-semibold",
-                        pnl >= 0 ? "text-emerald-400" : "text-red-400"
+                        pnl >= 0 ? "text-emerald-600" : "text-red-600"
                       )}
                     >
                       {pnl >= 0 ? "+" : ""}
@@ -122,7 +122,7 @@ function Stat({
   return (
     <div className="rounded-xl border border-surface-border bg-surface-raised p-5">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</p>
-      <p className={cn("mt-1 text-2xl font-extrabold", highlight && "text-emerald-400")}>
+      <p className={cn("mt-1 text-2xl font-extrabold", highlight && "text-emerald-600")}>
         {value}
       </p>
     </div>

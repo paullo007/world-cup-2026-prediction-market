@@ -3,6 +3,7 @@ import type { Market } from "@prisma/client";
 import { yesPrice } from "@/lib/amm";
 import { formatCents, formatDate, formatPercent, formatWCD } from "@/lib/utils";
 import { flag, matchTeams } from "@/lib/flags";
+import { FitText } from "@/components/FitText";
 import { Clock, CheckCircle2 } from "lucide-react";
 
 export function MarketCard({
@@ -24,7 +25,7 @@ export function MarketCard({
       className="group flex flex-col gap-3 rounded-xl border border-surface-border bg-surface-raised p-4 transition hover:border-accent/50 hover:bg-surface-hover"
     >
       <div>
-        <h3 className="text-[1.75rem] font-semibold leading-tight group-hover:text-accent">
+        <FitText className="font-semibold group-hover:text-accent" max={28} min={14} lines={2}>
           {index != null && (
             <span className="mr-1.5 font-bold text-slate-500">{index}.</span>
           )}
@@ -37,7 +38,7 @@ export function MarketCard({
           ) : (
             market.question
           )}
-        </h3>
+        </FitText>
         <div className="mt-2 flex items-baseline gap-1.5">
           <span className="text-2xl font-extrabold text-accent">{formatPercent(p)}</span>
           <span className="text-xs text-slate-400">chance</span>

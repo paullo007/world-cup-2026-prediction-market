@@ -75,3 +75,6 @@ export function matchTeams(question: string): [string, string] | null {
   const m = question.match(/^Will (.+) beat (.+)\?$/);
   return m ? [m[1], m[2]] : null;
 }
+
+/** All 48 World Cup 2026 team names, alphabetically. */
+export const ALL_TEAMS: string[] = Object.keys(ISO).sort((a, b) => a.localeCompare(b));

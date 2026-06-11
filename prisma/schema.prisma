@@ -29,6 +29,14 @@ enum TradeAction {
   SELL
 }
 
+// Knockout bracket slot -> team, filled in by an admin as results come in.
+// `slot` is the bracket position key (e.g. "74a", "89b", "104a").
+model BracketAssignment {
+  slot      String   @id
+  team      String
+  updatedAt DateTime @updatedAt
+}
+
 model User {
   id           String     @id @default(cuid())
   email        String     @unique

@@ -40,7 +40,6 @@ export function Navbar() {
 
         <nav className="flex items-center gap-4 text-sm font-medium text-slate-300">
           <Link href="/" className="hover:text-accent">Markets</Link>
-          <Link href="/bracket" className="hover:text-accent">Bracket</Link>
           <Link href="/leaderboard" className="hover:text-accent">Leaderboard</Link>
           {me && (
             <Link href="/portfolio" className="hover:text-accent">Portfolio</Link>

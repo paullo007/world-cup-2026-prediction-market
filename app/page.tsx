@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-const CATEGORIES = ["All", "Tournament Winner", "Matches", "Knockouts", "Crazy Predictions"];
+const CATEGORIES = ["All", "Tournament Winner", "Matches", "Bracket", "Knockouts", "Crazy Predictions"];
 
 export default async function HomePage({
   searchParams,
@@ -46,7 +46,7 @@ export default async function HomePage({
         {CATEGORIES.map((c) => (
           <Link
             key={c}
-            href={c === "All" ? "/" : `/?category=${encodeURIComponent(c)}`}
+            href={c === "All" ? "/" : c === "Bracket" ? "/bracket" : `/?category=${encodeURIComponent(c)}`}
             className={cn(
               "rounded-full px-4 py-1.5 text-sm font-semibold transition",
               c === category

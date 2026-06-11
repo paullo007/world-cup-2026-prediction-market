@@ -31,11 +31,13 @@ export function formatWCD(n: number): string {
 }
 
 export function formatDate(d: Date): string {
-  return d.toLocaleDateString("en-US", {
+  const base = d.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
+  const wd = d.toLocaleDateString("en-US", { weekday: "short" });
+  return `${base}/${wd}`;
 }
 
 export function cn(...classes: (string | false | null | undefined)[]): string {

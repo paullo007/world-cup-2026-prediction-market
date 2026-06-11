@@ -33,7 +33,8 @@ export function MatchStartTime({ iso }: { iso: string }) {
 
     const mon = d.toLocaleString("en-US", { month: "short" });
     const yy = String(d.getFullYear()).slice(-2);
-    const date = `${mon}${d.getDate()}.${yy}`;
+    const wd = d.toLocaleDateString("en-US", { weekday: "short" });
+    const date = `${mon}${d.getDate()}.${yy}/${wd}`;
 
     setText(`Start Time: ${time} ${city} (${offset}), ${date}`);
   }, [iso]);

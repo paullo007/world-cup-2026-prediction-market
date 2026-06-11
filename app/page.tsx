@@ -32,7 +32,7 @@ export default async function HomePage({
           FIFA World Cup · June 11 – July 19, 2026
         </p>
         <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">
-          Predict the World Cup. <span className="text-accent">Trade the odds.</span>
+          Predict the World Cup. <span className="text-accent">Trade the Odds.</span>
         </h1>
         <p className="mt-3 text-sm font-semibold text-slate-400">WC$ = World Cup Dollar</p>
         <p className="mt-1 max-w-2xl text-slate-300">

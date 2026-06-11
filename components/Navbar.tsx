@@ -33,7 +33,7 @@ export function Navbar() {
         <Link href="/" className="flex items-center gap-2 font-extrabold tracking-tight">
           <Trophy className="h-6 w-6 text-amber-600" />
           <span className="hidden sm:inline">World Cup 2026</span>
-          <span className="rounded bg-accent px-1.5 py-0.5 text-xs font-bold uppercase">
+          <span className="rounded bg-accent px-1.5 py-0.5 text-xs font-bold uppercase text-white">
             Predict
           </span>
         </Link>

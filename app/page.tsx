@@ -34,10 +34,11 @@ export default async function HomePage({
         <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">
           Predict the World Cup. <span className="text-accent">Trade the odds.</span>
         </h1>
-        <p className="mt-3 max-w-2xl text-slate-300">
-          Buy YES or NO shares on real tournament outcomes with World Cup Currency.
-          Prices move with the crowd — every share of the winning outcome pays WC$1.
-          New accounts start with WC$1,000.
+        <p className="mt-3 text-sm font-semibold text-slate-400">WC$ = World Cup Dollar</p>
+        <p className="mt-1 max-w-2xl text-slate-300">
+          Buy YES or NO shares on real tournament outcomes with WC$. Prices move with the
+          crowd — every share of the winning outcome pays 1.00 WC$. New accounts start with
+          1,000 WC$.
         </p>
       </section>
 

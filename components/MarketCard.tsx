@@ -33,6 +33,7 @@ export function MarketCard({
             lines={2}
             subtitle={`Will ${teams[0]} win?`}
             subtitleClassName="mt-1 text-center font-semibold text-slate-300"
+            subScale={0.75}
           >
             {index != null && (
               <span className="mr-1.5 font-bold text-slate-500">{index}.</span>

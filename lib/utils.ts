@@ -16,10 +16,18 @@ export function formatCoins(n: number): string {
   });
 }
 
-/** Format an amount as World Cup Currency, e.g. 1000 -> "WC$1,000". */
+/**
+ * Format an amount as World Cup Dollars, unit after the number.
+ * Single-digit amounts (abs < 10) always show 2 decimals: 1 -> "1.00 WC$".
+ * Larger amounts show natural precision: 1000 -> "1,000 WC$", 437.83 -> "437.83 WC$".
+ */
 export function formatWCD(n: number): string {
-  const neg = n < 0;
-  return `${neg ? "-" : ""}WC$${formatCoins(Math.abs(n))}`;
+  const minimumFractionDigits = Math.abs(n) < 10 ? 2 : 0;
+  const num = n.toLocaleString("en-US", {
+    minimumFractionDigits,
+    maximumFractionDigits: 2,
+  });
+  return `${num} WC$`;
 }
 
 export function formatDate(d: Date): string {

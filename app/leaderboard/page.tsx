@@ -38,7 +38,7 @@ export default async function LeaderboardPage() {
       <div>
         <h1 className="text-2xl font-extrabold">Leaderboard</h1>
         <p className="mt-1 text-sm text-slate-400">
-          Net worth = cash + market value of open positions. Everyone starts with WC$1,000.
+          Net worth = cash + market value of open positions. Everyone starts with 1,000 WC$.
         </p>
       </div>
 

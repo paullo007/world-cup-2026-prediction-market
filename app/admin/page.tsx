@@ -24,7 +24,7 @@ export default async function AdminPage() {
       <div>
         <h1 className="text-2xl font-extrabold">Admin — Market Resolution</h1>
         <p className="mt-1 text-sm text-slate-400">
-          Resolve markets when results are official. Winning shares pay WC$1 each.
+          Resolve markets when results are official. Winning shares pay 1.00 WC$ each.
         </p>
       </div>
 

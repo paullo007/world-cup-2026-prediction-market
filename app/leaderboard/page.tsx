@@ -56,14 +56,14 @@ export default async function LeaderboardPage() {
               <span className="flex-1 font-semibold">{u.name}</span>
               <span
                 className={cn(
-                  "text-sm font-semibold",
+                  "whitespace-nowrap text-sm font-semibold",
                   u.profit >= 0 ? "text-emerald-600" : "text-red-600"
                 )}
               >
                 {u.profit >= 0 ? "+" : ""}
                 {formatWCD(u.profit)}
               </span>
-              <span className="w-28 text-right font-extrabold">{formatWCD(u.netWorth)}</span>
+              <span className="whitespace-nowrap text-right font-extrabold">{formatWCD(u.netWorth)}</span>
             </li>
           ))}
         </ol>

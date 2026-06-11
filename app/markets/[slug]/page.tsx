@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { yesPrice } from "@/lib/amm";
-import { formatCents, formatDate, formatPercent, formatWCD } from "@/lib/utils";
+import { firstName, formatCents, formatDate, formatPercent, formatWCD } from "@/lib/utils";
 import { flag, matchTeams } from "@/lib/flags";
 import { TradePanel } from "@/components/TradePanel";
 import { PriceChart } from "@/components/PriceChart";
@@ -101,7 +101,7 @@ export default async function MarketPage({ params }: { params: { slug: string } 
               {market.trades.map((t) => (
                 <li key={t.id} className="flex items-center justify-between px-4 py-2.5 text-sm">
                   <span>
-                    <span className="font-semibold">{t.user.name}</span>{" "}
+                    <span className="font-semibold">{firstName(t.user.name)}</span>{" "}
                     <span className="text-slate-400">
                       {t.action === "BUY" ? "bought" : "sold"}
                     </span>{" "}

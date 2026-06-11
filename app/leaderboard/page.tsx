@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { yesPrice } from "@/lib/amm";
-import { cn, formatWCD } from "@/lib/utils";
+import { cn, firstName, formatWCD } from "@/lib/utils";
 import { Medal } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -53,7 +53,7 @@ export default async function LeaderboardPage() {
               <span className="w-8 text-center font-extrabold text-slate-400">
                 {i < 3 ? <Medal className={cn("mx-auto h-5 w-5", medals[i])} /> : i + 1}
               </span>
-              <span className="flex-1 font-semibold">{u.name}</span>
+              <span className="flex-1 font-semibold">{firstName(u.name)}</span>
               <span
                 className={cn(
                   "text-sm font-semibold",

@@ -41,3 +41,8 @@ export function formatDate(d: Date): string {
 export function cn(...classes: (string | false | null | undefined)[]): string {
   return classes.filter(Boolean).join(" ");
 }
+
+/** First name only, for privacy on public lists: "Paul Lo" -> "Paul". */
+export function firstName(name: string): string {
+  return name.trim().split(/\s+/)[0] || name;
+}

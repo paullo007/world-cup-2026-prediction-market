@@ -122,19 +122,29 @@ export function TradePanel({ marketSlug, amm, yesShares, noShares, open }: Props
         </button>
       </div>
 
-      <div className="flex rounded-lg bg-surface p-1 text-sm font-semibold">
-        {(["BUY", "SELL"] as const).map((a) => (
-          <button
-            key={a}
-            onClick={() => setAction(a)}
-            className={cn(
-              "flex-1 rounded-md py-1.5 transition",
-              action === a ? "bg-surface-hover text-slate-100" : "text-slate-400 hover:text-slate-100"
-            )}
-          >
-            {a === "BUY" ? "Buy" : "Sell"}
-          </button>
-        ))}
+      <div className="grid grid-cols-2 gap-2 text-sm font-bold">
+        {(["BUY", "SELL"] as const).map((a) => {
+          const isBuy = a === "BUY";
+          const active = action === a;
+          return (
+            <button
+              key={a}
+              onClick={() => setAction(a)}
+              className={cn(
+                "rounded-lg py-2 transition",
+                active
+                  ? isBuy
+                    ? "bg-yes text-white"
+                    : "bg-no text-white"
+                  : isBuy
+                    ? "bg-yes-dim/50 text-yes hover:bg-yes-dim"
+                    : "bg-no-dim/50 text-no hover:bg-no-dim"
+              )}
+            >
+              {isBuy ? "Buy" : "Sell"}
+            </button>
+          );
+        })}
       </div>
 
       <div>

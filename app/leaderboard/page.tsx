@@ -26,7 +26,7 @@ export default async function LeaderboardPage() {
         return sum + pos.yesShares * p + pos.noShares * (1 - p);
       }, 0);
       const netWorth = u.balance + positionsValue;
-      return { name: u.name, netWorth, profit: netWorth - STARTING_BALANCE };
+      return { name: firstName(u.name), netWorth, profit: netWorth - STARTING_BALANCE };
     })
     .sort((a, b) => b.netWorth - a.netWorth)
     .slice(0, 50);
@@ -53,7 +53,7 @@ export default async function LeaderboardPage() {
               <span className="w-8 text-center font-extrabold text-slate-400">
                 {i < 3 ? <Medal className={cn("mx-auto h-5 w-5", medals[i])} /> : i + 1}
               </span>
-              <span className="flex-1 font-semibold">{firstName(u.name)}</span>
+              <span className="flex-1 font-semibold">{u.name}</span>
               <span
                 className={cn(
                   "text-sm font-semibold",

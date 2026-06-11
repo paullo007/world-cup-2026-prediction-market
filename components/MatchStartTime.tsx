@@ -1,0 +1,43 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+/**
+ * Renders a match kickoff (given as a UTC ISO string) in the VIEWER's local
+ * time, e.g. "Start Time: 3:00am Singapore (UTC+8), Jun23.26".
+ * Client-only (depends on the browser timezone); renders nothing until mounted
+ * to avoid a hydration mismatch.
+ */
+export function MatchStartTime({ iso }: { iso: string }) {
+  const [text, setText] = useState<string | null>(null);
+
+  useEffect(() => {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return;
+
+    let time = d.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    time = time.replace(/\s?AM$/i, "am").replace(/\s?PM$/i, "pm");
+
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+    const city = tz.split("/").pop()!.replace(/_/g, " ");
+
+    const offMin = -d.getTimezoneOffset();
+    const sign = offMin >= 0 ? "+" : "-";
+    const oh = Math.floor(Math.abs(offMin) / 60);
+    const om = Math.abs(offMin) % 60;
+    const offset = `UTC${sign}${oh}${om ? ":" + String(om).padStart(2, "0") : ""}`;
+
+    const mon = d.toLocaleString("en-US", { month: "short" });
+    const yy = String(d.getFullYear()).slice(-2);
+    const date = `${mon}${d.getDate()}.${yy}`;
+
+    setText(`Start Time: ${time} ${city} (${offset}), ${date}`);
+  }, [iso]);
+
+  if (!text) return null;
+  return <span>{text}</span>;
+}

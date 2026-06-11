@@ -3,8 +3,10 @@ import type { Market } from "@prisma/client";
 import { yesPrice } from "@/lib/amm";
 import { formatCents, formatDate, formatPercent, formatWCD } from "@/lib/utils";
 import { flag, matchTeams } from "@/lib/flags";
+import { VENUES } from "@/lib/venues";
 import { FitText } from "@/components/FitText";
-import { Clock, CheckCircle2 } from "lucide-react";
+import { MatchStartTime } from "@/components/MatchStartTime";
+import { Clock, CheckCircle2, MapPin } from "lucide-react";
 
 export function MarketCard({
   market,
@@ -18,6 +20,7 @@ export function MarketCard({
   const p = yesPrice(market);
   const resolved = market.status === "RESOLVED";
   const teams = market.category === "Matches" ? matchTeams(market.question) : null;
+  const venue = teams ? VENUES[`${teams[0]} vs ${teams[1]}`] : null;
 
   return (
     <Link
@@ -76,12 +79,27 @@ export function MarketCard({
         </div>
       )}
 
+      {teams && !resolved && (
+        <div className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
+          <Clock className="h-3.5 w-3.5 shrink-0" />
+          <MatchStartTime iso={market.closesAt.toISOString()} />
+        </div>
+      )}
+      {venue && (
+        <div className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
+          <MapPin className="h-3.5 w-3.5 shrink-0" />
+          <span>Venue: {venue.stadium}, {venue.city}, {venue.country}</span>
+        </div>
+      )}
+
       <div className="mt-auto flex items-center justify-between text-xs text-slate-400">
         <span>{formatWCD(Math.round(volume))} traded</span>
-        <span className="flex items-center gap-1">
-          <Clock className="h-3.5 w-3.5" />
-          {resolved ? "Final" : `Closes ${formatDate(market.closesAt)}`}
-        </span>
+        {(!teams || resolved) && (
+          <span className="flex items-center gap-1">
+            <Clock className="h-3.5 w-3.5" />
+            {resolved ? "Final" : `Closes ${formatDate(market.closesAt)}`}
+          </span>
+        )}
       </div>
     </Link>
   );

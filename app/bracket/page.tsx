@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { BRACKET, THIRD_PLACE, type BracketMatch, type Slot } from "@/lib/bracket";
+import { BRACKET, THIRD_PLACE, type BracketMatch } from "@/lib/bracket";
 import { flag } from "@/lib/flags";
-import { formatDate } from "@/lib/utils";
+import { MatchStartTime } from "@/components/MatchStartTime";
 
 export const dynamic = "force-dynamic";
 
@@ -28,8 +28,9 @@ function MatchBox({ m, teamFor }: { m: BracketMatch; teamFor: (key: string) => s
         <div className="h-px bg-surface-border" />
         <SlotRow label={m.b.label} team={b} />
       </div>
-      <div className="mt-1.5 text-[11px] text-slate-400">
-        #{m.num} · {formatDate(new Date(`${m.date}T12:00:00Z`))}
+      <div className="mt-1.5 space-y-0.5 text-[10px] leading-tight text-slate-400">
+        <MatchStartTime iso={m.kickoff} />
+        <div>{m.venue.stadium}, {m.venue.city}</div>
       </div>
     </div>
   );

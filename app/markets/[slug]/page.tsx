@@ -4,8 +4,10 @@ import { auth } from "@/lib/auth";
 import { yesPrice } from "@/lib/amm";
 import { firstName, formatCents, formatDate, formatPercent, formatWCD } from "@/lib/utils";
 import { flag, matchTeams } from "@/lib/flags";
+import { VENUES } from "@/lib/venues";
 import { TradePanel } from "@/components/TradePanel";
 import { PriceChart } from "@/components/PriceChart";
+import { MatchStartTime } from "@/components/MatchStartTime";
 import { CheckCircle2, Clock } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +34,7 @@ export default async function MarketPage({ params }: { params: { slug: string } 
 
   const p = yesPrice(market);
   const teams = market.category === "Matches" ? matchTeams(market.question) : null;
+  const venue = teams ? VENUES[`${teams[0]} vs ${teams[1]}`] : null;
   const open = market.status === "OPEN" && market.closesAt > new Date();
   const volume = market.trades.reduce((s, t) => s + t.amount, 0);
 
@@ -57,11 +60,20 @@ export default async function MarketPage({ params }: { params: { slug: string } 
           <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-slate-400">
             <span className="flex items-center gap-1.5">
               <Clock className="h-4 w-4" />
-              {market.status === "RESOLVED"
-                ? `Resolved ${market.resolvedAt ? formatDate(market.resolvedAt) : ""}`
-                : `Closes ${formatDate(market.closesAt)}`}
+              {market.status === "RESOLVED" ? (
+                `Resolved ${market.resolvedAt ? formatDate(market.resolvedAt) : ""}`
+              ) : teams ? (
+                <MatchStartTime iso={market.closesAt.toISOString()} />
+              ) : (
+                `Closes ${formatDate(market.closesAt)}`
+              )}
             </span>
             <span>{formatWCD(volume)} traded (last 30 trades)</span>
+            {venue && (
+              <span>
+                Venue: {venue.stadium}, {venue.city}, {venue.country}
+              </span>
+            )}
           </div>
         </div>
 

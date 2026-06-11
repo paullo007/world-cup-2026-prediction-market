@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { seedStateForProbability } from "../lib/amm";
+import { KICKOFFS } from "../lib/kickoffs";
 
 const db = new PrismaClient();
 
@@ -127,7 +128,7 @@ const match = ([date, home, away]: [string, string, string]): SeedMarket => ({
   description: `Group-stage match on ${longDate(date)}. Resolves YES if ${home} win in regulation (a draw or a ${away} win resolves NO).`,
   category: "Matches",
   probability: 0.4,
-  closesAt: new Date(`${date}T19:00:00Z`),
+  closesAt: new Date(KICKOFFS[`${home} vs ${away}`] ?? `${date}T19:00:00Z`),
   liquidity: 1000,
 });
 
@@ -229,7 +230,7 @@ const MARKETS: SeedMarket[] = [
       "The 2026 World Cup kicks off June 11 at Estadio Azteca, Mexico City, as Mexico face South Africa. Resolves YES if Mexico win in regulation.",
     category: "Matches",
     probability: 0.55,
-    closesAt: OPENING_KICKOFF,
+    closesAt: new Date(KICKOFFS["Mexico vs South Africa"]),
   },
   // All 72 group-stage fixtures (opener handled above)
   ...GROUP_FIXTURES.map(match),

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { flag } from "@/lib/flags";
 import { getPlayedMatches } from "@/lib/playedMatches";
 import { MatchStartTime } from "@/components/MatchStartTime";
+import { SCORES_SOURCES } from "@/lib/sources";
+import { SourceNote } from "@/components/SourceNote";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -65,6 +67,8 @@ export default async function ScoresPage() {
           })}
         </div>
       )}
+
+      <SourceNote sources={SCORES_SOURCES} />
     </div>
   );
 }

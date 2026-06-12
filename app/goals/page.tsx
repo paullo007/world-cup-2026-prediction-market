@@ -1,5 +1,7 @@
 import { flag } from "@/lib/flags";
 import { getPlayedMatches } from "@/lib/playedMatches";
+import { GOALS_SOURCES } from "@/lib/sources";
+import { SourceNote } from "@/components/SourceNote";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +81,8 @@ export default async function GoalsPage() {
           </table>
         </div>
       )}
+
+      <SourceNote sources={GOALS_SOURCES} />
     </div>
   );
 }

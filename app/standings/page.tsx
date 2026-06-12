@@ -1,6 +1,8 @@
 import { flag } from "@/lib/flags";
 import { GROUPS } from "@/lib/groups";
 import { getPlayedMatches } from "@/lib/playedMatches";
+import { STANDINGS_SOURCES } from "@/lib/sources";
+import { SourceNote } from "@/components/SourceNote";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -101,6 +103,8 @@ export default async function StandingsPage() {
           );
         })}
       </div>
+
+      <SourceNote sources={STANDINGS_SOURCES} />
     </div>
   );
 }

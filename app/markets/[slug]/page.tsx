@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { yesPrice } from "@/lib/amm";
-import { firstName, formatCents, formatDate, formatPercent, formatWCD } from "@/lib/utils";
+import { awaitingResult, firstName, formatCents, formatDate, formatPercent, formatWCD } from "@/lib/utils";
 import { flag, matchTeams } from "@/lib/flags";
 import { VENUES } from "@/lib/venues";
 import { TradePanel } from "@/components/TradePanel";
@@ -36,6 +36,7 @@ export default async function MarketPage({ params }: { params: { slug: string } 
   const teams = market.category === "Matches" ? matchTeams(market.question) : null;
   const venue = teams ? VENUES[`${teams[0]} vs ${teams[1]}`] : null;
   const open = market.status === "OPEN" && market.closesAt > new Date();
+  const awaiting = awaitingResult(market);
   const volume = market.trades.reduce((s, t) => s + t.amount, 0);
 
   const chartPoints = [...market.trades]
@@ -62,6 +63,8 @@ export default async function MarketPage({ params }: { params: { slug: string } 
               <Clock className="h-4 w-4" />
               {market.status === "RESOLVED" ? (
                 `Resolved ${market.resolvedAt ? formatDate(market.resolvedAt) : ""}`
+              ) : awaiting ? (
+                "Closed — awaiting result"
               ) : teams ? (
                 <MatchStartTime iso={market.closesAt.toISOString()} />
               ) : (
@@ -87,6 +90,17 @@ export default async function MarketPage({ params }: { params: { slug: string } 
               <p className="text-sm text-slate-400">
                 Each winning share paid out 1.00 WC$.
               </p>
+            </div>
+          </div>
+        ) : awaiting ? (
+          <div className="flex items-end gap-6 rounded-xl border border-amber-600/40 bg-amber-600/5 p-5">
+            <div>
+              <div className="text-4xl font-extrabold text-slate-400">{formatPercent(p)}</div>
+              <div className="text-sm text-slate-400">final chance of YES</div>
+            </div>
+            <div className="flex items-center gap-2 text-sm font-semibold text-amber-700">
+              <Clock className="h-4 w-4" />
+              Closed — awaiting official result
             </div>
           </div>
         ) : (

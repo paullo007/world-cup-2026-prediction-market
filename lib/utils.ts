@@ -44,6 +44,17 @@ export function cn(...classes: (string | false | null | undefined)[]): string {
   return classes.filter(Boolean).join(" ");
 }
 
+/**
+ * A market is "awaiting result" once its trading window has closed (closesAt /
+ * kickoff has passed) but an admin hasn't resolved it yet. In this state it must
+ * NOT be shown as bettable — trading is already blocked server-side (lib/trade.ts).
+ * Single source of truth for the closed-but-unresolved rule across card, detail,
+ * home feed and admin queue.
+ */
+export function awaitingResult(m: { status: string; closesAt: Date }): boolean {
+  return m.status !== "RESOLVED" && m.closesAt.getTime() <= Date.now();
+}
+
 /** First name only, for privacy on public lists: "Paul Lo" -> "Paul". */
 export function firstName(name: string): string {
   return name.trim().split(/\s+/)[0] || name;

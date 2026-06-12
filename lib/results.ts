@@ -1,0 +1,260 @@
+import { ALL_TEAMS } from "@/lib/flags";
+
+// Two independent, free score sources. We query both and cross-check them; the
+// admin-approval gate (see app/admin) decides whenever they disagree or only one
+// has a result. The /admin/sources page compares them side by side.
+export type Source = "ESPN" | "TheSportsDB";
+
+const ESPN_URL =
+  "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard";
+
+// TheSportsDB: FIFA World Cup league id 4429. The free/test key "3" is fine for
+// a hobby app; override via env if you get your own.
+const tsdbUrl = () =>
+  `https://www.thesportsdb.com/api/v1/json/${process.env.THESPORTSDB_API_KEY || "3"}/eventsseason.php?id=4429&s=2026`;
+
+// External names that differ from our ALL_TEAMS spellings (keys are normalize()'d).
+const ALIASES: Record<string, string> = {
+  "bosnia herzegovina": "Bosnia and Herzegovina",
+  "bosnia and herzegovina": "Bosnia and Herzegovina",
+  "czech republic": "Czechia",
+  "korea republic": "South Korea",
+  "republic of korea": "South Korea",
+  "korea south": "South Korea",
+  usa: "United States",
+  "united states of america": "United States",
+  "ir iran": "Iran",
+  "cote divoire": "Ivory Coast",
+  "cabo verde": "Cape Verde",
+  turkey: "Türkiye",
+  "congo dr": "DR Congo",
+  curacao: "Curaçao",
+};
+
+/** Lowercase, strip diacritics and non-alphanumerics for tolerant name matching. */
+export function normalize(name: string): string {
+  return name
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+// normalized name -> canonical team name
+const CANON: Record<string, string> = (() => {
+  const m: Record<string, string> = {};
+  for (const t of ALL_TEAMS) m[normalize(t)] = t;
+  for (const [alias, canonical] of Object.entries(ALIASES)) m[normalize(alias)] = canonical;
+  return m;
+})();
+
+/** Map an external team name to one of our canonical names, or the raw name if unknown. */
+export function canonicalTeam(name: string): string {
+  return CANON[normalize(name)] ?? name;
+}
+
+export interface FinishedMatch {
+  source: Source;
+  home: string; // canonical name where recognised
+  away: string;
+  homeGoals: number | null;
+  awayGoals: number | null;
+  winner: "HOME" | "AWAY" | "DRAW";
+  date: string; // ISO-ish date from the source
+}
+
+const winnerFromScore = (h: number | null, a: number | null): "HOME" | "AWAY" | "DRAW" =>
+  h == null || a == null ? "DRAW" : h > a ? "HOME" : a > h ? "AWAY" : "DRAW";
+
+const yyyymmdd = (d: Date) => d.toISOString().slice(0, 10).replace(/-/g, "");
+
+interface EspnScoreboard {
+  events?: Array<{
+    id?: string;
+    date: string;
+    status?: { type?: { completed?: boolean } };
+    competitions?: Array<{
+      competitors?: Array<{
+        homeAway: "home" | "away";
+        score?: string;
+        winner?: boolean;
+        team?: { displayName?: string; name?: string };
+      }>;
+    }>;
+  }>;
+}
+
+/**
+ * Fetch finished World Cup matches from ESPN's public scoreboard endpoint.
+ * ESPN's scoreboard defaults to the current day only, so we sweep today plus the
+ * previous `daysBack` days to catch matches that finished earlier — comfortably
+ * more than enough headroom for a once-daily cron.
+ */
+export async function fetchEspn(daysBack = 4): Promise<FinishedMatch[]> {
+  const out: FinishedMatch[] = [];
+  const seen = new Set<string>();
+  let lastError: string | null = null;
+  let okDays = 0;
+
+  for (let i = 0; i <= daysBack; i++) {
+    const ds = yyyymmdd(new Date(Date.now() - i * 86_400_000));
+    const res = await fetch(`${ESPN_URL}?dates=${ds}`, { cache: "no-store" });
+    if (!res.ok) {
+      lastError = `ESPN ${res.status} ${res.statusText}`;
+      continue;
+    }
+    okDays++;
+    const data = (await res.json()) as EspnScoreboard;
+    for (const ev of data.events ?? []) {
+      if (!ev.status?.type?.completed) continue;
+      const comp = ev.competitions?.[0];
+      const home = comp?.competitors?.find((c) => c.homeAway === "home");
+      const away = comp?.competitors?.find((c) => c.homeAway === "away");
+      if (!home?.team || !away?.team) continue;
+
+      const homeName = canonicalTeam(home.team.displayName ?? home.team.name ?? "");
+      const awayName = canonicalTeam(away.team.displayName ?? away.team.name ?? "");
+      const dedupe = ev.id ?? `${pairKey(homeName, awayName)}|${ev.date}`;
+      if (seen.has(dedupe)) continue;
+      seen.add(dedupe);
+
+      const homeGoals = home.score != null ? Number(home.score) : null;
+      const awayGoals = away.score != null ? Number(away.score) : null;
+      const winner =
+        home.winner === true
+          ? "HOME"
+          : away.winner === true
+            ? "AWAY"
+            : winnerFromScore(homeGoals, awayGoals);
+
+      out.push({
+        source: "ESPN",
+        home: homeName,
+        away: awayName,
+        homeGoals,
+        awayGoals,
+        winner,
+        date: ev.date,
+      });
+    }
+  }
+
+  // Only surface an error if every day's request failed.
+  if (okDays === 0 && lastError) throw new Error(lastError);
+  return out;
+}
+
+/** Fetch finished World Cup matches from TheSportsDB (free, documented). */
+export async function fetchTheSportsDB(): Promise<FinishedMatch[]> {
+  const res = await fetch(tsdbUrl(), { cache: "no-store" });
+  if (!res.ok) throw new Error(`TheSportsDB responded ${res.status} ${res.statusText}`);
+
+  const data = (await res.json()) as {
+    events?: Array<{
+      strHomeTeam: string;
+      strAwayTeam: string;
+      intHomeScore: string | null;
+      intAwayScore: string | null;
+      strStatus: string | null;
+      dateEvent: string;
+    }> | null;
+  };
+
+  const finished = new Set(["FT", "AET", "PEN", "Match Finished", "Finished"]);
+  const out: FinishedMatch[] = [];
+  for (const ev of data.events ?? []) {
+    if (!ev.strStatus || !finished.has(ev.strStatus)) continue;
+    const homeGoals = ev.intHomeScore != null ? Number(ev.intHomeScore) : null;
+    const awayGoals = ev.intAwayScore != null ? Number(ev.intAwayScore) : null;
+    out.push({
+      source: "TheSportsDB",
+      home: canonicalTeam(ev.strHomeTeam),
+      away: canonicalTeam(ev.strAwayTeam),
+      homeGoals,
+      awayGoals,
+      winner: winnerFromScore(homeGoals, awayGoals),
+      date: ev.dateEvent,
+    });
+  }
+  return out;
+}
+
+export interface SourceFetch {
+  source: Source;
+  matches: FinishedMatch[];
+  error?: string;
+}
+
+/** Fetch both sources independently; a failure in one never blocks the other. */
+export async function fetchAllSources(): Promise<SourceFetch[]> {
+  const providers: Array<{ source: Source; fn: () => Promise<FinishedMatch[]> }> = [
+    { source: "ESPN", fn: fetchEspn },
+    { source: "TheSportsDB", fn: fetchTheSportsDB },
+  ];
+  return Promise.all(
+    providers.map(async ({ source, fn }) => {
+      try {
+        return { source, matches: await fn() };
+      } catch (err) {
+        return { source, matches: [], error: err instanceof Error ? err.message : "fetch failed" };
+      }
+    })
+  );
+}
+
+/** Unordered, normalized key for a team pair, e.g. pairKey("Mexico","South Africa"). */
+export function pairKey(a: string, b: string): string {
+  return [normalize(a), normalize(b)].sort().join("|");
+}
+
+/**
+ * Given a market's home/away and a finished match from some source, decide the
+ * YES/NO outcome for "Will {home} beat {away}?" (YES iff the market's home won).
+ */
+export function outcomeForMarket(
+  marketHome: string,
+  m: FinishedMatch
+): "YES" | "NO" {
+  const homeWon =
+    (m.winner === "HOME" && normalize(m.home) === normalize(marketHome)) ||
+    (m.winner === "AWAY" && normalize(m.away) === normalize(marketHome));
+  return homeWon ? "YES" : "NO";
+}
+
+export interface MergedResult {
+  outcome: "YES" | "NO"; // best consensus outcome
+  agree: boolean; // all sources that had a result agreed
+  sources: Source[]; // sources that reported this match
+  detail: string; // human-readable, for resultDetail / admin display
+}
+
+/**
+ * Merge per-source finished matches for one market pair. Returns null if no
+ * source has a finished result for this pair.
+ */
+export function mergeForMarket(
+  marketHome: string,
+  marketAway: string,
+  bySource: SourceFetch[]
+): MergedResult | null {
+  const key = pairKey(marketHome, marketAway);
+  const hits: Array<{ source: Source; outcome: "YES" | "NO"; m: FinishedMatch }> = [];
+  for (const sf of bySource) {
+    const m = sf.matches.find((x) => pairKey(x.home, x.away) === key);
+    if (m) hits.push({ source: sf.source, outcome: outcomeForMarket(marketHome, m), m });
+  }
+  if (hits.length === 0) return null;
+
+  const outcomes = new Set(hits.map((h) => h.outcome));
+  const agree = outcomes.size === 1;
+  const detail = hits
+    .map((h) => `${h.source}: ${h.m.home} ${h.m.homeGoals ?? "?"}–${h.m.awayGoals ?? "?"} ${h.m.away} (${h.outcome})`)
+    .join(" · ");
+
+  return {
+    outcome: hits[0].outcome,
+    agree,
+    sources: hits.map((h) => h.source),
+    detail: agree ? `${detail} ✓ agree` : `⚠ disagree — ${detail}`,
+  };
+}

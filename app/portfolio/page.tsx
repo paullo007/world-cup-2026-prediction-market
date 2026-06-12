@@ -31,6 +31,15 @@ export default async function PortfolioPage() {
   });
   const totalValue = rows.reduce((s, r) => s + r.value, 0);
 
+  // Resolved positions — payout already credited to cash balance at resolution
+  // (1.00 WC$ per winning share). Shown here as settled history with realized P&L.
+  const resolvedPositions = positions.filter((p) => p.market.status === "RESOLVED");
+  const resolvedRows = resolvedPositions.map((pos) => {
+    const payout =
+      pos.market.resolvedOutcome === "YES" ? pos.yesShares : pos.noShares;
+    return { pos, payout, pnl: payout - Math.max(pos.costBasis, 0) };
+  });
+
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-extrabold">Portfolio</h1>
@@ -106,6 +115,73 @@ export default async function PortfolioPage() {
           </div>
         )}
       </section>
+
+      {resolvedRows.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-lg font-bold">Results ({resolvedRows.length})</h2>
+          <div className="overflow-x-auto rounded-xl border border-surface-border">
+            <table className="w-full text-sm">
+              <thead className="bg-surface-raised text-left text-xs uppercase tracking-wide text-slate-400">
+                <tr>
+                  <th className="px-4 py-3">Market</th>
+                  <th className="px-4 py-3">Outcome</th>
+                  <th className="px-4 py-3">Your shares</th>
+                  <th className="px-4 py-3 text-right">Payout</th>
+                  <th className="px-4 py-3 text-right">P&L</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-surface-border">
+                {resolvedRows.map(({ pos, payout, pnl }) => (
+                  <tr key={pos.id} className="hover:bg-surface-raised/50">
+                    <td className="px-4 py-3">
+                      <Link
+                        href={`/markets/${pos.market.slug}`}
+                        className="font-semibold hover:text-accent"
+                      >
+                        {pos.market.question}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={cn(
+                          "font-bold",
+                          pos.market.resolvedOutcome === "YES" ? "text-yes" : "text-no"
+                        )}
+                      >
+                        {pos.market.resolvedOutcome}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      {pos.yesShares > 0.001 && (
+                        <span className="mr-2 font-semibold text-yes">
+                          {pos.yesShares.toFixed(1)} YES
+                        </span>
+                      )}
+                      {pos.noShares > 0.001 && (
+                        <span className="font-semibold text-no">
+                          {pos.noShares.toFixed(1)} NO
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-right font-semibold">
+                      {formatWCD(payout)}
+                    </td>
+                    <td
+                      className={cn(
+                        "px-4 py-3 text-right font-semibold",
+                        pnl >= 0 ? "text-emerald-600" : "text-red-600"
+                      )}
+                    >
+                      {pnl >= 0 ? "+" : ""}
+                      {formatWCD(pnl)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Market } from "@prisma/client";
 import { yesPrice } from "@/lib/amm";
-import { formatCents, formatDate, formatPercent, formatWCD } from "@/lib/utils";
+import { awaitingResult, formatCents, formatDate, formatPercent, formatWCD } from "@/lib/utils";
 import { flag, matchTeams } from "@/lib/flags";
 import { VENUES } from "@/lib/venues";
 import { FitText } from "@/components/FitText";
@@ -19,6 +19,7 @@ export function MarketCard({
 }) {
   const p = yesPrice(market);
   const resolved = market.status === "RESOLVED";
+  const awaiting = awaitingResult(market);
   const teams = market.category === "Matches" ? matchTeams(market.question) : null;
   const venue = teams ? VENUES[`${teams[0]} vs ${teams[1]}`] : null;
 
@@ -68,6 +69,11 @@ export function MarketCard({
           />
           Resolved: {market.resolvedOutcome}
         </div>
+      ) : awaiting ? (
+        <div className="flex items-center justify-center gap-2 rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm font-semibold text-slate-400">
+          <Clock className="h-4 w-4 shrink-0" />
+          Closed — awaiting result
+        </div>
       ) : (
         <div className="flex gap-2">
           <span className="flex-1 rounded-lg bg-yes-dim/60 px-3 py-2 text-center text-sm font-bold text-yes">
@@ -79,7 +85,7 @@ export function MarketCard({
         </div>
       )}
 
-      {teams && !resolved && (
+      {teams && !resolved && !awaiting && (
         <div className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
           <Clock className="h-3.5 w-3.5 shrink-0" />
           <MatchStartTime iso={market.closesAt.toISOString()} />
@@ -94,10 +100,10 @@ export function MarketCard({
 
       <div className="mt-auto flex items-center justify-between text-xs text-slate-400">
         <span>{formatWCD(Math.round(volume))} traded</span>
-        {(!teams || resolved) && (
+        {(!teams || resolved || awaiting) && (
           <span className="flex items-center gap-1">
             <Clock className="h-3.5 w-3.5" />
-            {resolved ? "Final" : `Closes ${formatDate(market.closesAt)}`}
+            {resolved ? "Final" : awaiting ? "Awaiting result" : `Closes ${formatDate(market.closesAt)}`}
           </span>
         )}
       </div>

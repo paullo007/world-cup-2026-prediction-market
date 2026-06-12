@@ -28,7 +28,9 @@ npm run db:seed    # tsx prisma/seed.ts — admin user + markets
 ```
 `.env` (gitignored) holds `DATABASE_URL` (pooled, 6543, pgbouncer), `DIRECT_URL` (5432),
 `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`. Seed refuses to run
-without `ADMIN_PASSWORD`.
+without `ADMIN_PASSWORD`. Results pipeline adds `CRON_SECRET` (protects the cron route;
+Vercel sends it as a Bearer token) and `THESPORTSDB_API_KEY` (free key "3" default; ESPN
+needs no key). Set `CRON_SECRET` + `THESPORTSDB_API_KEY` in Vercel env too.
 
 ## Architecture / key files
 | Path | Purpose |
@@ -40,7 +42,12 @@ without `ADMIN_PASSWORD`.
 | `lib/kickoffs.ts` | FIFA-verified UTC kickoff for all 72 group matches |
 | `lib/venues.ts` | official FIFA venue names for all 72 group matches |
 | `lib/bracket.ts` | knockout bracket data (R32→Final, kickoffs, venues) — static, no DB |
-| `lib/utils.ts` | `formatWCD()` currency, `firstName()`, `formatDate()` (with weekday) |
+| `lib/utils.ts` | `formatWCD()` currency, `firstName()`, `formatDate()`; `awaitingResult()` = closed-but-unresolved rule |
+| `lib/results.ts` | Dual-source results: `fetchEspn()` + `fetchTheSportsDB()`, team-name normalize/alias, `mergeForMarket()` cross-check (✓ agree / ⚠ disagree) |
+| `app/api/cron/results/` | Vercel Cron (CRON_SECRET-gated): ingests both sources, writes **pending** result only (never pays) |
+| `app/api/admin/approve-result/` | Admin gate: resolves a market via its stored `pendingOutcome` → `resolveMarket()` |
+| `app/admin/sources/` | Diagnostic: ESPN vs TheSportsDB side-by-side (accuracy/coverage) |
+| `components/ApproveResultButton.tsx` | Admin "Approve" button for an auto-detected pending result |
 | `prisma/schema.prisma` | Users, markets (AMM state), positions, trades, `BracketAssignment` |
 | `prisma/seed.ts` | admin + markets (winner / 72 matches / knockouts / crazy predictions) |
 | `app/page.tsx` | home: hero + category pills (Matches · Bracket · Knockouts · …) |
@@ -53,6 +60,8 @@ without `ADMIN_PASSWORD`.
 
 ## Domain facts
 - **234 markets live**: 10 tournament-winner · 72 group matches · 144 knockout progression · 8 crazy predictions.
+- **Market lifecycle**: OPEN (tradable) → *awaiting result* (derived: `closesAt` passed, not yet RESOLVED — UI shows "Closed — awaiting result", trading already blocked in `lib/trade.ts`) → RESOLVED. The `CLOSED` enum value exists but isn't set; "awaiting" is computed via `awaitingResult()`, not stored.
+- **Results flow**: daily cron auto-detects finished matches from two sources, cross-checks them, and stores a **pending** outcome; an admin **approves** on `/admin` before any payout. Never auto-resolves. `/admin/sources` compares the feeds.
 - Knockouts are **per-team progression** markets ("reach QF/SF/final"), not concrete matchups — real matchups aren't known until group stage ends (~Jun 27).
 - Bracket times/venues are **static data** (`lib/bracket.ts`); group `closesAt` = real kickoff.
 - Flags/teams parsed frontend-side from the "Will X beat Y?" question — no schema change needed.

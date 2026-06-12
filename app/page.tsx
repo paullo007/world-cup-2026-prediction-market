@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { MarketCard } from "@/components/MarketCard";
-import { cn } from "@/lib/utils";
+import { awaitingResult, cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-const CATEGORIES = ["All", "Tournament Winner", "Matches", "Bracket", "Knockouts", "Crazy Predictions"];
+const CATEGORIES = ["All", "Tournament Winner", "Matches", "Bracket", "Knockouts", "Crazy Predictions", "Results"];
 
 export default async function HomePage({
   searchParams,
@@ -13,11 +13,24 @@ export default async function HomePage({
   searchParams: { category?: string };
 }) {
   const category = searchParams.category ?? "All";
+  const isResults = category === "Results";
 
+  // Resolved markets live in the "Results" tab; everywhere else only show
+  // not-yet-resolved markets (open + closed-awaiting).
   const markets = await db.market.findMany({
-    where: category === "All" ? {} : { category },
-    orderBy: [{ status: "asc" }, { closesAt: "asc" }],
+    where: isResults
+      ? { status: "RESOLVED" }
+      : category === "All"
+        ? { status: { not: "RESOLVED" } }
+        : { category, status: { not: "RESOLVED" } },
+    orderBy: isResults ? [{ resolvedAt: "desc" }] : [{ closesAt: "asc" }],
   });
+
+  // Within a non-Results view, push closed-awaiting markets below tradable ones
+  // (stable sort keeps the closesAt ordering within each group).
+  if (!isResults) {
+    markets.sort((a, b) => Number(awaitingResult(a)) - Number(awaitingResult(b)));
+  }
 
   const volumes = await db.trade.groupBy({
     by: ["marketId"],

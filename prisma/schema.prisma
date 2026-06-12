@@ -62,6 +62,13 @@ model Market {
   resolvedAt      DateTime?
   createdAt       DateTime     @default(now())
 
+  // (C1) Auto-detected result from a sports API, awaiting admin approval before
+  // payout. The cron sets these; an admin approves to trigger resolveMarket().
+  pendingOutcome Outcome?
+  resultSource   String? // e.g. "football-data.org"
+  resultDetail   String? // human-readable, e.g. "Mexico 2–1 South Africa"
+  fetchedAt      DateTime?
+
   // LMSR automated market maker state
   liquidity Float @default(1000) // LMSR "b" parameter
   qYes      Float @default(0) // outstanding YES shares

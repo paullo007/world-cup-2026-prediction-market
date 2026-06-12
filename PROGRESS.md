@@ -2,32 +2,37 @@
 
 _You-are-here for a cheap resume. Durable map: `CLAUDE.md`. Deep archive: `../SESSION MD CODE HISTORY/SESSION_LOG.md`._
 
-**Last updated:** 2026-06-12 (end of Session 3 — cheap-resume scaffolding + Vercel CLI token auth)
+**Last updated:** 2026-06-12 (end of Session 4 — market lifecycle revamp + dual-source auto-results)
 
 ## Current phase
-App still **fully live and shipped** — no app-code changes this session. This session set up the cost-discipline scaffolding (this PROGRESS.md + CLAUDE.md, now committed) and got the Vercel CLI persistently token-authenticated. Working tree **clean**; `main` at `b58f701` (docs: add CLAUDE.md + PROGRESS.md), pushed & deploy verified (Vercel: success).
+Group stage has started (2 games played). Built the "finished games shouldn't look bettable" revamp **A + B + C1**. All code is **tsc-green and live-validated**; being migrated + deployed at the end of this session.
 
 ## START HERE (next action)
-**No app-code task is queued** — pick the next piece of work with Paul before coding. Strongest candidate (group stage opened Jun 12):
-- **Sanity-check timezone / `closesAt` behaviour** now that real matches are kicking off — confirm the 72 group markets close at their true kickoff (`lib/kickoffs.ts`, `MatchStartTime`), and that closed markets render correctly.
-- Then: first market **resolution** flow as results come in (admin resolve path in `app/admin/`, `lib/trade.ts`).
+**Watch the first real auto-resolution flow end-to-end.** After the next cron run (daily 05:00 UTC):
+1. Open `/admin` → "Ready to resolve" should show kicked-off games with an **auto-detected** line (e.g. "ESPN+TheSportsDB: Mexico 2–0 South Africa (YES) ✓ agree") and an **Approve** button.
+2. Open `/admin/sources` to compare ESPN vs TheSportsDB accuracy/coverage as more games finish.
+3. Approve a couple, confirm payouts land in users' balances + show in Portfolio → Results.
+- If the cron didn't fire, hit `GET /api/cron/results` manually with `Authorization: Bearer $CRON_SECRET` to trigger ingestion.
 
 ## Done (high level)
-- **Session 3 (Jun 12):** added `CLAUDE.md` (durable map) + `PROGRESS.md` (this file) for cheap resumes — committed & pushed (`b58f701`). Vercel CLI now **token-authenticated & persistent** (token in `~/.config/vercel/token.env`, `~/.zshrc` sources it + aliases `vercel` to pass `--token`); `vercel whoami` → `paullo007`, no more device-flow.
-- New public repo, fresh history; Supabase (Singapore) + Vercel deploy; GitHub auto-deploy on `main`.
-- 234 markets seeded (10 winner · 72 matches · 144 knockouts · 8 crazy predictions).
-- Light Apple-style theme, country flags, WC$ currency, FitText auto-sizing titles.
-- Profile page (`/profile`), name privacy (first-name-only on leaderboard + feed).
-- Visual bracket (`/bracket`) + admin slot editor (`/admin/bracket`, `BracketAssignment` table).
-- FIFA-verified kickoff times (viewer-local tz) + official venues on cards, detail, bracket.
-- Day-of-week on all dates; coloured Buy/Sell toggle (YES green / NO red).
+- **Session 4 (Jun 12):** Market lifecycle + automated results revamp:
+  - **A — UI honesty:** `awaitingResult()` helper (`lib/utils.ts`); MarketCard shows "Closed — awaiting result" (no fake Yes/No) once kickoff passes; detail page awaiting banner; home feed hides RESOLVED behind a new **Results** pill and sorts awaiting markets below tradable ones.
+  - **B — Results surfacing:** Portfolio **Results** table (payout + realized P&L); admin split into **"Ready to resolve"** (kicked-off) vs "Open — still trading".
+  - **C1 — Dual-source auto-results:** `lib/results.ts` queries **ESPN** (`fifa.world` scoreboard, date-swept) **+ TheSportsDB** (league 4429), normalizes team names, **cross-checks** (✓ agree / ⚠ disagree). Cron `/api/cron/results` (CRON_SECRET-protected) sets a **pending** result only — never auto-pays. `/api/admin/approve-result` + `ApproveResultButton` = human gate → `resolveMarket()`. **`/admin/sources`** diagnostic compares the two feeds. Schema: 4 nullable `Market` cols (pendingOutcome, resultSource, resultDetail, fetchedAt). `vercel.json` cron 1×/day (Hobby).
+  - Live-validated: both sources returned Mexico 2–0 SA + South Korea 2–1 Czechia, agreed, correct YES outcomes.
+- **Session 3 (Jun 12):** CLAUDE.md + PROGRESS.md scaffolding; Vercel CLI token-auth persisted.
+- 234 markets seeded; light theme, flags, WC$ currency; Profile, Bracket, FIFA-verified kickoffs/venues.
 
 ## In-flight
-- Nothing. Clean tree, nothing half-done.
+- DB migration (`db:push`) + deploy happening now at session end. (If this note still says "happening now" next session, verify it actually completed — see START HERE.)
 
 ## Active gotchas (see CLAUDE.md for full rules)
 - ⛔ No commit/push or live-DB write without Paul's explicit OK ("go" = code only).
-- Vercel CLI: token now persisted (see Done). CLI v50 ignores the `VERCEL_TOKEN` env var — pass `--token "$VERCEL_TOKEN"` (the `vercel` alias does this). If "Authorize Device" page appears, token is missing/expired — don't click Allow.
-- FIFA data = Paul's screenshots (site is a JS SPA; aggregators hallucinate venues).
+- 🔴 **Deploy order is load-bearing:** the regenerated Prisma client selects the 4 new `Market` columns, so **`db:push` MUST run before deploying** new code — deploying first breaks every page that reads a market.
+- **Sources:** ESPN scoreboard returns only the current day → `fetchEspn()` sweeps the last ~4 days; TheSportsDB returns the whole season. ESPN keyless; TheSportsDB uses free key "3" (env `THESPORTSDB_API_KEY`). Both are undocumented/ToS-gray (fine for play-money); admin-approval gate is the safety net for any team-name mismatch or source disagreement.
+- Auto-resolution NEVER pays out directly — admin must approve each pending result.
 - Vercel sometimes misses a deploy webhook → empty commit to re-trigger.
 - Verify cleanly: `grep | head` hides exit codes; React `<!-- -->` splits text.
+
+## How to run / verify
+- `npm run dev` → localhost:3000 · `npm run build` (catches type errors) · `npx tsc --noEmit` · `npm run db:push` (schema → DB). Full stack/commands in CLAUDE.md.

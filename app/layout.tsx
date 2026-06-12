@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Navbar } from "@/components/Navbar";
+import { CategoryNav, CategoryPills } from "@/components/CategoryNav";
 
 export const metadata: Metadata = {
   title: "World Cup 2026 Prediction Market",
@@ -19,7 +21,12 @@ export default function RootLayout({
       <body>
         <Providers>
           <Navbar />
-          <main className="mx-auto max-w-6xl px-4 pb-20 pt-6">{children}</main>
+          <main className="mx-auto max-w-6xl px-4 pb-20 pt-6">
+            <Suspense fallback={<CategoryPills active={null} />}>
+              <CategoryNav />
+            </Suspense>
+            <div className="mt-6">{children}</div>
+          </main>
           <footer className="border-t border-surface-border py-8 text-center text-sm text-slate-500">
             World Cup 2026 Prediction Market — WC$ only, no real wagering.
           </footer>

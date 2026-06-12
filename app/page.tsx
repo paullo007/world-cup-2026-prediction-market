@@ -1,19 +1,8 @@
-import Link from "next/link";
 import { db } from "@/lib/db";
 import { MarketCard } from "@/components/MarketCard";
-import { awaitingResult, cn } from "@/lib/utils";
+import { awaitingResult } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
-
-const CATEGORIES = ["All", "Tournament Winner", "Matches", "Bracket", "Standings", "Scores", "Goals", "Knockouts", "Crazy Predictions", "Results"];
-
-// Pills that navigate to a standalone tab page rather than filtering the home grid.
-const TAB_ROUTES: Record<string, string> = {
-  Bracket: "/bracket",
-  Standings: "/standings",
-  Scores: "/scores",
-  Goals: "/goals",
-};
 
 export default async function HomePage({
   searchParams,
@@ -62,23 +51,6 @@ export default async function HomePage({
           1,000 WC$.
         </p>
       </section>
-
-      <div className="flex flex-wrap gap-2">
-        {CATEGORIES.map((c) => (
-          <Link
-            key={c}
-            href={c === "All" ? "/" : TAB_ROUTES[c] ?? `/?category=${encodeURIComponent(c)}`}
-            className={cn(
-              "rounded-full px-4 py-1.5 text-sm font-semibold transition",
-              c === category
-                ? "bg-accent text-white"
-                : "bg-surface-raised text-slate-300 hover:bg-surface-hover"
-            )}
-          >
-            {c}
-          </Link>
-        ))}
-      </div>
 
       {markets.length === 0 ? (
         <p className="py-12 text-center text-slate-400">

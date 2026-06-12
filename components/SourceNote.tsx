@@ -7,21 +7,23 @@ import type { SourceLink } from "@/lib/sources";
  */
 export function SourceNote({ sources }: { sources: SourceLink[] }) {
   return (
-    <p className="mt-6 border-t border-surface-border pt-4 text-xs text-slate-400">
-      Source:{" "}
-      {sources.map((s, i) => (
-        <span key={s.url}>
-          {i > 0 && ", "}
-          <a
-            href={s.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium text-accent hover:underline"
-          >
-            {s.url}
-          </a>
-        </span>
-      ))}
-    </p>
+    <div className="mt-6 border-t border-surface-border pt-4 text-xs text-slate-400">
+      <p>Source:</p>
+      <ol className="mt-1 space-y-0.5">
+        {sources.map((s, i) => (
+          <li key={s.url}>
+            {i + 1}){" "}
+            <a
+              href={s.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-accent hover:underline"
+            >
+              {s.url}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
   );
 }

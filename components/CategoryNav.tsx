@@ -8,17 +8,19 @@ const CATEGORIES = [
   "All",
   "Tournament Winner",
   "Matches",
+  "Brazil",
   "Bracket",
+  "Knockouts",
   "Standings",
   "Scores",
   "Goals",
-  "Knockouts",
   "Crazy Predictions",
   "Results",
 ];
 
 // Pills that navigate to a standalone tab page rather than filtering the home grid.
 const TAB_ROUTES: Record<string, string> = {
+  Brazil: "/brazil",
   Bracket: "/bracket",
   Standings: "/standings",
   Scores: "/scores",
@@ -29,6 +31,12 @@ const TAB_ROUTES: Record<string, string> = {
 const ROUTE_TO_TAB: Record<string, string> = Object.fromEntries(
   Object.entries(TAB_ROUTES).map(([cat, route]) => [route, cat])
 );
+
+// Display overrides: pill text differs from the underlying category value/key
+// (which must stay in sync with the market `category` stored in the DB).
+const LABELS: Record<string, string> = {
+  "Tournament Winner": "Predict World Cup Winner",
+};
 
 /** Presentational pill bar. `active` is the currently-selected category, or null. */
 export function CategoryPills({ active }: { active: string | null }) {
@@ -45,7 +53,7 @@ export function CategoryPills({ active }: { active: string | null }) {
               : "bg-surface-raised text-slate-300 hover:bg-surface-hover"
           )}
         >
-          {c}
+          {LABELS[c] ?? c}
         </Link>
       ))}
     </div>

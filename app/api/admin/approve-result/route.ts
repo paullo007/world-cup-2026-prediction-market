@@ -32,6 +32,16 @@ export async function POST(req: Request) {
 
   try {
     await resolveMarket(market.id, market.pendingOutcome);
+    // Commit the structured score + scorers alongside the payout, so Standings,
+    // Scores and Goals (which read only approved results) pick them up.
+    await db.market.update({
+      where: { id: market.id },
+      data: {
+        homeGoals: market.pendingHomeGoals,
+        awayGoals: market.pendingAwayGoals,
+        scorers: market.pendingScorers ?? undefined,
+      },
+    });
     return NextResponse.json({ ok: true });
   } catch (err) {
     if (err instanceof TradeError) {

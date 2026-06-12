@@ -69,6 +69,16 @@ model Market {
   resultDetail   String? // human-readable, e.g. "Mexico 2–1 South Africa"
   fetchedAt      DateTime?
 
+  // Structured score + goalscorers. The cron writes the pending* fields; an
+  // admin approval copies them to the final fields. Standings / Scores / Goals
+  // read only the final (approved) fields. scorers = [{ name, team, minute?, penalty? }].
+  pendingHomeGoals Int?
+  pendingAwayGoals Int?
+  pendingScorers   Json?
+  homeGoals        Int?
+  awayGoals        Int?
+  scorers          Json?
+
   // LMSR automated market maker state
   liquidity Float @default(1000) // LMSR "b" parameter
   qYes      Float @default(0) // outstanding YES shares

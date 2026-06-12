@@ -53,6 +53,14 @@ export function canonicalTeam(name: string): string {
   return CANON[normalize(name)] ?? name;
 }
 
+/** A single goal, attributed to a player and their (canonical) team. */
+export interface Scorer {
+  name: string;
+  team: string; // canonical team name
+  minute?: string; // e.g. "9'"
+  penalty?: boolean;
+}
+
 export interface FinishedMatch {
   source: Source;
   home: string; // canonical name where recognised
@@ -61,6 +69,7 @@ export interface FinishedMatch {
   awayGoals: number | null;
   winner: "HOME" | "AWAY" | "DRAW";
   date: string; // ISO-ish date from the source
+  scorers?: Scorer[]; // goalscorers where the source provides them (ESPN only)
 }
 
 const winnerFromScore = (h: number | null, a: number | null): "HOME" | "AWAY" | "DRAW" =>
@@ -78,7 +87,16 @@ interface EspnScoreboard {
         homeAway: "home" | "away";
         score?: string;
         winner?: boolean;
-        team?: { displayName?: string; name?: string };
+        team?: { id?: string; displayName?: string; name?: string };
+      }>;
+      details?: Array<{
+        type?: { text?: string };
+        clock?: { displayValue?: string };
+        team?: { id?: string };
+        scoringPlay?: boolean;
+        ownGoal?: boolean;
+        penaltyKick?: boolean;
+        athletesInvolved?: Array<{ displayName?: string; fullName?: string }>;
       }>;
     }>;
   }>;
@@ -127,6 +145,22 @@ export async function fetchEspn(daysBack = 4): Promise<FinishedMatch[]> {
             ? "AWAY"
             : winnerFromScore(homeGoals, awayGoals);
 
+      // Goalscorers: ESPN lists each scoring play in competition.details[].
+      // Map the scoring team id back to our canonical name; skip own goals
+      // (they don't count toward the scorer's tally) and any non-goal plays.
+      const teamById = new Map<string, string>();
+      if (home.team?.id) teamById.set(home.team.id, homeName);
+      if (away.team?.id) teamById.set(away.team.id, awayName);
+      const scorers: Scorer[] = [];
+      for (const d of comp?.details ?? []) {
+        if (!d.scoringPlay || d.ownGoal) continue;
+        if (!/goal/i.test(d.type?.text ?? "")) continue;
+        const player = d.athletesInvolved?.[0]?.fullName ?? d.athletesInvolved?.[0]?.displayName;
+        const team = d.team?.id ? teamById.get(d.team.id) : undefined;
+        if (!player || !team) continue;
+        scorers.push({ name: player, team, minute: d.clock?.displayValue, penalty: d.penaltyKick });
+      }
+
       out.push({
         source: "ESPN",
         home: homeName,
@@ -135,6 +169,7 @@ export async function fetchEspn(daysBack = 4): Promise<FinishedMatch[]> {
         awayGoals,
         winner,
         date: ev.date,
+        scorers: scorers.length ? scorers : undefined,
       });
     }
   }
@@ -226,6 +261,9 @@ export interface MergedResult {
   agree: boolean; // all sources that had a result agreed
   sources: Source[]; // sources that reported this match
   detail: string; // human-readable, for resultDetail / admin display
+  homeGoals: number | null; // goals for the market's HOME team
+  awayGoals: number | null; // goals for the market's AWAY team
+  scorers: Scorer[]; // goalscorers (from whichever source provides them)
 }
 
 /**
@@ -251,10 +289,21 @@ export function mergeForMarket(
     .map((h) => `${h.source}: ${h.m.home} ${h.m.homeGoals ?? "?"}–${h.m.awayGoals ?? "?"} ${h.m.away} (${h.outcome})`)
     .join(" · ");
 
+  // Orient the score to the MARKET's home/away (a source may list them swapped).
+  const primary = hits[0].m;
+  const homeIsMarketHome = normalize(primary.home) === normalize(marketHome);
+  const homeGoals = homeIsMarketHome ? primary.homeGoals : primary.awayGoals;
+  const awayGoals = homeIsMarketHome ? primary.awayGoals : primary.homeGoals;
+  // Scorers come from whichever hit has them (ESPN); they already carry their team.
+  const scorers = hits.find((h) => h.m.scorers?.length)?.m.scorers ?? [];
+
   return {
     outcome: hits[0].outcome,
     agree,
     sources: hits.map((h) => h.source),
     detail: agree ? `${detail} ✓ agree` : `⚠ disagree — ${detail}`,
+    homeGoals,
+    awayGoals,
+    scorers,
   };
 }

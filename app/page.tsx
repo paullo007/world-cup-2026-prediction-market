@@ -5,7 +5,15 @@ import { awaitingResult, cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-const CATEGORIES = ["All", "Tournament Winner", "Matches", "Bracket", "Knockouts", "Crazy Predictions", "Results"];
+const CATEGORIES = ["All", "Tournament Winner", "Matches", "Bracket", "Standings", "Scores", "Goals", "Knockouts", "Crazy Predictions", "Results"];
+
+// Pills that navigate to a standalone tab page rather than filtering the home grid.
+const TAB_ROUTES: Record<string, string> = {
+  Bracket: "/bracket",
+  Standings: "/standings",
+  Scores: "/scores",
+  Goals: "/goals",
+};
 
 export default async function HomePage({
   searchParams,
@@ -59,7 +67,7 @@ export default async function HomePage({
         {CATEGORIES.map((c) => (
           <Link
             key={c}
-            href={c === "All" ? "/" : c === "Bracket" ? "/bracket" : `/?category=${encodeURIComponent(c)}`}
+            href={c === "All" ? "/" : TAB_ROUTES[c] ?? `/?category=${encodeURIComponent(c)}`}
             className={cn(
               "rounded-full px-4 py-1.5 text-sm font-semibold transition",
               c === category

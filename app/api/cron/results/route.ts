@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { matchTeams } from "@/lib/flags";
 import { fetchAllSources, mergeForMarket } from "@/lib/results";
@@ -28,8 +29,16 @@ export async function GET(req: Request) {
     );
   }
 
+  // Process unresolved match markets that either have no pending result yet, or
+  // were detected before structured scores existed (pendingOutcome set but
+  // pendingHomeGoals still null) — the latter self-heals the score/scorer
+  // backfill so Standings/Scores/Goals can pick them up after approval.
   const markets = await db.market.findMany({
-    where: { category: "Matches", status: { not: "RESOLVED" }, pendingOutcome: null },
+    where: {
+      category: "Matches",
+      status: { not: "RESOLVED" },
+      OR: [{ pendingOutcome: null }, { pendingHomeGoals: null }],
+    },
   });
 
   let detected = 0;
@@ -52,6 +61,11 @@ export async function GET(req: Request) {
         resultSource: merged.sources.join("+"),
         resultDetail: merged.detail,
         fetchedAt: new Date(),
+        pendingHomeGoals: merged.homeGoals,
+        pendingAwayGoals: merged.awayGoals,
+        pendingScorers: merged.scorers.length
+          ? (merged.scorers as unknown as Prisma.InputJsonValue)
+          : undefined,
       },
     });
     detected++;

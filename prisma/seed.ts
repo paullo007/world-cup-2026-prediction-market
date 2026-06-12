@@ -17,6 +17,8 @@ interface SeedMarket {
   probability: number; // initial implied probability
   closesAt: Date;
   liquidity?: number;
+  matchKey?: string; // groups a 3-way match's outcome markets
+  outcomeType?: "HOME" | "DRAW" | "AWAY";
 }
 
 const winner = (team: string, p: number): SeedMarket => ({
@@ -122,15 +124,54 @@ const GROUP_FIXTURES: [string, string, string][] = [
   ["2026-06-27", "Jordan", "Argentina"],
 ];
 
-const match = ([date, home, away]: [string, string, string]): SeedMarket => ({
-  slug: `${slugify(home)}-vs-${slugify(away)}-${date}`,
-  question: `Will ${home} beat ${away}?`,
-  description: `Group-stage match on ${longDate(date)}. Resolves YES if ${home} win in regulation (a draw or a ${away} win resolves NO).`,
-  category: "Matches",
-  probability: 0.4,
-  closesAt: new Date(KICKOFFS[`${home} vs ${away}`] ?? `${date}T19:00:00Z`),
-  liquidity: 1000,
-});
+// Three-way group match: each fixture seeds a Home-win, Draw and Away-win
+// binary market, grouped by matchKey. Initial implied probabilities sum to ~1
+// (home edge + ~27% draw); the crowd moves them from there.
+const SEED_PROB = { HOME: 0.4, DRAW: 0.27, AWAY: 0.33 } as const;
+
+function outcomeMarket(
+  date: string,
+  home: string,
+  away: string,
+  outcomeType: "HOME" | "DRAW" | "AWAY"
+): SeedMarket {
+  const matchKey = `${home} vs ${away}`;
+  const base = {
+    category: "Matches",
+    closesAt: new Date(KICKOFFS[matchKey] ?? `${date}T19:00:00Z`),
+    liquidity: 1000,
+    matchKey,
+    outcomeType,
+  };
+  if (outcomeType === "DRAW") {
+    return {
+      ...base,
+      slug: `${slugify(home)}-vs-${slugify(away)}-${date}-draw`,
+      question: `Will ${home} vs ${away} end in a draw?`,
+      description: `Group-stage match on ${longDate(date)}. Resolves YES if the match is level after regulation (a draw).`,
+      probability: SEED_PROB.DRAW,
+    };
+  }
+  if (outcomeType === "AWAY") {
+    return {
+      ...base,
+      slug: `${slugify(away)}-beats-${slugify(home)}-${date}`,
+      question: `Will ${away} beat ${home}?`,
+      description: `Group-stage match on ${longDate(date)}. Resolves YES if ${away} win in regulation.`,
+      probability: SEED_PROB.AWAY,
+    };
+  }
+  return {
+    ...base,
+    slug: `${slugify(home)}-vs-${slugify(away)}-${date}`,
+    question: `Will ${home} beat ${away}?`,
+    description: `Group-stage match on ${longDate(date)}. Resolves YES if ${home} win in regulation.`,
+    probability: SEED_PROB.HOME,
+  };
+}
+
+const threeWay = ([date, home, away]: [string, string, string]): SeedMarket[] =>
+  (["HOME", "DRAW", "AWAY"] as const).map((t) => outcomeMarket(date, home, away, t));
 
 // Knockout placeholders: bracket matchups aren't known until the group stage
 // finishes, so these are per-team "how far do they go?" progression markets.
@@ -222,7 +263,8 @@ const MARKETS: SeedMarket[] = [
   winner("USA", 0.03),
   winner("Mexico", 0.02),
 
-  // Matches
+  // Matches — opening game (3-way: home / draw / away). The home-win market
+  // keeps its original slug so existing trades/results stay intact.
   {
     slug: "mexico-wins-opening-match",
     question: "Will Mexico beat South Africa?",
@@ -231,9 +273,13 @@ const MARKETS: SeedMarket[] = [
     category: "Matches",
     probability: 0.55,
     closesAt: new Date(KICKOFFS["Mexico vs South Africa"]),
+    matchKey: "Mexico vs South Africa",
+    outcomeType: "HOME",
   },
-  // All 72 group-stage fixtures (opener handled above)
-  ...GROUP_FIXTURES.map(match),
+  outcomeMarket("2026-06-11", "Mexico", "South Africa", "DRAW"),
+  outcomeMarket("2026-06-11", "Mexico", "South Africa", "AWAY"),
+  // All 72 group-stage fixtures as 3-way markets (opener handled above)
+  ...GROUP_FIXTURES.flatMap(threeWay),
 
   // Knockout-stage progression placeholders (all 48 teams)
   ...KO_TEAMS.flatMap(knockout),
@@ -339,6 +385,8 @@ async function main() {
         liquidity,
         qYes: state.qYes,
         qNo: state.qNo,
+        matchKey: m.matchKey,
+        outcomeType: m.outcomeType,
       },
     });
   }

@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
-import { resolveMarket, TradeError } from "@/lib/trade";
+import { db } from "@/lib/db";
+import { resolveMarket, resolveMatchGroup, TradeError } from "@/lib/trade";
 
+// Either a binary outcome (non-match markets) or a 3-way winner (group matches).
 const schema = z.object({
   marketId: z.string(),
-  outcome: z.enum(["YES", "NO"]),
+  outcome: z.enum(["YES", "NO"]).optional(),
+  winner: z.enum(["HOME", "DRAW", "AWAY"]).optional(),
 });
 
 export async function POST(req: Request) {
@@ -21,7 +24,19 @@ export async function POST(req: Request) {
   }
 
   try {
-    await resolveMarket(parsed.data.marketId, parsed.data.outcome);
+    const { marketId, outcome, winner } = parsed.data;
+    if (winner) {
+      // 3-way match: resolve the whole Home/Draw/Away group to the chosen winner.
+      const market = await db.market.findUnique({ where: { id: marketId } });
+      if (!market?.matchKey) {
+        return NextResponse.json({ error: "Not a 3-way match market" }, { status: 400 });
+      }
+      await resolveMatchGroup(market.matchKey, winner);
+    } else if (outcome) {
+      await resolveMarket(marketId, outcome);
+    } else {
+      return NextResponse.json({ error: "outcome or winner required" }, { status: 400 });
+    }
     return NextResponse.json({ ok: true });
   } catch (err) {
     if (err instanceof TradeError) {

@@ -257,7 +257,8 @@ export function outcomeForMarket(
 }
 
 export interface MergedResult {
-  outcome: "YES" | "NO"; // best consensus outcome
+  outcome: "YES" | "NO"; // best consensus outcome (YES iff the market's home won)
+  winner: "HOME" | "AWAY" | "DRAW"; // result oriented to the market's home/away
   agree: boolean; // all sources that had a result agreed
   sources: Source[]; // sources that reported this match
   detail: string; // human-readable, for resultDetail / admin display
@@ -297,8 +298,24 @@ export function mergeForMarket(
   // Scorers come from whichever hit has them (ESPN); they already carry their team.
   const scorers = hits.find((h) => h.m.scorers?.length)?.m.scorers ?? [];
 
+  const winner: "HOME" | "AWAY" | "DRAW" =
+    homeGoals != null && awayGoals != null
+      ? homeGoals > awayGoals
+        ? "HOME"
+        : homeGoals < awayGoals
+          ? "AWAY"
+          : "DRAW"
+      : // No parsed score — fall back to the source's own verdict (which can be a
+        // draw), re-oriented to the market's home/away.
+        primary.winner === "DRAW"
+        ? "DRAW"
+        : (primary.winner === "HOME") === homeIsMarketHome
+          ? "HOME"
+          : "AWAY";
+
   return {
     outcome: hits[0].outcome,
+    winner,
     agree,
     sources: hits.map((h) => h.source),
     detail: agree ? `${detail} ✓ agree` : `⚠ disagree — ${detail}`,

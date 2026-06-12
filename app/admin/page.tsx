@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { yesPrice } from "@/lib/amm";
 import { awaitingResult, formatDate, formatPercent } from "@/lib/utils";
 import { ResolveButtons } from "@/components/ResolveButtons";
+import { ResolveMatchButtons } from "@/components/ResolveMatchButtons";
 import { ApproveResultButton } from "@/components/ApproveResultButton";
 
 export const dynamic = "force-dynamic";
@@ -17,11 +18,16 @@ export default async function AdminPage() {
     orderBy: [{ status: "asc" }, { closesAt: "asc" }],
   });
 
+  // For a 3-way match, only show the HOME row — approving it resolves the whole
+  // Home/Draw/Away group at once, so the Draw/Away rows would be redundant.
+  const isSecondary = (m: (typeof markets)[number]) =>
+    m.outcomeType === "DRAW" || m.outcomeType === "AWAY";
+
   // "Ready to resolve" = trading window closed (kickoff passed) but not yet resolved.
   // "Open" = still trading. Resolved = settled.
-  const ready = markets.filter((m) => awaitingResult(m));
-  const open = markets.filter((m) => m.status !== "RESOLVED" && !awaitingResult(m));
-  const resolved = markets.filter((m) => m.status === "RESOLVED");
+  const ready = markets.filter((m) => awaitingResult(m) && !isSecondary(m));
+  const open = markets.filter((m) => m.status !== "RESOLVED" && !awaitingResult(m) && !isSecondary(m));
+  const resolved = markets.filter((m) => m.status === "RESOLVED" && !isSecondary(m));
 
   return (
     <div className="space-y-8">
@@ -67,7 +73,11 @@ export default async function AdminPage() {
               {m.pendingOutcome && (
                 <ApproveResultButton marketId={m.id} outcome={m.pendingOutcome} />
               )}
-              <ResolveButtons marketId={m.id} />
+              {m.matchKey ? (
+                <ResolveMatchButtons marketId={m.id} />
+              ) : (
+                <ResolveButtons marketId={m.id} />
+              )}
             </li>
           ))}
           {ready.length === 0 && (
@@ -90,7 +100,11 @@ export default async function AdminPage() {
                   {formatPercent(yesPrice(m))}
                 </p>
               </div>
-              <ResolveButtons marketId={m.id} />
+              {m.matchKey ? (
+                <ResolveMatchButtons marketId={m.id} />
+              ) : (
+                <ResolveButtons marketId={m.id} />
+              )}
             </li>
           ))}
           {open.length === 0 && (

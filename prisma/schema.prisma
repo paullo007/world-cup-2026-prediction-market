@@ -57,6 +57,13 @@ model Market {
   category        String
   imageUrl        String?
   status          MarketStatus @default(OPEN)
+
+  // Three-way group-stage matches: each fixture is 3 grouped binary markets
+  // (Home win / Draw / Away win). matchKey ("Home vs Away") links the trio;
+  // outcomeType says which outcome this market represents. Null for non-match
+  // (binary) markets like tournament-winner or knockouts.
+  matchKey    String? // e.g. "Brazil vs Morocco"
+  outcomeType String? // "HOME" | "DRAW" | "AWAY"
   resolvedOutcome Outcome?
   closesAt        DateTime
   resolvedAt      DateTime?

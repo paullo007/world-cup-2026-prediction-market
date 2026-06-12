@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { MarketCard } from "@/components/MarketCard";
+import { MatchDayBoard } from "@/components/MatchDayBoard";
 import { awaitingResult } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -11,15 +12,21 @@ export default async function HomePage({
 }) {
   const category = searchParams.category ?? "All";
   const isResults = category === "Results";
+  const isMatches = category === "Matches";
+
+  // Outside the Matches tab, a 3-way fixture is represented by its single HOME
+  // market (the "Will X beat Y?" card); the Draw/Away outcome markets only show
+  // grouped on the Matches tab. The Matches tab itself includes all three.
+  const hideSecondary = isMatches ? {} : { NOT: { outcomeType: { in: ["DRAW", "AWAY"] } } };
 
   // Resolved markets live in the "Results" tab; everywhere else only show
   // not-yet-resolved markets (open + closed-awaiting).
   const markets = await db.market.findMany({
     where: isResults
-      ? { status: "RESOLVED" }
+      ? { status: "RESOLVED", ...hideSecondary }
       : category === "All"
-        ? { status: { not: "RESOLVED" } }
-        : { category, status: { not: "RESOLVED" } },
+        ? { status: { not: "RESOLVED" }, ...hideSecondary }
+        : { category, status: { not: "RESOLVED" }, ...hideSecondary },
     orderBy: isResults ? [{ resolvedAt: "desc" }] : [{ closesAt: "asc" }],
   });
 
@@ -52,7 +59,11 @@ export default async function HomePage({
         </p>
       </section>
 
-      {markets.length === 0 ? (
+      {isMatches ? (
+        <MatchDayBoard
+          matches={markets.map((m) => ({ market: m, volume: volumeByMarket.get(m.id) ?? 0 }))}
+        />
+      ) : markets.length === 0 ? (
         <p className="py-12 text-center text-slate-400">
           No markets in this category yet.
         </p>

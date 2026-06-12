@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { resolveMarket, TradeError } from "@/lib/trade";
+import { resolveMarket, resolveMatchGroup, TradeError } from "@/lib/trade";
 
 const schema = z.object({ marketId: z.string() });
 
@@ -31,17 +31,37 @@ export async function POST(req: Request) {
   }
 
   try {
-    await resolveMarket(market.id, market.pendingOutcome);
-    // Commit the structured score + scorers alongside the payout, so Standings,
-    // Scores and Goals (which read only approved results) pick them up.
-    await db.market.update({
-      where: { id: market.id },
-      data: {
-        homeGoals: market.pendingHomeGoals,
-        awayGoals: market.pendingAwayGoals,
-        scorers: market.pendingScorers ?? undefined,
-      },
-    });
+    if (market.matchKey) {
+      // 3-way match: derive the actual winner from the HOME market's detected
+      // score (not from each sibling's pending outcome — those may not be set
+      // yet) and resolve all three outcome markets atomically. This guarantees
+      // no outcome is left tradeable after the match is decided.
+      const home =
+        (await db.market.findFirst({
+          where: { matchKey: market.matchKey, outcomeType: "HOME" },
+        })) ?? market;
+      const hg = home.pendingHomeGoals;
+      const ag = home.pendingAwayGoals;
+      const winner: "HOME" | "DRAW" | "AWAY" =
+        hg != null && ag != null
+          ? hg > ag
+            ? "HOME"
+            : hg < ag
+              ? "AWAY"
+              : "DRAW"
+          : home.pendingOutcome === "YES"
+            ? "HOME"
+            : "AWAY"; // no score on record (degenerate) — best effort
+      await resolveMatchGroup(market.matchKey, winner);
+      // Commit the structured score + scorers to the HOME market only, so the
+      // one-row-per-match views (Scores/Standings/Goals) pick them up.
+      await db.market.update({
+        where: { id: home.id },
+        data: { homeGoals: hg, awayGoals: ag, scorers: home.pendingScorers ?? undefined },
+      });
+    } else {
+      await resolveMarket(market.id, market.pendingOutcome);
+    }
     return NextResponse.json({ ok: true });
   } catch (err) {
     if (err instanceof TradeError) {

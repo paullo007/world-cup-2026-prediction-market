@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import {
   applyTrade,
@@ -119,32 +120,59 @@ export async function executeTrade(params: {
 }
 
 /**
- * Resolve a market: pay 1 coin per winning share, mark it RESOLVED.
+ * Resolve one market inside an existing transaction: pay 1 coin per winning
+ * share, mark it RESOLVED. Idempotent across a group — already-resolved markets
+ * are skipped so a retry can finish a partially-applied group.
+ */
+async function resolveMarketTx(
+  tx: Prisma.TransactionClient,
+  marketId: string,
+  outcome: "YES" | "NO"
+) {
+  const market = await tx.market.findUnique({ where: { id: marketId } });
+  if (!market) throw new TradeError("Market not found");
+  if (market.status === "RESOLVED") return; // already settled — nothing to do
+
+  const positions = await tx.position.findMany({ where: { marketId } });
+  for (const pos of positions) {
+    const payout = outcome === "YES" ? pos.yesShares : pos.noShares;
+    if (payout > 0) {
+      await tx.user.update({
+        where: { id: pos.userId },
+        data: { balance: { increment: payout } },
+      });
+    }
+  }
+
+  await tx.market.update({
+    where: { id: marketId },
+    data: { status: "RESOLVED", resolvedOutcome: outcome, resolvedAt: new Date() },
+  });
+}
+
+/**
+ * Resolve a single market: pay 1 coin per winning share, mark it RESOLVED.
  */
 export async function resolveMarket(marketId: string, outcome: "YES" | "NO") {
+  return db.$transaction((tx) => resolveMarketTx(tx, marketId, outcome));
+}
+
+/**
+ * Resolve all three outcome markets of a 3-way match atomically. The market
+ * whose outcomeType matches the actual `winner` resolves YES; the other two
+ * resolve NO. A single transaction guarantees a match can never be left
+ * partially resolved (no outcome left tradeable after the result is in).
+ */
+export async function resolveMatchGroup(
+  matchKey: string,
+  winner: "HOME" | "DRAW" | "AWAY"
+) {
   return db.$transaction(async (tx) => {
-    const market = await tx.market.findUnique({ where: { id: marketId } });
-    if (!market) throw new TradeError("Market not found");
-    if (market.status === "RESOLVED") throw new TradeError("Already resolved");
-
-    const positions = await tx.position.findMany({ where: { marketId } });
-    for (const pos of positions) {
-      const payout = outcome === "YES" ? pos.yesShares : pos.noShares;
-      if (payout > 0) {
-        await tx.user.update({
-          where: { id: pos.userId },
-          data: { balance: { increment: payout } },
-        });
-      }
-    }
-
-    await tx.market.update({
-      where: { id: marketId },
-      data: {
-        status: "RESOLVED",
-        resolvedOutcome: outcome,
-        resolvedAt: new Date(),
-      },
+    const markets = await tx.market.findMany({
+      where: { matchKey, status: { not: "RESOLVED" } },
     });
+    for (const m of markets) {
+      await resolveMarketTx(tx, m.id, m.outcomeType === winner ? "YES" : "NO");
+    }
   });
 }

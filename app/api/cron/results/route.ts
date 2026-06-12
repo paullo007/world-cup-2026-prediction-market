@@ -29,15 +29,17 @@ export async function GET(req: Request) {
     );
   }
 
-  // Process unresolved match markets that either have no pending result yet, or
-  // were detected before structured scores existed (pendingOutcome set but
-  // pendingHomeGoals still null) — the latter self-heals the score/scorer
-  // backfill so Standings/Scores/Goals can pick them up after approval.
+  // Process unresolved match markets that have no pending result yet, or are the
+  // HOME market of a match still missing its structured score (self-heals the
+  // score/scorer backfill so Standings/Scores/Goals pick them up after approval).
   const markets = await db.market.findMany({
     where: {
       category: "Matches",
       status: { not: "RESOLVED" },
-      OR: [{ pendingOutcome: null }, { pendingHomeGoals: null }],
+      OR: [
+        { pendingOutcome: null },
+        { AND: [{ outcomeType: "HOME" }, { pendingHomeGoals: null }] },
+      ],
     },
   });
 
@@ -45,27 +47,53 @@ export async function GET(req: Request) {
   let conflicts = 0;
   let unmatched = 0;
   for (const m of markets) {
-    const teams = matchTeams(m.question);
-    if (!teams) continue;
-    const merged = mergeForMarket(teams[0], teams[1], sources);
+    // Each market is one outcome (HOME/DRAW/AWAY) of a 3-way match. Use the
+    // structured matchKey/outcomeType; fall back to parsing the question for any
+    // legacy binary market.
+    let home: string | undefined;
+    let away: string | undefined;
+    let outcomeType: "HOME" | "DRAW" | "AWAY" = "HOME";
+    if (m.matchKey && m.outcomeType) {
+      [home, away] = m.matchKey.split(" vs ");
+      outcomeType = m.outcomeType as "HOME" | "DRAW" | "AWAY";
+    } else {
+      const teams = matchTeams(m.question);
+      if (teams) [home, away] = teams;
+    }
+    if (!home || !away) continue;
+
+    const merged = mergeForMarket(home, away, sources);
     if (!merged) {
       unmatched++;
       continue;
     }
     if (!merged.agree) conflicts++;
 
+    const won =
+      outcomeType === "HOME"
+        ? merged.winner === "HOME"
+        : outcomeType === "AWAY"
+          ? merged.winner === "AWAY"
+          : merged.winner === "DRAW";
+
     await db.market.update({
       where: { id: m.id },
       data: {
-        pendingOutcome: merged.outcome,
+        pendingOutcome: won ? "YES" : "NO",
         resultSource: merged.sources.join("+"),
         resultDetail: merged.detail,
         fetchedAt: new Date(),
-        pendingHomeGoals: merged.homeGoals,
-        pendingAwayGoals: merged.awayGoals,
-        pendingScorers: merged.scorers.length
-          ? (merged.scorers as unknown as Prisma.InputJsonValue)
-          : undefined,
+        // Structured score + scorers live on the HOME market only, so the
+        // one-row-per-match views don't triple-count.
+        ...(outcomeType === "HOME"
+          ? {
+              pendingHomeGoals: merged.homeGoals,
+              pendingAwayGoals: merged.awayGoals,
+              pendingScorers: merged.scorers.length
+                ? (merged.scorers as unknown as Prisma.InputJsonValue)
+                : undefined,
+            }
+          : {}),
       },
     });
     detected++;

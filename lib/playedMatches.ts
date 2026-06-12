@@ -22,7 +22,14 @@ export interface PlayedMatch {
  */
 export async function getPlayedMatches(): Promise<PlayedMatch[]> {
   const markets = await db.market.findMany({
-    where: { category: "Matches", homeGoals: { not: null }, awayGoals: { not: null } },
+    where: {
+      category: "Matches",
+      homeGoals: { not: null },
+      awayGoals: { not: null },
+      // Only the HOME (or legacy binary) market of a 3-way fixture carries the
+      // score, so this stays one row per match.
+      NOT: { outcomeType: { in: ["DRAW", "AWAY"] } },
+    },
     orderBy: { closesAt: "asc" },
   });
 

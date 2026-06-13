@@ -4,10 +4,13 @@ import { MatchStartTime } from "@/components/MatchStartTime";
 import { cn } from "@/lib/utils";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-// Compact nominal date ("2026-06-29" → "Jun 29"); parsed by parts to avoid TZ drift.
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+// Compact nominal date with weekday ("2026-06-28" → "Jun28/Sun"); parsed by
+// parts and resolved in UTC to avoid TZ drift.
 function shortDate(ymd: string) {
-  const [, mo, d] = ymd.split("-").map(Number);
-  return `${MONTHS[mo - 1]} ${d}`;
+  const [y, mo, d] = ymd.split("-").map(Number);
+  const dow = DAYS[new Date(Date.UTC(y, mo - 1, d)).getUTCDay()];
+  return `${MONTHS[mo - 1]}${d}/${dow}`;
 }
 
 // Festival palette: a vibrant signature color per round, cool (early) → warm
@@ -72,10 +75,10 @@ function Slot({ label, team }: { label: string; team?: string }) {
       {team ? (
         <>
           <span className="shrink-0 text-lg leading-none">{flag(team)}</span>
-          <span className="truncate font-semibold">{team}</span>
+          <span className="truncate font-bold">{team}</span>
         </>
       ) : (
-        <span className="truncate font-medium text-slate-400">{label}</span>
+        <span className="truncate font-bold text-slate-400">{label}</span>
       )}
     </div>
   );
@@ -137,7 +140,7 @@ function MatchCell({
         <Slot label={m.a.label} team={a} />
         <div className="my-1 h-px bg-slate-200" />
         <Slot label={m.b.label} team={b} />
-        <div className="mt-1 text-[10px] font-medium text-slate-400">{shortDate(m.date)}</div>
+        <div className="mt-1 text-[10px] font-bold text-slate-400">{shortDate(m.date)}</div>
 
         {/* Time + venue on hover, so the boxes stay compact. */}
         <div className="pointer-events-none absolute left-1/2 top-full z-20 mt-1 hidden w-max max-w-[16rem] -translate-x-1/2 rounded-lg border border-surface-border bg-surface px-3 py-2 text-[11px] leading-snug text-slate-300 shadow-lg group-hover:block">
@@ -196,7 +199,7 @@ export function BracketTree({ teams }: { teams: Record<string, string> }) {
           <Slot label={THIRD_PLACE.a.label} team={teamFor(`${THIRD_PLACE.num}a`) ?? THIRD_PLACE.a.team} />
           <div className="my-1 h-px bg-slate-200" />
           <Slot label={THIRD_PLACE.b.label} team={teamFor(`${THIRD_PLACE.num}b`) ?? THIRD_PLACE.b.team} />
-          <div className="mt-1 text-[10px] font-medium text-slate-400">
+          <div className="mt-1 text-[10px] font-bold text-slate-400">
             {shortDate(THIRD_PLACE.date)} · {THIRD_PLACE.venue.stadium}, {THIRD_PLACE.venue.city}
           </div>
         </div>

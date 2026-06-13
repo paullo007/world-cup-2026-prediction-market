@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
-import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
-import { validateNickname, generateRecoveryCode } from "@/lib/nickname";
+import { validateNickname } from "@/lib/nickname";
 
-// Create a nickname account: instant 1000 WC$ (schema default) + a one-time
-// recovery code (returned once, stored hashed). No email/password needed.
+// Create a nickname account: instant 1000 WC$ (schema default). No password and
+// no recovery code — sign-in is nickname-only (see lib/auth.ts). The client
+// signs in immediately after.
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
   const nickname: string = (body?.nickname ?? "").trim();
@@ -19,16 +19,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "That nickname is taken — try another." }, { status: 409 });
   }
 
-  const code = generateRecoveryCode();
   try {
     await db.user.create({
-      data: {
-        name: nickname,
-        nickname,
-        nicknameLower: lower,
-        recoveryCodeHash: await bcrypt.hash(code.canonical, 10),
-        // balance defaults to 1000 in the schema
-      },
+      data: { name: nickname, nickname, nicknameLower: lower },
+      // balance defaults to 1000 in the schema
     });
   } catch (e) {
     // Unique race: someone took the nickname between the check and the insert.
@@ -38,5 +32,5 @@ export async function POST(req: Request) {
     throw e;
   }
 
-  return NextResponse.json({ ok: true, recoveryCode: code.display });
+  return NextResponse.json({ ok: true });
 }

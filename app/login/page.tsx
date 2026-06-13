@@ -8,7 +8,6 @@ import Link from "next/link";
 export default function LoginPage() {
   const router = useRouter();
   const [nickname, setNickname] = useState("");
-  const [recoveryCode, setRecoveryCode] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showEmail, setShowEmail] = useState(false);
@@ -29,8 +28,8 @@ export default function LoginPage() {
     e.preventDefault();
     setBusy(true);
     setError("");
-    const res = await signIn("nickname", { nickname, recoveryCode, redirect: false });
-    done(res ?? undefined, "That nickname and recovery code don't match.");
+    const res = await signIn("nickname", { nickname, redirect: false });
+    done(res ?? undefined, "No account with that nickname yet — pick one below to get started.");
   }
 
   async function loginEmail(e: React.FormEvent) {
@@ -48,23 +47,17 @@ export default function LoginPage() {
       {!showEmail ? (
         <>
           <p className="mt-1 text-sm text-slate-400">
-            Switched devices or cleared your browser? Enter your nickname and recovery code.
+            Just type your nickname to sign in — no password, nothing to remember.
           </p>
           <form onSubmit={loginNickname} className="mt-6 space-y-3">
             <input
               required
+              autoFocus
               maxLength={12}
               placeholder="Nickname"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               className="w-full rounded-lg border border-surface-border bg-surface-raised px-3 py-2.5 outline-none focus:border-accent"
-            />
-            <input
-              required
-              placeholder="Recovery code (e.g. K7QF-3MXR-9TJD)"
-              value={recoveryCode}
-              onChange={(e) => setRecoveryCode(e.target.value)}
-              className="w-full rounded-lg border border-surface-border bg-surface-raised px-3 py-2.5 font-mono outline-none focus:border-accent"
             />
             {error && <p className="text-sm text-red-600">{error}</p>}
             <button

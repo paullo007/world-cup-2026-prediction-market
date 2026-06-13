@@ -8,8 +8,6 @@ import Link from "next/link";
 export default function RegisterPage() {
   const router = useRouter();
   const [nickname, setNickname] = useState("");
-  const [recoveryCode, setRecoveryCode] = useState("");
-  const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -28,59 +26,19 @@ export default function RegisterPage() {
       setBusy(false);
       return;
     }
-    // Log in immediately with the fresh code, then reveal it to save.
-    await signIn("nickname", { nickname, recoveryCode: data.recoveryCode, redirect: false });
-    setRecoveryCode(data.recoveryCode);
-    setBusy(false);
+    // Log in immediately with just the nickname, then go to the markets.
+    await signIn("nickname", { nickname, redirect: false });
+    router.push("/");
+    router.refresh();
   }
 
-  // Step 2: show the recovery code once.
-  if (recoveryCode) {
-    return (
-      <div className="mx-auto max-w-sm pt-10">
-        <h1 className="text-2xl font-extrabold">You&apos;re in, {nickname}! 🎉</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          You&apos;ve got <span className="font-bold text-emerald-600">1,000 WC$</span>. Save
-          this recovery code — it&apos;s the <span className="font-semibold">only</span> way back
-          into your account if you switch devices or clear your browser.
-        </p>
-        <div className="mt-5 rounded-xl border border-accent/40 bg-surface-raised p-4 text-center">
-          <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
-            Recovery code
-          </div>
-          <div className="mt-1 select-all font-mono text-2xl font-extrabold tracking-widest text-accent">
-            {recoveryCode}
-          </div>
-        </div>
-        <button
-          onClick={() => {
-            navigator.clipboard?.writeText(recoveryCode);
-            setCopied(true);
-          }}
-          className="mt-3 w-full rounded-lg border border-surface-border py-2 text-sm font-semibold hover:border-accent"
-        >
-          {copied ? "Copied ✓" : "Copy code"}
-        </button>
-        <button
-          onClick={() => {
-            router.push("/");
-            router.refresh();
-          }}
-          className="mt-3 w-full rounded-lg bg-accent py-2.5 font-bold text-white hover:bg-accent-hover"
-        >
-          I&apos;ve saved it — start trading
-        </button>
-      </div>
-    );
-  }
-
-  // Step 1: pick a nickname.
   return (
     <div className="mx-auto max-w-sm pt-10">
       <h1 className="text-2xl font-extrabold">Pick a nickname</h1>
       <p className="mt-1 text-sm text-slate-400">
-        No email, no password. Just a nickname and you&apos;re in with{" "}
-        <span className="font-bold text-emerald-600">1,000 WC$</span>.
+        No email, no password, nothing to remember — just a nickname and you&apos;re in with{" "}
+        <span className="font-bold text-emerald-600">1,000 WC$</span>. Sign back in any time by
+        typing the same nickname.
       </p>
       <form onSubmit={submit} className="mt-6 space-y-2">
         <input

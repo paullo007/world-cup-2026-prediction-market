@@ -3,7 +3,6 @@ import { getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
-import { canonicalizeCode } from "@/lib/nickname";
 
 export const authOptions: NextAuthOptions = {
   // 7-day expiry (down from NextAuth's 30-day default): shorter session window
@@ -18,16 +17,18 @@ export const authOptions: NextAuthOptions = {
       name: "Nickname",
       credentials: {
         nickname: { label: "Nickname", type: "text" },
-        recoveryCode: { label: "Recovery code", type: "text" },
       },
+      // Nickname-only sign-in: if the nickname exists, you're in — no password
+      // or recovery code. A deliberate zero-friction choice for this private,
+      // play-money game. Legacy email accounts (incl. admin) have no nickname,
+      // so they can't be reached this way and keep their email + password.
       async authorize(credentials) {
-        if (!credentials?.nickname || !credentials?.recoveryCode) return null;
+        const nickname = credentials?.nickname?.trim();
+        if (!nickname) return null;
         const user = await db.user.findUnique({
-          where: { nicknameLower: credentials.nickname.trim().toLowerCase() },
+          where: { nicknameLower: nickname.toLowerCase() },
         });
-        if (!user?.recoveryCodeHash) return null;
-        const valid = await bcrypt.compare(canonicalizeCode(credentials.recoveryCode), user.recoveryCodeHash);
-        if (!valid) return null;
+        if (!user) return null;
         return { id: user.id, name: user.name, role: user.role };
       },
     }),

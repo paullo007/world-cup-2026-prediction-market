@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { cn } from "@/lib/utils";
 
 const CATEGORIES = [
@@ -38,6 +39,47 @@ const LABELS: Record<string, string> = {
   "Tournament Winner": "Predict World Cup Winner",
 };
 
+/**
+ * Permanent "Update Latest Results" pill. Refreshes the current page's server
+ * data (router.refresh re-runs the server components → re-queries the DB) so any
+ * viewer sees the latest admin-approved results without a reload. Read-only: it
+ * shows fresher approved data, it does not fetch sources or resolve anything.
+ */
+function UpdateResultsButton() {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [justUpdated, setJustUpdated] = useState(false);
+  const wasPending = useRef(false);
+
+  // When a refresh finishes (pending true → false), flash "Updated ✓" briefly.
+  useEffect(() => {
+    if (wasPending.current && !isPending) {
+      setJustUpdated(true);
+      const t = setTimeout(() => setJustUpdated(false), 2000);
+      wasPending.current = isPending;
+      return () => clearTimeout(t);
+    }
+    wasPending.current = isPending;
+  }, [isPending]);
+
+  const label = isPending ? "Updating…" : justUpdated ? "Updated ✓" : "Update Latest Results";
+
+  return (
+    <button
+      type="button"
+      onClick={() => startTransition(() => router.refresh())}
+      disabled={isPending}
+      aria-label="Update latest results"
+      className={cn(
+        "rounded-full px-4 py-1.5 text-sm font-semibold text-white transition",
+        "bg-accent hover:bg-accent/90 disabled:opacity-70"
+      )}
+    >
+      {label}
+    </button>
+  );
+}
+
 /** Presentational pill bar. `active` is the currently-selected category, or null. */
 export function CategoryPills({ active }: { active: string | null }) {
   return (
@@ -56,6 +98,8 @@ export function CategoryPills({ active }: { active: string | null }) {
           {LABELS[c] ?? c}
         </Link>
       ))}
+      {/* Permanent last item, same accent style, present on every tab. */}
+      <UpdateResultsButton />
     </div>
   );
 }

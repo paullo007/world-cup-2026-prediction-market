@@ -50,9 +50,12 @@ export default async function HomePage({
 
   // Resolved markets live in the "Results" tab; everywhere else only show
   // not-yet-resolved markets (open + closed-awaiting).
+  // Legacy per-team "Knockouts" markets are retired — the pill now points to the
+  // static "AI Knockouts" prediction page — so keep them out of the grid/Results.
+  const hideKnockouts = { category: { not: "Knockouts" as const } };
   const markets = await db.market.findMany({
     where: isResults
-      ? { status: "RESOLVED", ...hideSecondary }
+      ? { status: "RESOLVED", ...hideSecondary, ...hideKnockouts }
       : isMatches
         ? // Include resolved fixtures so the day picker spans every match-day and
           // past (played) days show their final results, not just upcoming games.
@@ -60,7 +63,7 @@ export default async function HomePage({
         : isAll
           ? // Include every outcome so match fixtures can render as 3-way cards
             // (Home/Draw/Away) here too; they're grouped by matchKey below.
-            { status: { not: "RESOLVED" } }
+            { status: { not: "RESOLVED" }, ...hideKnockouts }
           : { category, status: { not: "RESOLVED" }, ...hideSecondary },
     orderBy: isResults ? [{ resolvedAt: "desc" }] : [{ closesAt: "asc" }],
   });

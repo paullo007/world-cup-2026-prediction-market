@@ -11,7 +11,7 @@ const CATEGORIES = [
   "Matches",
   "Brazil",
   "Bracket",
-  "Knockouts",
+  "AI Knockouts",
   "Standings",
   "Scores",
   "Goals",
@@ -23,6 +23,7 @@ const CATEGORIES = [
 const TAB_ROUTES: Record<string, string> = {
   Brazil: "/brazil",
   Bracket: "/bracket",
+  "AI Knockouts": "/ai-knockouts",
   Standings: "/standings",
   Scores: "/scores",
   Goals: "/goals",

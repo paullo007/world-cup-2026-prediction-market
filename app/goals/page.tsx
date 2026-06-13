@@ -32,6 +32,8 @@ export default async function GoalsPage() {
     (a, b) => b.goals - a.goals || a.name.localeCompare(b.name)
   );
 
+  const totalGoals = scorers.reduce((sum, s) => sum + s.goals, 0);
+
   return (
     <div className="space-y-6">
       <div>
@@ -78,6 +80,20 @@ export default async function GoalsPage() {
                 </tr>
               ))}
             </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-surface-border bg-surface">
+                <td className="px-4 py-2.5" />
+                <td
+                  className="px-2 py-2.5 text-[11px] font-bold uppercase tracking-wide text-slate-400"
+                  colSpan={2}
+                >
+                  Total Goals
+                </td>
+                <td className="px-4 py-2.5 text-right text-base font-extrabold tabular-nums">
+                  {totalGoals}
+                </td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       )}

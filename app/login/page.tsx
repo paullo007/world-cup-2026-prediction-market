@@ -78,7 +78,7 @@ export default function LoginPage() {
               setShowEmail(true);
               setError("");
             }}
-            className="mt-2 text-xs text-slate-500 hover:text-accent"
+            className="mt-2 text-sm font-bold text-accent hover:text-accent-hover hover:underline"
           >
             Returning email user / admin →
           </button>

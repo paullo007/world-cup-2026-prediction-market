@@ -1,5 +1,7 @@
+import type { Market } from "@prisma/client";
 import { db } from "@/lib/db";
 import { MarketCard } from "@/components/MarketCard";
+import { MatchCard3Way } from "@/components/MatchCard3Way";
 import { MatchDayBoard } from "@/components/MatchDayBoard";
 import { awaitingResult } from "@/lib/utils";
 
@@ -34,6 +36,7 @@ export default async function HomePage({
   const category = searchParams.category ?? "All";
   const isResults = category === "Results";
   const isMatches = category === "Matches";
+  const isAll = category === "All";
 
   // Outside the Matches tab, a 3-way fixture is represented by its single HOME
   // market (the "Will X beat Y?" card); the Draw/Away outcome markets only show
@@ -54,8 +57,10 @@ export default async function HomePage({
         ? // Include resolved fixtures so the day picker spans every match-day and
           // past (played) days show their final results, not just upcoming games.
           { category: "Matches" }
-        : category === "All"
-          ? { status: { not: "RESOLVED" }, ...hideSecondary }
+        : isAll
+          ? // Include every outcome so match fixtures can render as 3-way cards
+            // (Home/Draw/Away) here too; they're grouped by matchKey below.
+            { status: { not: "RESOLVED" } }
           : { category, status: { not: "RESOLVED" }, ...hideSecondary },
     orderBy: isResults ? [{ resolvedAt: "desc" }] : [{ closesAt: "asc" }],
   });
@@ -76,6 +81,46 @@ export default async function HomePage({
     _sum: { amount: true },
   });
   const volumeByMarket = new Map(volumes.map((v) => [v.marketId, v._sum.amount ?? 0]));
+
+  // On the All tab, fold the 3-way match outcomes back into one fixture card each
+  // (so Home/Draw/Away all show), and keep non-match markets as binary cards.
+  // Both share a sort key so they interleave by kickoff time, tradable first.
+  type AllCard =
+    | { kind: "single"; key: string; sort: number; market: Market; volume: number }
+    | { kind: "fixture"; key: string; sort: number; home: Market; markets: Market[]; volume: number };
+
+  const allCards: AllCard[] = [];
+  if (isAll) {
+    const fixtures = new Map<string, Market[]>();
+    for (const m of markets) {
+      if (m.category === "Matches" && m.matchKey) {
+        const g = fixtures.get(m.matchKey) ?? [];
+        g.push(m);
+        fixtures.set(m.matchKey, g);
+      } else {
+        allCards.push({
+          kind: "single",
+          key: m.id,
+          sort: m.closesAt.getTime(),
+          market: m,
+          volume: volumeByMarket.get(m.id) ?? 0,
+        });
+      }
+    }
+    for (const gms of Array.from(fixtures.values())) {
+      const home = gms.find((x) => x.outcomeType === "HOME") ?? gms[0];
+      allCards.push({
+        kind: "fixture",
+        key: home.matchKey ?? home.id,
+        sort: home.closesAt.getTime(),
+        home,
+        markets: gms,
+        volume: gms.reduce((sum, x) => sum + (volumeByMarket.get(x.id) ?? 0), 0),
+      });
+    }
+    const awaitingOf = (c: AllCard) => awaitingResult(c.kind === "single" ? c.market : c.home);
+    allCards.sort((a, b) => Number(awaitingOf(a)) - Number(awaitingOf(b)) || a.sort - b.sort);
+  }
 
   return (
     <div className="space-y-8">
@@ -98,6 +143,20 @@ export default async function HomePage({
         <MatchDayBoard
           matches={markets.map((m) => ({ market: m, volume: volumeByMarket.get(m.id) ?? 0 }))}
         />
+      ) : isAll ? (
+        allCards.length === 0 ? (
+          <p className="py-12 text-center text-slate-400">No markets in this category yet.</p>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {allCards.map((c, i) =>
+              c.kind === "single" ? (
+                <MarketCard key={c.key} market={c.market} volume={c.volume} index={i + 1} />
+              ) : (
+                <MatchCard3Way key={c.key} markets={c.markets} volume={c.volume} index={i + 1} />
+              )
+            )}
+          </div>
+        )
       ) : markets.length === 0 ? (
         <p className="py-12 text-center text-slate-400">
           No markets in this category yet.

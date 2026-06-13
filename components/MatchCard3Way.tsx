@@ -3,7 +3,7 @@ import type { Market } from "@prisma/client";
 import { yesPrice } from "@/lib/amm";
 import { flag, matchTeams } from "@/lib/flags";
 import { VENUES } from "@/lib/venues";
-import { awaitingResult, formatCents, formatWCD } from "@/lib/utils";
+import { awaitingResult, formatPercent, formatWCD } from "@/lib/utils";
 import { MatchStartTime } from "@/components/MatchStartTime";
 import { Clock, MapPin } from "lucide-react";
 
@@ -42,15 +42,15 @@ export function MatchCard3Way({
     market ? (
       <Link
         href={`/markets/${market.slug}`}
-        className="flex items-center justify-between gap-2 rounded-lg bg-surface px-3 py-2 text-sm font-semibold transition hover:bg-surface-hover"
+        className="flex items-center justify-between gap-2 rounded-lg bg-yes-dim/60 px-3 py-2 text-sm font-bold text-yes transition hover:bg-yes-dim"
       >
         <span className="truncate">{label}</span>
-        <span className="shrink-0 text-accent">{formatCents(yesPrice(market))}</span>
+        <span className="shrink-0">{formatPercent(yesPrice(market))}</span>
       </Link>
     ) : null;
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-surface-border bg-surface-raised p-4">
+    <div className="flex flex-col gap-3 rounded-xl border border-surface-border bg-surface-raised p-4 transition hover:border-accent/50">
       <div className="font-semibold">
         {index != null && <span className="mr-1.5 font-bold text-slate-500">{index}.</span>}
         {homeTeam} <span className="align-middle">{flag(homeTeam)}</span>

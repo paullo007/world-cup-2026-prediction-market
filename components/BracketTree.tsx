@@ -168,12 +168,21 @@ export function BracketTree({ teams }: { teams: Record<string, string> }) {
           const isFinal = round.key === "final";
           return (
             <div key={round.key} className="flex flex-1 flex-col">
-              <div className="mb-3 text-center">
-                <div className={cn("text-sm font-bold", theme.header)}>
+              {/* Fixed header height bottom-aligned: keeps every column's boxes
+                  (and their connectors) aligned even though the Final title is
+                  enlarged 3×. */}
+              <div className="mb-3 flex h-20 flex-col items-center justify-end text-center">
+                <div
+                  className={cn(
+                    "font-bold",
+                    theme.header,
+                    isFinal ? "whitespace-nowrap text-[2.625rem] font-extrabold leading-none" : "text-sm"
+                  )}
+                >
                   {isFinal ? "🏆 " : ""}
                   {round.name}
                 </div>
-                <div className="text-xs text-slate-400">{round.dates}</div>
+                <div className="mt-1 text-xs font-bold text-slate-400">{round.dates}</div>
               </div>
               <div className="flex flex-1 flex-col">
                 {round.matches.map((m) => (

@@ -38,15 +38,20 @@ model BracketAssignment {
 }
 
 model User {
-  id           String     @id @default(cuid())
-  email        String     @unique
-  name         String
-  passwordHash String
-  role         Role       @default(USER)
-  balance      Float      @default(1000)
-  createdAt    DateTime   @default(now())
-  positions    Position[]
-  trades       Trade[]
+  id               String     @id @default(cuid())
+  // Nickname auth (new users): public display name + case-insensitive unique key.
+  nickname         String?
+  nicknameLower    String?    @unique
+  recoveryCodeHash String?
+  // Legacy email/password auth (the original users + admin) — kept working.
+  email            String?    @unique
+  passwordHash     String?
+  name             String
+  role             Role       @default(USER)
+  balance          Float      @default(1000)
+  createdAt        DateTime   @default(now())
+  positions        Position[]
+  trades           Trade[]
 }
 
 model Market {

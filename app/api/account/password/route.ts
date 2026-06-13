@@ -29,6 +29,13 @@ export async function POST(req: Request) {
   if (!user) {
     return NextResponse.json({ error: "Account not found" }, { status: 404 });
   }
+  if (!user.passwordHash) {
+    // Nickname accounts have no password — they recover via their recovery code.
+    return NextResponse.json(
+      { error: "This account doesn't use a password." },
+      { status: 400 }
+    );
+  }
 
   const valid = await bcrypt.compare(currentPassword, user.passwordHash);
   if (!valid) {

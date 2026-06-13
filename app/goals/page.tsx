@@ -82,14 +82,13 @@ export default async function GoalsPage() {
             </tbody>
             <tfoot>
               <tr className="border-t-2 border-surface-border bg-surface">
-                <td className="px-4 py-2.5" />
                 <td
-                  className="px-2 py-2.5 text-[11px] font-bold uppercase tracking-wide text-slate-400"
-                  colSpan={2}
+                  className="px-2 py-3 text-right text-base font-bold uppercase tracking-wide text-slate-400"
+                  colSpan={3}
                 >
                   Total Goals
                 </td>
-                <td className="px-4 py-2.5 text-right text-base font-extrabold tabular-nums">
+                <td className="px-4 py-3 text-right text-2xl font-extrabold tabular-nums">
                   {totalGoals}
                 </td>
               </tr>

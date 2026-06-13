@@ -67,6 +67,7 @@ function UpdateResultsButton() {
   return (
     <button
       type="button"
+      data-update-btn
       onClick={() => startTransition(() => router.refresh())}
       disabled={isPending}
       aria-label="Update latest results"
@@ -82,8 +83,37 @@ function UpdateResultsButton() {
 
 /** Presentational pill bar. `active` is the currently-selected category, or null. */
 export function CategoryPills({ active }: { active: string | null }) {
+  const navRef = useRef<HTMLDivElement>(null);
+
+  // Pixel-align the "Update Latest Results" button's right edge with the right
+  // edge of the furthest category pill (e.g. "Crazy Predictions" at the end of
+  // the first row). The wrap point shifts with viewport width, so we measure and
+  // pull the button in with a right margin, re-measuring on resize. ml-auto in
+  // the className keeps it right-aligned before/while this runs.
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const btn = nav.querySelector<HTMLButtonElement>("[data-update-btn]");
+    if (!btn) return;
+
+    const align = () => {
+      const navRight = nav.getBoundingClientRect().right;
+      let maxPillRight = 0;
+      nav.querySelectorAll<HTMLAnchorElement>("a").forEach((a) => {
+        maxPillRight = Math.max(maxPillRight, a.getBoundingClientRect().right);
+      });
+      // Distance from the nav's right edge back to the furthest pill's edge.
+      btn.style.marginRight = `${Math.max(0, navRight - maxPillRight)}px`;
+    };
+
+    align();
+    const ro = new ResizeObserver(align);
+    ro.observe(nav);
+    return () => ro.disconnect();
+  }, [active]);
+
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div ref={navRef} className="flex flex-wrap items-center gap-2">
       {CATEGORIES.map((c) => (
         <Link
           key={c}

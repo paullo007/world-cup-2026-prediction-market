@@ -79,7 +79,7 @@ function MatchCell({
 
         {/* Kickoff (in the viewer's local time) + venue on hover. */}
         {meta && (
-          <div className="pointer-events-none absolute left-1/2 top-full z-20 mt-1 hidden w-max max-w-[16rem] -translate-x-1/2 rounded-lg border border-surface-border bg-surface px-3 py-2 text-[11px] leading-snug text-slate-300 shadow-lg group-hover:block">
+          <div className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-1 hidden w-max max-w-[16rem] -translate-x-1/2 rounded-lg border border-surface-border bg-surface px-3 py-2 text-[11px] leading-snug text-slate-300 shadow-lg group-hover:block">
             <div className="font-semibold text-slate-200">
               <MatchStartTime iso={meta.kickoff} />
             </div>

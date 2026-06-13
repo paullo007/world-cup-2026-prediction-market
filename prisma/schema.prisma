@@ -37,6 +37,16 @@ model BracketAssignment {
   updatedAt DateTime @updatedAt
 }
 
+// Single-row ("singleton") app-wide state. `resultsFetchedAt` is the ONE global
+// timestamp behind the results-refresh cooldown: both the daily cron and the
+// public "Update Latest Results" button stamp it, and the button refuses to
+// re-fetch the external sources unless it's older than the 60-minute cooldown.
+// A single shared row (not per-user/per-IP) is all the throttle needs.
+model SystemState {
+  id               String    @id @default("singleton")
+  resultsFetchedAt DateTime?
+}
+
 model User {
   id               String     @id @default(cuid())
   // Nickname auth (new users): public display name + case-insensitive unique key.

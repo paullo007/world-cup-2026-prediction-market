@@ -40,36 +40,41 @@ const LABELS: Record<string, string> = {
 };
 
 /**
- * Permanent "Update Latest Results" pill. Refreshes the current page's server
- * data (router.refresh re-runs the server components → re-queries the DB) so any
- * viewer sees the latest admin-approved results without a reload. Read-only: it
- * shows fresher approved data, it does not fetch sources or resolve anything.
+ * Permanent "Update Latest Results" pill. POSTs to /api/refresh-results, which
+ * (for a signed-in user, at most once per 60-min global cooldown) fetches the
+ * score sources and auto-publishes any finished match on the spot, then
+ * re-queries the page data via router.refresh() so everyone sees the fresh
+ * scores. Anonymous visitors / within-cooldown clicks just get the refresh —
+ * the route is a server-side no-op in those cases, so the external APIs are
+ * never hit more than once an hour.
  */
 function UpdateResultsButton() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [justUpdated, setJustUpdated] = useState(false);
-  const wasPending = useRef(false);
+  const [busy, setBusy] = useState(false);
 
-  // When a refresh finishes (pending true → false), flash "Updated ✓" briefly.
-  useEffect(() => {
-    if (wasPending.current && !isPending) {
-      setJustUpdated(true);
-      const t = setTimeout(() => setJustUpdated(false), 2000);
-      wasPending.current = isPending;
-      return () => clearTimeout(t);
+  async function handleClick() {
+    setBusy(true);
+    try {
+      await fetch("/api/refresh-results", { method: "POST" });
+    } catch {
+      // Network hiccup — still refresh to show whatever's already published.
     }
-    wasPending.current = isPending;
-  }, [isPending]);
+    setBusy(false);
+    startTransition(() => router.refresh());
+    setJustUpdated(true);
+    setTimeout(() => setJustUpdated(false), 2000);
+  }
 
-  const label = isPending ? "Updating…" : justUpdated ? "Updated ✓" : "Update Latest Results";
+  const label = busy || isPending ? "Updating…" : justUpdated ? "Updated ✓" : "Update Latest Results";
 
   return (
     <button
       type="button"
       data-update-btn
-      onClick={() => startTransition(() => router.refresh())}
-      disabled={isPending}
+      onClick={handleClick}
+      disabled={busy || isPending}
       aria-label="Update latest results"
       className={cn(
         "ml-auto shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold text-white transition",

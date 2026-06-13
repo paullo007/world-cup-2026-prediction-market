@@ -36,7 +36,7 @@ export function MatchCard3Way({
   // For a played fixture, the winning outcome is the one that resolved YES.
   const winner = markets.find((m) => m.resolvedOutcome === "YES")?.outcomeType;
   const winnerLabel =
-    winner === "HOME" ? `${homeTeam} win` : winner === "AWAY" ? `${awayTeam} win` : winner === "DRAW" ? "Draw" : null;
+    winner === "HOME" ? `${homeTeam} won` : winner === "AWAY" ? `${awayTeam} won` : winner === "DRAW" ? "Draw" : null;
 
   const Outcome = ({ label, market }: { label: string; market?: Market }) =>
     market ? (

@@ -17,7 +17,12 @@ export default async function HomePage({
   // Outside the Matches tab, a 3-way fixture is represented by its single HOME
   // market (the "Will X beat Y?" card); the Draw/Away outcome markets only show
   // grouped on the Matches tab. The Matches tab itself includes all three.
-  const hideSecondary = isMatches ? {} : { NOT: { outcomeType: { in: ["DRAW", "AWAY"] } } };
+  // NB: keep HOME *and* NULL-outcome markets (Tournament Winner, Knockouts,
+  // Crazy Predictions are all NULL). A `NOT … in [DRAW, AWAY]` filter would
+  // silently drop NULL rows (SQL three-valued logic), emptying those tabs.
+  const hideSecondary = isMatches
+    ? {}
+    : { OR: [{ outcomeType: "HOME" as const }, { outcomeType: null }] };
 
   // Resolved markets live in the "Results" tab; everywhere else only show
   // not-yet-resolved markets (open + closed-awaiting).

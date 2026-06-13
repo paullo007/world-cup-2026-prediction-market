@@ -6,7 +6,9 @@ import { db } from "@/lib/db";
 import { canonicalizeCode } from "@/lib/nickname";
 
 export const authOptions: NextAuthOptions = {
-  session: { strategy: "jwt" },
+  // 7-day expiry (down from NextAuth's 30-day default): shorter session window
+  // while still friendly to the no-email recovery model.
+  session: { strategy: "jwt", maxAge: 60 * 60 * 24 * 7 },
   pages: { signIn: "/login" },
   providers: [
     // New users: nickname + one-time recovery code. The session cookie keeps

@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Market } from "@prisma/client";
 import { yesPrice } from "@/lib/amm";
 import { awaitingResult, formatCents, formatDate, formatPercent, formatWCD } from "@/lib/utils";
-import { flag, matchTeams } from "@/lib/flags";
+import { flag, matchTeams, winnerCountry } from "@/lib/flags";
 import { VENUES } from "@/lib/venues";
 import { FitText } from "@/components/FitText";
 import { MatchStartTime } from "@/components/MatchStartTime";
@@ -22,6 +22,9 @@ export function MarketCard({
   const awaiting = awaitingResult(market);
   const teams = market.category === "Matches" ? matchTeams(market.question) : null;
   const venue = teams ? VENUES[`${teams[0]} vs ${teams[1]}`] : null;
+  // Tournament-winner cards ("Will {country} win …?") get the country flag at
+  // the end of the title, sized 1.25× the (auto-fitted) title font via em.
+  const winner = !teams ? winnerCountry(market.question) : null;
 
   return (
     <Link
@@ -54,6 +57,9 @@ export function MarketCard({
               <span className="mr-1.5 font-bold text-slate-500">{index}.</span>
             )}
             {market.question}
+            {winner && (
+              <span className="ml-1.5 align-middle text-[1.25em] leading-none">{flag(winner)}</span>
+            )}
           </FitText>
         )}
         <div className="mt-2 flex items-baseline justify-center gap-1.5">

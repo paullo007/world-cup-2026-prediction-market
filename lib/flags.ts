@@ -76,5 +76,20 @@ export function matchTeams(question: string): [string, string] | null {
   return m ? [m[1], m[2]] : null;
 }
 
+// Short names used in question text that differ from our ISO keys.
+const NAME_ALIASES: Record<string, string> = { USA: "United States" };
+
+/**
+ * Parse a tournament-winner title like "Will {country} win the 2026 FIFA World
+ * Cup?" -> the canonical country name, but only if it's a known team. null
+ * otherwise (so it never misfires on match/other questions).
+ */
+export function winnerCountry(question: string): string | null {
+  const m = question.match(/^Will (.+?) win /);
+  if (!m) return null;
+  const name = NAME_ALIASES[m[1]] ?? m[1];
+  return ISO[name] ? name : null;
+}
+
 /** All 48 World Cup 2026 team names, alphabetically. */
 export const ALL_TEAMS: string[] = Object.keys(ISO).sort((a, b) => a.localeCompare(b));

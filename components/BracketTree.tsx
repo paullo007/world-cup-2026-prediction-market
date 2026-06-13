@@ -48,7 +48,10 @@ function MatchCell({
   return (
     <div
       className={cn(
-        "relative flex flex-1 items-center",
+        // Vertical padding opens a clear gap between the tightly-stacked boxes
+        // (esp. the 16-box Round of 32). Applied uniformly to every cell so the
+        // connector fractions (top-1/4 / 1/2 / bottom-1/4) stay aligned.
+        "relative flex flex-1 items-center py-3",
         !isLast &&
           "after:absolute after:left-full after:top-1/2 after:w-8 after:border-t-2 after:border-accent/40 after:content-['']",
         !isFirst &&

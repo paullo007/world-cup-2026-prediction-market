@@ -116,7 +116,7 @@ export default function LoginPage() {
               setShowEmail(false);
               setError("");
             }}
-            className="mt-4 text-2xl font-bold text-blue-600 hover:text-blue-700"
+            className="mt-4 text-lg font-bold text-blue-600 hover:text-blue-700"
           >
             ← Back to nickname login
           </button>

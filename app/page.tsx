@@ -5,6 +5,27 @@ import { awaitingResult } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
+// Explicit display order for the "Predict World Cup Winner" tab. The winner
+// markets all close on the same day (Jul 19), so there is no natural sort key —
+// pin a deterministic order here. Any team not listed falls to the end.
+const WINNER_ORDER = [
+  "Brazil",
+  "Argentina",
+  "Spain",
+  "France",
+  "England",
+  "Portugal",
+  "Germany",
+  "Netherlands",
+  "USA",
+  "Mexico",
+];
+const winnerRank = (question: string) => {
+  const team = question.match(/^Will (.+?) win the 2026/)?.[1];
+  const i = team ? WINNER_ORDER.indexOf(team) : -1;
+  return i === -1 ? WINNER_ORDER.length : i;
+};
+
 export default async function HomePage({
   searchParams,
 }: {
@@ -39,6 +60,11 @@ export default async function HomePage({
   // (stable sort keeps the closesAt ordering within each group).
   if (!isResults) {
     markets.sort((a, b) => Number(awaitingResult(a)) - Number(awaitingResult(b)));
+  }
+
+  // On the Predict World Cup Winner tab, apply the explicit team order.
+  if (category === "Tournament Winner") {
+    markets.sort((a, b) => winnerRank(a.question) - winnerRank(b.question));
   }
 
   const volumes = await db.trade.groupBy({

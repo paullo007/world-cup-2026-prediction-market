@@ -57,14 +57,16 @@ export function MarketCard({
               <span className="mr-1.5 font-bold text-slate-500">{index}.</span>
             )}
             {market.question}
-            {winner && (
-              <span className="ml-1.5 align-middle text-[1.25em] leading-none">{flag(winner)}</span>
-            )}
           </FitText>
         )}
-        <div className="mt-2 flex items-baseline justify-center gap-1.5">
-          <span className="text-2xl font-extrabold text-accent">{formatPercent(p)}</span>
-          <span className="text-xs text-slate-400">chance</span>
+        <div className="mt-2 flex flex-col items-center gap-1">
+          {/* Tournament-winner cards show the country flag above the % chance,
+              sized larger than the percentage (text-4xl ≈ 1.5× the text-2xl %). */}
+          {winner && <span className="text-4xl leading-none">{flag(winner)}</span>}
+          <div className="flex items-baseline justify-center gap-1.5">
+            <span className="text-2xl font-extrabold text-accent">{formatPercent(p)}</span>
+            <span className="text-xs text-slate-400">chance</span>
+          </div>
         </div>
       </div>
 

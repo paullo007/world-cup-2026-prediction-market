@@ -23,6 +23,19 @@ export default async function AdminPage() {
   const isSecondary = (m: (typeof markets)[number]) =>
     m.outcomeType === "DRAW" || m.outcomeType === "AWAY";
 
+  // For a 3-way HOME row, the pendingOutcome is just YES/NO for the home market,
+  // which reads oddly on a draw ("resolve NO"). Derive the actual match winner
+  // from the detected score so the admin sees "Draw" / the winning side.
+  const matchWinnerLabel = (m: (typeof markets)[number]) => {
+    if (!m.matchKey) return null;
+    const hg = m.pendingHomeGoals;
+    const ag = m.pendingAwayGoals;
+    if (hg == null || ag == null) return null;
+    const [home, away] = m.matchKey.split(" vs ");
+    if (hg === ag) return "Draw";
+    return `${hg > ag ? home : away} win`;
+  };
+
   // "Ready to resolve" = trading window closed (kickoff passed) but not yet resolved.
   // "Open" = still trading. Resolved = settled.
   const ready = markets.filter((m) => awaitingResult(m) && !isSecondary(m));
@@ -64,8 +77,8 @@ export default async function AdminPage() {
                 </p>
                 {m.pendingOutcome && (
                   <p className="mt-1 text-xs font-semibold text-accent">
-                    Auto-detected: {m.resultDetail ?? m.pendingOutcome} → resolve{" "}
-                    {m.pendingOutcome}
+                    Auto-detected: {m.resultDetail ?? m.pendingOutcome} →{" "}
+                    {matchWinnerLabel(m) ?? `resolve ${m.pendingOutcome}`}
                     {m.resultSource ? ` (${m.resultSource})` : ""}
                   </p>
                 )}

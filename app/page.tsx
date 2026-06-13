@@ -50,9 +50,13 @@ export default async function HomePage({
   const markets = await db.market.findMany({
     where: isResults
       ? { status: "RESOLVED", ...hideSecondary }
-      : category === "All"
-        ? { status: { not: "RESOLVED" }, ...hideSecondary }
-        : { category, status: { not: "RESOLVED" }, ...hideSecondary },
+      : isMatches
+        ? // Include resolved fixtures so the day picker spans every match-day and
+          // past (played) days show their final results, not just upcoming games.
+          { category: "Matches" }
+        : category === "All"
+          ? { status: { not: "RESOLVED" }, ...hideSecondary }
+          : { category, status: { not: "RESOLVED" }, ...hideSecondary },
     orderBy: isResults ? [{ resolvedAt: "desc" }] : [{ closesAt: "asc" }],
   });
 

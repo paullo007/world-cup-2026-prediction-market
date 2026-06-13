@@ -30,7 +30,13 @@ export function MatchCard3Way({
     ? home.matchKey.split(" vs ")
     : matchTeams(home.question) ?? ["", ""];
   const venue = home.matchKey ? VENUES[home.matchKey] : undefined;
-  const awaiting = awaitingResult(home) && home.status !== "RESOLVED";
+  const resolved = home.status === "RESOLVED";
+  const awaiting = awaitingResult(home) && !resolved;
+
+  // For a played fixture, the winning outcome is the one that resolved YES.
+  const winner = markets.find((m) => m.resolvedOutcome === "YES")?.outcomeType;
+  const winnerLabel =
+    winner === "HOME" ? `${homeTeam} win` : winner === "AWAY" ? `${awayTeam} win` : winner === "DRAW" ? "Draw" : null;
 
   const Outcome = ({ label, market }: { label: string; market?: Market }) =>
     market ? (
@@ -52,7 +58,19 @@ export function MatchCard3Way({
         <span className="align-middle">{flag(awayTeam)}</span> {awayTeam}
       </div>
 
-      {awaiting ? (
+      {resolved ? (
+        <div className="flex flex-col items-center gap-1 rounded-lg border border-surface-border bg-surface px-3 py-3">
+          <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+            Full time
+          </span>
+          <span className="text-lg font-extrabold tabular-nums">
+            {home.homeGoals ?? "?"} – {home.awayGoals ?? "?"}
+          </span>
+          {winnerLabel && (
+            <span className="text-xs font-semibold text-accent">{winnerLabel}</span>
+          )}
+        </div>
+      ) : awaiting ? (
         <div className="flex items-center justify-center gap-2 rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm font-semibold text-slate-400">
           <Clock className="h-4 w-4 shrink-0" /> Closed — awaiting result
         </div>

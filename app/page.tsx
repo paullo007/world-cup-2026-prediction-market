@@ -1,4 +1,5 @@
 import type { Market } from "@prisma/client";
+import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { MarketCard } from "@/components/MarketCard";
 import { MatchCard3Way } from "@/components/MatchCard3Way";
@@ -33,6 +34,10 @@ export default async function HomePage({
 }: {
   searchParams: { category?: string };
 }) {
+  // The legacy "Knockouts" category is retired — bounce old links/bookmarks to
+  // the new static AI Knockouts prediction page.
+  if (searchParams.category === "Knockouts") redirect("/ai-knockouts");
+
   const category = searchParams.category ?? "All";
   const isResults = category === "Results";
   const isMatches = category === "Matches";

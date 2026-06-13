@@ -1,6 +1,15 @@
 import { AI_BRACKET, AI_CHAMPION, predWinner, type PredMatch } from "@/lib/aiKnockouts";
+import { BRACKET } from "@/lib/bracket";
+import type { Venue } from "@/lib/venues";
 import { flag } from "@/lib/flags";
+import { MatchStartTime } from "@/components/MatchStartTime";
 import { cn } from "@/lib/utils";
+
+// Borrow the real knockout schedule (same round keys + match counts) so each
+// predicted box can show a real kickoff time + venue on hover.
+const SCHEDULE: Record<string, { kickoff: string; venue: Venue }[]> = Object.fromEntries(
+  BRACKET.map((r) => [r.key, r.matches.map((m) => ({ kickoff: m.kickoff, venue: m.venue }))])
+);
 
 // Per-round festival palette, cool → warm toward the Final (mirrors the Bracket
 // tab). Full literal classes so Tailwind's JIT keeps them.
@@ -31,7 +40,17 @@ function TeamRow({ team, score, won }: { team: string; score: number; won: boole
   );
 }
 
-function MatchCell({ m, roundKey, isFirst }: { m: PredMatch; roundKey: string; isFirst: boolean }) {
+function MatchCell({
+  m,
+  roundKey,
+  isFirst,
+  meta,
+}: {
+  m: PredMatch;
+  roundKey: string;
+  isFirst: boolean;
+  meta?: { kickoff: string; venue: Venue };
+}) {
   const theme = THEMES[roundKey];
   const w = predWinner(m);
   return (
@@ -49,7 +68,7 @@ function MatchCell({ m, roundKey, isFirst }: { m: PredMatch; roundKey: string; i
     >
       <div
         className={cn(
-          "w-full rounded-xl border bg-gradient-to-br from-surface-raised to-surface px-3 pb-2 pt-2 text-sm shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg",
+          "group relative w-full rounded-xl border bg-gradient-to-br from-surface-raised to-surface px-3 pb-2 pt-2 text-sm shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg",
           theme.topBar,
           theme.border
         )}
@@ -57,6 +76,18 @@ function MatchCell({ m, roundKey, isFirst }: { m: PredMatch; roundKey: string; i
         <TeamRow team={m.a.team} score={m.a.score} won={w.team === m.a.team} />
         <div className="my-1 h-px bg-slate-200" />
         <TeamRow team={m.b.team} score={m.b.score} won={w.team === m.b.team} />
+
+        {/* Kickoff (in the viewer's local time) + venue on hover. */}
+        {meta && (
+          <div className="pointer-events-none absolute left-1/2 top-full z-20 mt-1 hidden w-max max-w-[16rem] -translate-x-1/2 rounded-lg border border-surface-border bg-surface px-3 py-2 text-[11px] leading-snug text-slate-300 shadow-lg group-hover:block">
+            <div className="font-semibold text-slate-200">
+              <MatchStartTime iso={meta.kickoff} />
+            </div>
+            <div>
+              {meta.venue.stadium}, {meta.venue.city}, {meta.venue.country}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -73,7 +104,13 @@ export function AiKnockoutBracket() {
             </div>
             <div className="flex flex-1 flex-col">
               {round.matches.map((m, i) => (
-                <MatchCell key={i} m={m} roundKey={round.key} isFirst={round.key === "r32"} />
+                <MatchCell
+                  key={i}
+                  m={m}
+                  roundKey={round.key}
+                  isFirst={round.key === "r32"}
+                  meta={SCHEDULE[round.key]?.[i]}
+                />
               ))}
             </div>
           </div>

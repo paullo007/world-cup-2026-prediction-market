@@ -71,7 +71,7 @@ function UpdateResultsButton() {
       disabled={isPending}
       aria-label="Update latest results"
       className={cn(
-        "rounded-full px-4 py-1.5 text-sm font-semibold text-white transition",
+        "shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold text-white transition",
         "bg-accent hover:bg-accent/90 disabled:opacity-70"
       )}
     >
@@ -83,22 +83,24 @@ function UpdateResultsButton() {
 /** Presentational pill bar. `active` is the currently-selected category, or null. */
 export function CategoryPills({ active }: { active: string | null }) {
   return (
-    <div className="flex flex-wrap gap-2">
-      {CATEGORIES.map((c) => (
-        <Link
-          key={c}
-          href={c === "All" ? "/" : TAB_ROUTES[c] ?? `/?category=${encodeURIComponent(c)}`}
-          className={cn(
-            "rounded-full px-4 py-1.5 text-sm font-semibold transition",
-            c === active
-              ? "bg-accent text-white"
-              : "bg-surface-raised text-slate-300 hover:bg-surface-hover"
-          )}
-        >
-          {LABELS[c] ?? c}
-        </Link>
-      ))}
-      {/* Permanent last item, same accent style, present on every tab. */}
+    <div className="flex items-start justify-between gap-2">
+      <div className="flex flex-wrap gap-2">
+        {CATEGORIES.map((c) => (
+          <Link
+            key={c}
+            href={c === "All" ? "/" : TAB_ROUTES[c] ?? `/?category=${encodeURIComponent(c)}`}
+            className={cn(
+              "rounded-full px-4 py-1.5 text-sm font-semibold transition",
+              c === active
+                ? "bg-accent text-white"
+                : "bg-surface-raised text-slate-300 hover:bg-surface-hover"
+            )}
+          >
+            {LABELS[c] ?? c}
+          </Link>
+        ))}
+      </div>
+      {/* Permanent, pinned to the far-right edge of the nav on every tab. */}
       <UpdateResultsButton />
     </div>
   );

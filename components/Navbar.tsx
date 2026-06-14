@@ -35,7 +35,7 @@ export function Navbar() {
       <div className="mx-auto max-w-6xl px-4">
         <div className="flex items-center gap-4 border-b-2 border-amber-500/50 bg-gradient-to-r from-black via-zinc-900 to-black px-6 py-3">
         <Link href="/" className="mr-auto flex min-w-0 items-center gap-3">
-          <Trophy className="h-9 w-9 shrink-0 text-amber-400 sm:h-11 sm:w-11" />
+          <Trophy className="h-16 w-16 shrink-0 text-amber-400 sm:h-20 sm:w-20 lg:h-28 lg:w-28" />
           {/* Wordmark with the badge stacked + centered beneath it. */}
           <span className="flex flex-col items-center gap-1.5">
             <span className="whitespace-nowrap bg-gradient-to-b from-amber-200 via-amber-400 to-amber-600 bg-clip-text text-4xl font-black uppercase tracking-tight text-transparent sm:text-5xl lg:text-7xl">

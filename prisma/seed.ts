@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { seedStateForProbability } from "../lib/amm";
+import { matchProbabilities } from "../lib/elo";
 import { KICKOFFS } from "../lib/kickoffs";
 
 const db = new PrismaClient();
@@ -125,10 +126,9 @@ const GROUP_FIXTURES: [string, string, string][] = [
 ];
 
 // Three-way group match: each fixture seeds a Home-win, Draw and Away-win
-// binary market, grouped by matchKey. Initial implied probabilities sum to ~1
-// (home edge + ~27% draw); the crowd moves them from there.
-const SEED_PROB = { HOME: 0.4, DRAW: 0.27, AWAY: 0.33 } as const;
-
+// binary market, grouped by matchKey. Starting odds come from the Elo model
+// (lib/elo.ts) so each fixture opens at its own realistic 3-way split that sums
+// to ~1; the crowd moves them from there.
 function outcomeMarket(
   date: string,
   home: string,
@@ -136,6 +136,7 @@ function outcomeMarket(
   outcomeType: "HOME" | "DRAW" | "AWAY"
 ): SeedMarket {
   const matchKey = `${home} vs ${away}`;
+  const probs = matchProbabilities(home, away);
   const base = {
     category: "Matches",
     closesAt: new Date(KICKOFFS[matchKey] ?? `${date}T19:00:00Z`),
@@ -149,7 +150,7 @@ function outcomeMarket(
       slug: `${slugify(home)}-vs-${slugify(away)}-${date}-draw`,
       question: `Will ${home} vs ${away} end in a draw?`,
       description: `Group-stage match on ${longDate(date)}. Resolves YES if the match is level after regulation (a draw).`,
-      probability: SEED_PROB.DRAW,
+      probability: probs.DRAW,
     };
   }
   if (outcomeType === "AWAY") {
@@ -158,7 +159,7 @@ function outcomeMarket(
       slug: `${slugify(away)}-beats-${slugify(home)}-${date}`,
       question: `Will ${away} beat ${home}?`,
       description: `Group-stage match on ${longDate(date)}. Resolves YES if ${away} win in regulation.`,
-      probability: SEED_PROB.AWAY,
+      probability: probs.AWAY,
     };
   }
   return {
@@ -166,7 +167,7 @@ function outcomeMarket(
     slug: `${slugify(home)}-vs-${slugify(away)}-${date}`,
     question: `Will ${home} beat ${away}?`,
     description: `Group-stage match on ${longDate(date)}. Resolves YES if ${home} win in regulation.`,
-    probability: SEED_PROB.HOME,
+    probability: probs.HOME,
   };
 }
 

@@ -40,17 +40,6 @@ const LABELS: Record<string, string> = {
   "Tournament Winner": "Predict World Cup Winner",
 };
 
-// AI-Knockouts festival palette — one color per pill (cycled across the tabs).
-// Active pill = solid in its color; inactive = soft pastel tint, hover deepens.
-const FESTIVAL = [
-  { active: "bg-emerald-500 text-white", idle: "bg-emerald-50 text-emerald-700 hover:bg-emerald-100" },
-  { active: "bg-sky-500 text-white", idle: "bg-sky-50 text-sky-700 hover:bg-sky-100" },
-  { active: "bg-violet-500 text-white", idle: "bg-violet-50 text-violet-700 hover:bg-violet-100" },
-  { active: "bg-orange-500 text-white", idle: "bg-orange-50 text-orange-700 hover:bg-orange-100" },
-  { active: "bg-amber-500 text-white", idle: "bg-amber-50 text-amber-700 hover:bg-amber-100" },
-  { active: "bg-rose-500 text-white", idle: "bg-rose-50 text-rose-700 hover:bg-rose-100" },
-];
-
 /**
  * Permanent "Update Latest Results" pill. POSTs to /api/refresh-results, which
  * (for any signed-in user, on every click — no cooldown) fetches the score
@@ -160,21 +149,20 @@ export function CategoryPills({ active }: { active: string | null }) {
 
   return (
     <div ref={navRef} className="flex flex-wrap items-center gap-2">
-      {CATEGORIES.map((c, i) => {
-        const fest = FESTIVAL[i % FESTIVAL.length];
-        return (
-          <Link
-            key={c}
-            href={c === "All" ? "/" : TAB_ROUTES[c] ?? `/?category=${encodeURIComponent(c)}`}
-            className={cn(
-              "rounded-full px-4 py-1.5 text-sm font-semibold transition",
-              c === active ? `${fest.active} shadow-sm` : fest.idle
-            )}
-          >
-            {LABELS[c] ?? c}
-          </Link>
-        );
-      })}
+      {CATEGORIES.map((c) => (
+        <Link
+          key={c}
+          href={c === "All" ? "/" : TAB_ROUTES[c] ?? `/?category=${encodeURIComponent(c)}`}
+          className={cn(
+            "rounded-full px-4 py-1.5 text-sm font-semibold transition",
+            c === active
+              ? "bg-accent text-white"
+              : "bg-surface-raised text-slate-300 hover:bg-surface-hover"
+          )}
+        >
+          {LABELS[c] ?? c}
+        </Link>
+      ))}
       {/* Permanent last item; ml-auto pushes it to the far-right of its row so
           the category pills keep their natural order/wrapping. */}
       <UpdateResultsButton />

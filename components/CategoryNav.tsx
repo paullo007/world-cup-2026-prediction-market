@@ -85,7 +85,7 @@ function UpdateResultsButton() {
   const label = busy || isPending ? "Updating…" : "Update Latest Results";
 
   return (
-    <>
+    <div data-update-wrap className="relative ml-auto shrink-0">
       <button
         type="button"
         data-update-btn
@@ -93,25 +93,26 @@ function UpdateResultsButton() {
         disabled={busy || isPending}
         aria-label="Update latest results"
         className={cn(
-          "ml-auto shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold text-white transition",
+          "whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold text-white transition",
           "bg-accent hover:bg-accent/90 disabled:opacity-70"
         )}
       >
         {label}
       </button>
       {flash && (
+        // Pops up directly beneath the button, right-aligned to its edge.
         <div
           role="status"
           aria-live="polite"
           className={cn(
-            "fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-lg",
-            flash.tone === "err" ? "bg-red-600" : "bg-emerald-600"
+            "absolute right-0 top-full z-50 mt-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-lg",
+            flash.tone === "err" ? "bg-red-600" : "bg-accent"
           )}
         >
           {flash.msg}
         </div>
       )}
-    </>
+    </div>
   );
 }
 
@@ -127,7 +128,7 @@ export function CategoryPills({ active }: { active: string | null }) {
   useEffect(() => {
     const nav = navRef.current;
     if (!nav) return;
-    const btn = nav.querySelector<HTMLButtonElement>("[data-update-btn]");
+    const btn = nav.querySelector<HTMLElement>("[data-update-wrap]");
     if (!btn) return;
 
     const align = () => {

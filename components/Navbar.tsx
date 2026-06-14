@@ -27,20 +27,23 @@ export function Navbar() {
     return () => window.removeEventListener("balance-updated", refresh);
   }, [refresh]);
 
-  // Full-width sticky strip (page-colored) masks content scrolling under it; the
-  // black bar inside is constrained to the site's max content width so its edges
-  // line up with the rest of the page.
+  // The black bar is constrained to the site's max content width so its edges
+  // line up with the rest of the page. Stickiness is owned by the wrapper in
+  // app/layout.tsx, which pins the header + tab bar together.
   return (
-    <header className="sticky top-0 z-40 bg-surface">
+    <header className="bg-surface">
       <div className="mx-auto max-w-6xl px-4">
         <div className="flex items-center gap-4 border-b-2 border-amber-500/50 bg-gradient-to-r from-black via-zinc-900 to-black px-6 py-3">
-        <Link href="/" className="mr-auto flex min-w-0 items-center gap-2.5">
+        <Link href="/" className="mr-auto flex min-w-0 items-center gap-3">
           <Trophy className="h-9 w-9 shrink-0 text-amber-400 sm:h-11 sm:w-11" />
-          <span className="hidden whitespace-nowrap bg-gradient-to-b from-amber-200 via-amber-400 to-amber-600 bg-clip-text text-4xl font-black uppercase tracking-tight text-transparent sm:inline sm:text-5xl lg:text-7xl">
-            World Cup 2026
-          </span>
-          <span className="self-start whitespace-nowrap rounded bg-gradient-to-b from-amber-300 to-amber-500 px-2 py-1 text-xs font-black uppercase tracking-wide text-black shadow-sm">
-            Prediction Market
+          {/* Wordmark with the badge stacked + centered beneath it. */}
+          <span className="flex flex-col items-center gap-1.5">
+            <span className="whitespace-nowrap bg-gradient-to-b from-amber-200 via-amber-400 to-amber-600 bg-clip-text text-4xl font-black uppercase tracking-tight text-transparent sm:text-5xl lg:text-7xl">
+              World Cup 2026
+            </span>
+            <span className="whitespace-nowrap rounded bg-gradient-to-b from-amber-300 to-amber-500 px-2 py-1 text-xs font-black uppercase tracking-wide text-black shadow-sm">
+              Prediction Market
+            </span>
           </span>
         </Link>
 

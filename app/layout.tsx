@@ -20,12 +20,18 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Providers>
-          <Navbar />
+          {/* Sticky top region: the black header AND the category tab bar pin
+              together at the top of the viewport while the page scrolls. */}
+          <div className="sticky top-0 z-40 border-b border-surface-border bg-surface">
+            <Navbar />
+            <div className="mx-auto max-w-6xl px-4 py-3">
+              <Suspense fallback={<CategoryPills active={null} />}>
+                <CategoryNav />
+              </Suspense>
+            </div>
+          </div>
           <main className="mx-auto max-w-6xl px-4 pb-20 pt-6">
-            <Suspense fallback={<CategoryPills active={null} />}>
-              <CategoryNav />
-            </Suspense>
-            <div className="mt-6">{children}</div>
+            {children}
           </main>
           <footer className="border-t border-surface-border py-8 text-center text-sm text-slate-500">
             World Cup 2026 Prediction Market — WC$ only, no real wagering.

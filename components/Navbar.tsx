@@ -28,61 +28,67 @@ export function Navbar() {
   }, [refresh]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-surface-border bg-surface/90 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center gap-6 px-4 py-3">
-        <Link href="/" className="flex items-center gap-2 font-extrabold tracking-tight">
-          <Trophy className="h-6 w-6 text-amber-600" />
-          <span className="hidden sm:inline">World Cup 2026</span>
-          <span className="rounded bg-accent px-1.5 py-0.5 text-xs font-bold uppercase text-white">
+    <header className="sticky top-0 z-40 border-b-2 border-amber-500/50 bg-gradient-to-r from-black via-zinc-900 to-black backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
+        <Link href="/" className="mr-auto flex min-w-0 items-center gap-2.5">
+          <Trophy className="h-9 w-9 shrink-0 text-amber-400 sm:h-11 sm:w-11" />
+          <span className="hidden whitespace-nowrap bg-gradient-to-b from-amber-200 via-amber-400 to-amber-600 bg-clip-text text-4xl font-black uppercase tracking-tight text-transparent sm:inline sm:text-5xl lg:text-7xl">
+            World Cup 2026
+          </span>
+          <span className="self-start rounded bg-gradient-to-b from-amber-300 to-amber-500 px-2 py-1 text-xs font-black uppercase tracking-wide text-black shadow-sm">
             Predict
           </span>
         </Link>
 
-        <nav className="flex items-center gap-4 text-sm font-medium text-slate-300">
-          <Link href="/" className="hover:text-accent">Markets</Link>
-          <Link href="/leaderboard" className="hover:text-accent">Leaderboard</Link>
-          {me && (
-            <Link href="/portfolio" className="hover:text-accent">Portfolio</Link>
-          )}
-          {me?.role === "ADMIN" && (
-            <Link href="/admin" className="text-amber-600 hover:text-amber-700">Admin</Link>
-          )}
-        </nav>
+        {/* Right column: global nav over the user / auth cluster, freeing the
+            row width so the gold wordmark can stretch ~3/4 across. */}
+        <div className="flex shrink-0 flex-col items-end gap-2">
+          <nav className="flex items-center gap-4 text-sm font-semibold text-zinc-300">
+            <Link href="/" className="hover:text-amber-400">Markets</Link>
+            <Link href="/leaderboard" className="hover:text-amber-400">Leaderboard</Link>
+            {me && (
+              <Link href="/portfolio" className="hover:text-amber-400">Portfolio</Link>
+            )}
+            {me?.role === "ADMIN" && (
+              <Link href="/admin" className="text-amber-400 hover:text-amber-300">Admin</Link>
+            )}
+          </nav>
 
-        <div className="ml-auto flex items-center gap-3">
-          {me ? (
-            <>
-              <Link
-                href="/profile"
-                title="Edit profile"
-                className="hidden text-sm font-medium text-slate-200 hover:text-accent sm:inline"
-              >
-                {me.name}
-              </Link>
-              <span className="flex items-center gap-1.5 rounded-full bg-surface-raised px-3 py-1.5 text-sm font-semibold text-emerald-600">
-                <Coins className="h-4 w-4" />
-                {formatWCD(me.balance)}
-              </span>
-              <button
-                onClick={() => signOut({ callbackUrl: "/" })}
-                className="text-sm text-slate-400 hover:text-accent"
-              >
-                Sign out
-              </button>
-            </>
-          ) : (
-            <>
-              <Link href="/login" className="text-sm text-slate-300 hover:text-accent">
-                Log in
-              </Link>
-              <Link
-                href="/register"
-                className="rounded-lg bg-accent px-3 py-1.5 text-sm font-semibold text-white hover:bg-accent-hover"
-              >
-                Sign up
-              </Link>
-            </>
-          )}
+          <div className="flex items-center gap-3">
+            {me ? (
+              <>
+                <Link
+                  href="/profile"
+                  title="Edit profile"
+                  className="hidden text-sm font-medium text-zinc-200 hover:text-amber-400 sm:inline"
+                >
+                  {me.name}
+                </Link>
+                <span className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-sm font-semibold text-amber-300 ring-1 ring-white/15">
+                  <Coins className="h-4 w-4" />
+                  {formatWCD(me.balance)}
+                </span>
+                <button
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  className="text-sm text-zinc-400 hover:text-amber-400"
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="text-sm text-zinc-300 hover:text-amber-400">
+                  Log in
+                </Link>
+                <Link
+                  href="/register"
+                  className="rounded-lg bg-gradient-to-b from-amber-300 to-amber-500 px-3 py-1.5 text-sm font-bold text-black hover:from-amber-200 hover:to-amber-400"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </header>

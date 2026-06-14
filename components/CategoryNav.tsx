@@ -42,48 +42,76 @@ const LABELS: Record<string, string> = {
 
 /**
  * Permanent "Update Latest Results" pill. POSTs to /api/refresh-results, which
- * (for a signed-in user, at most once per 60-min global cooldown) fetches the
- * score sources and auto-publishes any finished match on the spot, then
- * re-queries the page data via router.refresh() so everyone sees the fresh
- * scores. Anonymous visitors / within-cooldown clicks just get the refresh —
- * the route is a server-side no-op in those cases, so the external APIs are
- * never hit more than once an hour.
+ * (for any signed-in user, on every click — no cooldown) fetches the score
+ * sources and auto-publishes any finished match on the spot, then re-queries the
+ * page data via router.refresh() so everyone sees the fresh scores. A pop-up
+ * message (toast) reports the outcome ("N matches were updated" / "No new
+ * results" / an error). Anonymous visitors just get the display refresh.
  */
 function UpdateResultsButton() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [justUpdated, setJustUpdated] = useState(false);
+  const [flash, setFlash] = useState<{ msg: string; tone: "ok" | "err" } | null>(null);
   const [busy, setBusy] = useState(false);
 
   async function handleClick() {
     setBusy(true);
+    let msg = "Results refreshed";
+    let tone: "ok" | "err" = "ok";
     try {
-      await fetch("/api/refresh-results", { method: "POST" });
+      const res = await fetch("/api/refresh-results", { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (data?.reason === "auth") {
+        msg = "Sign in to update results";
+        tone = "err";
+      } else if (data?.ok === false) {
+        msg = "Couldn't reach the score sources — try again";
+        tone = "err";
+      } else if (typeof data?.published === "number") {
+        const n = data.published as number;
+        msg = n > 0 ? `${n} ${n === 1 ? "match was" : "matches were"} updated` : "No new results to update";
+      }
     } catch {
       // Network hiccup — still refresh to show whatever's already published.
+      msg = "Couldn't reach server — try again";
+      tone = "err";
     }
     setBusy(false);
     startTransition(() => router.refresh());
-    setJustUpdated(true);
-    setTimeout(() => setJustUpdated(false), 2000);
+    setFlash({ msg, tone });
+    setTimeout(() => setFlash(null), 4000);
   }
 
-  const label = busy || isPending ? "Updating…" : justUpdated ? "Updated ✓" : "Update Latest Results";
+  const label = busy || isPending ? "Updating…" : "Update Latest Results";
 
   return (
-    <button
-      type="button"
-      data-update-btn
-      onClick={handleClick}
-      disabled={busy || isPending}
-      aria-label="Update latest results"
-      className={cn(
-        "ml-auto shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold text-white transition",
-        "bg-accent hover:bg-accent/90 disabled:opacity-70"
+    <>
+      <button
+        type="button"
+        data-update-btn
+        onClick={handleClick}
+        disabled={busy || isPending}
+        aria-label="Update latest results"
+        className={cn(
+          "ml-auto shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold text-white transition",
+          "bg-accent hover:bg-accent/90 disabled:opacity-70"
+        )}
+      >
+        {label}
+      </button>
+      {flash && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={cn(
+            "fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-lg",
+            flash.tone === "err" ? "bg-red-600" : "bg-emerald-600"
+          )}
+        >
+          {flash.msg}
+        </div>
       )}
-    >
-      {label}
-    </button>
+    </>
   );
 }
 

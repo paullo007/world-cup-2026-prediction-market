@@ -12,6 +12,8 @@ export interface IngestSummary {
   published: number; // matches resolved + paid out this run
   conflicts: number; // matches where the two sources disagreed (still published)
   unmatched: number; // unresolved markets no source had a result for yet
+  failed: number; // matches that matched a result but threw while resolving
+  errors: string[]; // per-match failures (matchKey/question + message)
 }
 
 /**
@@ -33,7 +35,7 @@ export async function ingestAndPublish(): Promise<IngestSummary> {
   const sourceSummary = sources.map((s) => ({ source: s.source, finished: s.matches.length, error: s.error }));
 
   if (sources.every((s) => s.matches.length === 0)) {
-    return { ok: false, error: "No results from any source", sources: sourceSummary, sourceErrors, published: 0, conflicts: 0, unmatched: 0 };
+    return { ok: false, error: "No results from any source", sources: sourceSummary, sourceErrors, published: 0, conflicts: 0, unmatched: 0, failed: 0, errors: [] };
   }
 
   // One row per match: the HOME outcome market (carries matchKey + structured
@@ -50,6 +52,8 @@ export async function ingestAndPublish(): Promise<IngestSummary> {
   let published = 0;
   let conflicts = 0;
   let unmatched = 0;
+  let failed = 0;
+  const errors: string[] = [];
   for (const m of markets) {
     let home: string | undefined;
     let away: string | undefined;
@@ -66,32 +70,42 @@ export async function ingestAndPublish(): Promise<IngestSummary> {
       unmatched++;
       continue;
     }
-    if (!merged.agree) conflicts++;
 
-    if (m.matchKey) {
-      // Resolve all three outcomes atomically, then commit the structured score
-      // + scorers to the HOME market so Scores/Standings/Goals pick them up.
-      await resolveMatchGroup(m.matchKey, merged.winner);
-      await db.market.update({
-        where: { id: m.id },
-        data: {
-          homeGoals: merged.homeGoals,
-          awayGoals: merged.awayGoals,
-          scorers: merged.scorers.length ? (merged.scorers as unknown as Prisma.InputJsonValue) : undefined,
-          resultSource: merged.sources.join("+"),
-          resultDetail: merged.detail,
-          fetchedAt: new Date(),
-        },
-      });
-    } else {
-      await resolveMarket(m.id, merged.outcome);
-      await db.market.update({
-        where: { id: m.id },
-        data: { resultSource: merged.sources.join("+"), resultDetail: merged.detail, fetchedAt: new Date() },
-      });
+    // Per-match isolation: a single market that throws while resolving must NOT
+    // abort the whole batch (it would strand the cooldown lock and leave every
+    // later finished match unresolved — the CQ-01 failure mode). Record it and
+    // move on; the next run retries it (resolution is idempotent).
+    try {
+      if (m.matchKey) {
+        // Resolve all three outcomes atomically, then commit the structured score
+        // + scorers to the HOME market so Scores/Standings/Goals pick them up.
+        await resolveMatchGroup(m.matchKey, merged.winner);
+        await db.market.update({
+          where: { id: m.id },
+          data: {
+            homeGoals: merged.homeGoals,
+            awayGoals: merged.awayGoals,
+            scorers: merged.scorers.length ? (merged.scorers as unknown as Prisma.InputJsonValue) : undefined,
+            resultSource: merged.sources.join("+"),
+            resultDetail: merged.detail,
+            fetchedAt: new Date(),
+          },
+        });
+      } else {
+        await resolveMarket(m.id, merged.outcome);
+        await db.market.update({
+          where: { id: m.id },
+          data: { resultSource: merged.sources.join("+"), resultDetail: merged.detail, fetchedAt: new Date() },
+        });
+      }
+      if (!merged.agree) conflicts++;
+      published++;
+    } catch (err) {
+      failed++;
+      const label = m.matchKey ?? m.question;
+      errors.push(`${label}: ${err instanceof Error ? err.message : "resolve failed"}`);
     }
-    published++;
   }
 
-  return { ok: true, sources: sourceSummary, sourceErrors, published, conflicts, unmatched };
+  return { ok: true, sources: sourceSummary, sourceErrors, published, conflicts, unmatched, failed, errors };
 }

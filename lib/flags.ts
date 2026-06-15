@@ -70,6 +70,9 @@ const EXTRA_ISO: Record<string, string> = {
   Italy: "IT",
   Chile: "CL",
   Czechoslovakia: "CZ",
+  Hungary: "HU",
+  Russia: "RU",
+  "West Germany": "DE", // historical finals in the Countries titles tables
 };
 
 /** Flag emoji for a country name, or "" if unknown. */

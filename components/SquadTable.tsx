@@ -1,18 +1,18 @@
 "use client";
 
-import { BRAZIL_ROSTER } from "@/lib/brazil";
+import type { CountryPlayer } from "@/lib/countries";
 import { useTopbarHeight } from "@/components/StickyUnderNav";
 import { cn } from "@/lib/utils";
 
 /**
- * Brazil squad table with column headers that stay pinned just under the global
- * nav while the page scrolls (same technique as the AI Knockouts labels). The
- * `<th>` cells are individually `position: sticky` (the cross-browser-reliable
- * way for table headers) and the wrapper uses `overflow-x: clip` rather than
- * `auto` so it doesn't become a scroll container that would break the pinning.
- * Live goals are computed on the server and passed in keyed by player name.
+ * Squad table (any country) with column headers pinned just under the global nav
+ * while the page scrolls — same technique as the AI Knockouts labels. The `<th>`
+ * cells are individually `position: sticky` (the cross-browser-reliable way for
+ * table headers); the wrapper uses `overflow-x: clip` rather than `auto` so it
+ * isn't a scroll container that would break the pinning. Live goals are computed
+ * on the server and passed in keyed by player name.
  */
-export function BrazilSquadTable({ goals }: { goals: Record<string, number> }) {
+export function SquadTable({ roster, goals }: { roster: CountryPlayer[]; goals: Record<string, number> }) {
   const top = useTopbarHeight();
   const th = "sticky z-20 border-b border-surface-border bg-surface-raised px-2 py-2 font-semibold";
 
@@ -32,8 +32,8 @@ export function BrazilSquadTable({ goals }: { goals: Record<string, number> }) {
           </tr>
         </thead>
         <tbody>
-          {BRAZIL_ROSTER.map((p) => (
-            <tr key={p.name} className="border-t border-surface-border">
+          {roster.map((p) => (
+            <tr key={`${p.number ?? "x"}-${p.name}`} className="border-t border-surface-border">
               <td className="px-2 py-2 text-slate-400">{p.number ?? "—"}</td>
               <td className="px-2 py-2 font-semibold">{p.name}</td>
               <td className="px-2 py-2 text-right text-slate-300">{p.age ?? "—"}</td>

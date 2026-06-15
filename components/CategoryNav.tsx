@@ -10,6 +10,7 @@ const CATEGORIES = [
   "Tournament Winner",
   "Matches",
   "Brazil",
+  "Countries",
   "Bracket",
   "AI Knockouts",
   "Standings",
@@ -22,6 +23,7 @@ const CATEGORIES = [
 // Pills that navigate to a standalone tab page rather than filtering the home grid.
 const TAB_ROUTES: Record<string, string> = {
   Brazil: "/brazil",
+  Countries: "/countries",
   Bracket: "/bracket",
   "AI Knockouts": "/ai-knockouts",
   Standings: "/standings",
@@ -180,6 +182,7 @@ export function CategoryNav() {
   const searchParams = useSearchParams();
   const active =
     ROUTE_TO_TAB[pathname] ??
+    (pathname.startsWith("/countries") ? "Countries" : null) ??
     (pathname === "/" ? searchParams.get("category") ?? "All" : null);
   return <CategoryPills active={active} />;
 }

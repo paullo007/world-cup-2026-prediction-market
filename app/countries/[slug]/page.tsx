@@ -1,0 +1,15 @@
+import { notFound } from "next/navigation";
+import { getPlayedMatches } from "@/lib/playedMatches";
+import { getCountry, goalsForRoster, countryFromSlug } from "@/lib/countries";
+import { CountryDetail } from "@/components/CountryDetail";
+
+export const dynamic = "force-dynamic";
+
+export default async function CountryPage({ params }: { params: { slug: string } }) {
+  const name = countryFromSlug(params.slug);
+  if (!name) notFound();
+  const data = getCountry(name)!;
+  const played = await getPlayedMatches();
+  const goals = goalsForRoster(data.roster, played, name);
+  return <CountryDetail data={data} goals={goals} />;
+}

@@ -10,6 +10,7 @@ import {
 } from "@/lib/brazil";
 import { MatchStartTime } from "@/components/MatchStartTime";
 import { SourceNote } from "@/components/SourceNote";
+import { BrazilSquadTable } from "@/components/BrazilSquadTable";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,11 @@ export default async function BrazilPage() {
       goalsByPlayer.set(k, (goalsByPlayer.get(k) ?? 0) + 1);
     }
   }
+
+  // Resolve live goals to each roster player by exact name, so the (client)
+  // squad table doesn't need the DB or the normalize() helper.
+  const goals: Record<string, number> = {};
+  for (const p of BRAZIL_ROSTER) goals[p.name] = goalsByPlayer.get(normalize(p.name)) ?? 0;
 
   const matches = getBrazilMatches();
 
@@ -70,38 +76,7 @@ export default async function BrazilPage() {
 
       {/* 2) Squad table */}
       <Box title="Squad — 2026 World Cup">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-[11px] uppercase tracking-wide text-slate-400">
-                <th className="px-2 py-2 text-left font-semibold">#</th>
-                <th className="px-2 py-2 text-left font-semibold">Player</th>
-                <th className="px-2 py-2 text-right font-semibold">Age</th>
-                <th className="px-2 py-2 text-left font-semibold">Position</th>
-                <th className="px-2 py-2 text-left font-semibold">Club</th>
-                <th className="px-2 py-2 text-right font-semibold">Caps</th>
-                <th className="px-2 py-2 text-right font-semibold">Goals</th>
-                <th className="px-2 py-2 text-right font-semibold">Assists</th>
-              </tr>
-            </thead>
-            <tbody>
-              {BRAZIL_ROSTER.map((p) => (
-                <tr key={p.name} className="border-t border-surface-border">
-                  <td className="px-2 py-2 text-slate-400">{p.number ?? "—"}</td>
-                  <td className="px-2 py-2 font-semibold">{p.name}</td>
-                  <td className="px-2 py-2 text-right text-slate-300">{p.age ?? "—"}</td>
-                  <td className="px-2 py-2 text-slate-300">{p.position}</td>
-                  <td className="px-2 py-2 text-slate-300">{p.club ?? "—"}</td>
-                  <td className="px-2 py-2 text-right text-slate-300">—</td>
-                  <td className="px-2 py-2 text-right font-bold tabular-nums">
-                    {goalsByPlayer.get(normalize(p.name)) ?? 0}
-                  </td>
-                  <td className="px-2 py-2 text-right tabular-nums text-slate-300">0</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <BrazilSquadTable goals={goals} />
         <p className="mt-3 text-xs italic text-slate-400">
           Name, age and position from ESPN&apos;s official 26-man roster; goals update live from
           approved match results. Club is shown where a source confirms it; caps, assists and

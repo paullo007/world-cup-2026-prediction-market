@@ -263,6 +263,7 @@ const MARKETS: SeedMarket[] = [
   winner("Netherlands", 0.05),
   winner("USA", 0.03),
   winner("Mexico", 0.02),
+  winner("Canada", 0.01),
 
   // Matches — opening game (3-way: home / draw / away). The home-win market
   // keeps its original slug so existing trades/results stay intact.

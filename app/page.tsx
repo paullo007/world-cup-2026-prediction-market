@@ -22,6 +22,7 @@ const WINNER_ORDER = [
   "Netherlands",
   "USA",
   "Mexico",
+  "Canada",
 ];
 const winnerRank = (question: string) => {
   const team = question.match(/^Will (.+?) win the 2026/)?.[1];

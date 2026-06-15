@@ -2,6 +2,7 @@ import Link from "next/link";
 import { GROUPS } from "@/lib/groups";
 import { flag } from "@/lib/flags";
 import { slugifyCountry } from "@/lib/countries";
+import { WorldCupHistory } from "@/components/WorldCupHistory";
 
 export default function CountriesPage() {
   return (
@@ -13,6 +14,8 @@ export default function CountriesPage() {
           laid out just like the Brazil tab.
         </p>
       </div>
+
+      <WorldCupHistory />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Object.entries(GROUPS).map(([letter, teams]) => (

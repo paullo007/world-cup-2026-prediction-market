@@ -3,6 +3,7 @@ import { BRACKET } from "@/lib/bracket";
 import type { Venue } from "@/lib/venues";
 import { flag } from "@/lib/flags";
 import { MatchStartTime } from "@/components/MatchStartTime";
+import { FitToWidth } from "@/components/FitToWidth";
 import { cn } from "@/lib/utils";
 
 // Borrow the real knockout schedule (same round keys + match counts) so each
@@ -95,8 +96,10 @@ function MatchCell({
 
 export function AiKnockoutBracket() {
   return (
-    <div className="overflow-x-auto pb-4">
-      <div className="flex min-w-[1180px] items-stretch gap-8">
+    <FitToWidth className="pb-4">
+      {/* Fixed design width; FitToWidth scales the whole tree (Champion included)
+          down to fit any screen, falling back to scroll only on very small ones. */}
+      <div className="flex w-[1180px] items-stretch gap-8 pr-2">
         {AI_BRACKET.map((round) => (
           <div key={round.key} className="flex flex-1 flex-col">
             <div className="mb-3 flex h-12 items-end justify-center text-center">
@@ -134,6 +137,6 @@ export function AiKnockoutBracket() {
           </div>
         </div>
       </div>
-    </div>
+    </FitToWidth>
   );
 }

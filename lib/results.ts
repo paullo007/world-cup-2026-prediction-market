@@ -1,9 +1,12 @@
 import { ALL_TEAMS } from "@/lib/flags";
 
-// Two independent, free score sources. We query both and cross-check them; the
-// admin-approval gate (see app/admin) decides whenever they disagree or only one
-// has a result. The /admin/sources page compares them side by side.
-export type Source = "ESPN" | "TheSportsDB";
+// Three independent, free score sources (no API key required for ESPN/365Scores;
+// TheSportsDB uses the free key "3"). We query all of them and cross-check; a
+// match resolves as soon as ANY one source reports it finished (see mergeForMarket
+// / ingest — there is no "both must agree" gate). The /admin/sources page compares
+// them side by side. TheSportsDB's free season feed is often stale, so ESPN +
+// 365Scores carry the load in practice.
+export type Source = "ESPN" | "TheSportsDB" | "365Scores";
 
 const ESPN_URL =
   "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard";
@@ -214,16 +217,73 @@ export async function fetchTheSportsDB(): Promise<FinishedMatch[]> {
   return out;
 }
 
+// 365scores public web API (no key). FIFA World Cup competition id = 5930;
+// statusGroup === 4 means the match has ended. Scores live on each competitor.
+// We pull a small date range (today back `daysBack` days) filtered to the WC
+// competition, so the response is just the recent World Cup fixtures.
+const SCORES365_URL = "https://webws.365scores.com/web/games/";
+const ddmmyyyy = (d: Date) =>
+  `${String(d.getUTCDate()).padStart(2, "0")}/${String(d.getUTCMonth() + 1).padStart(2, "0")}/${d.getUTCFullYear()}`;
+
+interface Scores365Response {
+  games?: Array<{
+    competitionId?: number;
+    statusGroup?: number;
+    homeCompetitor?: { name?: string; score?: number };
+    awayCompetitor?: { name?: string; score?: number };
+    startTime?: string;
+  }> | null;
+}
+
+export async function fetch365Scores(daysBack = 4): Promise<FinishedMatch[]> {
+  const params = new URLSearchParams({
+    appTypeId: "5",
+    langId: "1",
+    timezoneName: "UTC",
+    competitions: "5930", // FIFA World Cup
+    startDate: ddmmyyyy(new Date(Date.now() - daysBack * 86_400_000)),
+    endDate: ddmmyyyy(new Date()),
+  });
+  const res = await fetch(`${SCORES365_URL}?${params.toString()}`, {
+    cache: "no-store",
+    headers: { "User-Agent": "Mozilla/5.0" },
+  });
+  if (!res.ok) throw new Error(`365Scores responded ${res.status} ${res.statusText}`);
+
+  const data = (await res.json()) as Scores365Response;
+  const out: FinishedMatch[] = [];
+  for (const g of data.games ?? []) {
+    if (g.competitionId !== 5930) continue; // World Cup only
+    if (g.statusGroup !== 4) continue; // 4 = ended
+    const h = g.homeCompetitor;
+    const a = g.awayCompetitor;
+    if (!h?.name || !a?.name) continue;
+    const homeGoals = h.score != null ? Math.round(Number(h.score)) : null;
+    const awayGoals = a.score != null ? Math.round(Number(a.score)) : null;
+    out.push({
+      source: "365Scores",
+      home: canonicalTeam(h.name),
+      away: canonicalTeam(a.name),
+      homeGoals,
+      awayGoals,
+      winner: winnerFromScore(homeGoals, awayGoals),
+      date: g.startTime ?? "",
+    });
+  }
+  return out;
+}
+
 export interface SourceFetch {
   source: Source;
   matches: FinishedMatch[];
   error?: string;
 }
 
-/** Fetch both sources independently; a failure in one never blocks the other. */
+/** Fetch all sources independently; a failure in one never blocks the others. */
 export async function fetchAllSources(): Promise<SourceFetch[]> {
   const providers: Array<{ source: Source; fn: () => Promise<FinishedMatch[]> }> = [
     { source: "ESPN", fn: fetchEspn },
+    { source: "365Scores", fn: fetch365Scores },
     { source: "TheSportsDB", fn: fetchTheSportsDB },
   ];
   return Promise.all(

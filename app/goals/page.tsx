@@ -1,7 +1,7 @@
-import { flag } from "@/lib/flags";
 import { getPlayedMatches } from "@/lib/playedMatches";
 import { GOALS_SOURCES } from "@/lib/sources";
 import { SourceNote } from "@/components/SourceNote";
+import { GoalscorersTable } from "@/components/GoalscorersTable";
 
 export const dynamic = "force-dynamic";
 
@@ -50,51 +50,7 @@ export default async function GoalsPage() {
           No goals recorded yet — scorers appear here once match results are approved.
         </p>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-surface-border bg-surface-raised">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-[11px] uppercase tracking-wide text-slate-400">
-                <th className="px-4 py-2 text-left font-semibold">#</th>
-                <th className="px-2 py-2 text-left font-semibold">Player</th>
-                <th className="px-2 py-2 text-left font-semibold">Team</th>
-                <th className="px-4 py-2 text-right font-semibold">Goals</th>
-              </tr>
-            </thead>
-            <tbody>
-              {scorers.map((s, i) => (
-                <tr key={`${s.name}|${s.team}`} className="border-t border-surface-border">
-                  <td className="px-4 py-2 text-slate-400">{i + 1}</td>
-                  <td className="px-2 py-2 font-semibold">
-                    {s.name}
-                    {s.penalties > 0 && (
-                      <span className="ml-1.5 text-[11px] font-medium text-slate-400">
-                        ({s.penalties} pen)
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-2 py-2 text-slate-300">
-                    <span className="mr-1.5">{flag(s.team)}</span>
-                    {s.team}
-                  </td>
-                  <td className="px-4 py-2 text-right font-bold tabular-nums">{s.goals}</td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="border-t-2 border-surface-border bg-surface">
-                <td
-                  className="px-2 py-3 text-right text-base font-bold uppercase tracking-wide text-slate-400"
-                  colSpan={3}
-                >
-                  Total Goals
-                </td>
-                <td className="px-4 py-3 text-right text-2xl font-extrabold tabular-nums">
-                  {totalGoals}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
+        <GoalscorersTable scorers={scorers} totalGoals={totalGoals} />
       )}
 
       <SourceNote sources={GOALS_SOURCES} />

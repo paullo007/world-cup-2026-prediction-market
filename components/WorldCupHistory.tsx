@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { flag } from "@/lib/flags";
 import { WORLD_CUP_HISTORY } from "@/lib/worldCupHistory";
+import { useTopbarHeight } from "@/components/StickyUnderNav";
 import { cn } from "@/lib/utils";
 
 /**
@@ -13,6 +14,8 @@ import { cn } from "@/lib/utils";
  */
 export function WorldCupHistory() {
   const [open, setOpen] = useState(false);
+  const top = useTopbarHeight();
+  const th = "sticky z-20 border-b border-surface-border bg-surface-raised px-2 py-2 text-left font-semibold";
 
   return (
     <section className="rounded-2xl border border-surface-border bg-surface-raised">
@@ -29,15 +32,16 @@ export function WorldCupHistory() {
       </button>
 
       {open && (
-        <div className="overflow-x-auto px-5 pb-5">
+        <div className="px-5 pb-5" style={{ overflowX: "clip" }}>
           <table className="w-full text-sm">
             <thead>
               <tr className="text-[11px] uppercase tracking-wide text-slate-400">
-                <th className="px-2 py-2 text-left font-semibold">Year</th>
-                <th className="px-2 py-2 text-left font-semibold">Winner</th>
-                <th className="px-2 py-2 text-left font-semibold">Beat in Final</th>
-                <th className="px-2 py-2 text-left font-semibold">Final City</th>
-                <th className="px-2 py-2 text-left font-semibold">Host Country</th>
+                <th style={{ top }} className={th}>Year</th>
+                <th style={{ top }} className={th}>Winner</th>
+                <th style={{ top }} className={th}>Beat in Final</th>
+                <th style={{ top }} className={th}>Final Score</th>
+                <th style={{ top }} className={th}>Final City</th>
+                <th style={{ top }} className={th}>Host Country</th>
               </tr>
             </thead>
             <tbody>
@@ -49,8 +53,12 @@ export function WorldCupHistory() {
                     {f.winner}
                   </td>
                   <td className="px-2 py-2 text-slate-300">
-                    <span className="mr-1.5">{flag(f.beat.replace(/ \(.*\)/, ""))}</span>
+                    <span className="mr-1.5">{flag(f.beat)}</span>
                     {f.beat}
+                  </td>
+                  <td className="px-2 py-2 whitespace-nowrap text-slate-300">
+                    {f.penalties && <span className="font-bold text-amber-600">PENALTIES: </span>}
+                    <span className="font-semibold">{f.winner}</span> {f.winnerGoals} vs {f.loserGoals} {f.beat}
                   </td>
                   <td className="px-2 py-2 text-slate-300">{f.city}</td>
                   <td className="px-2 py-2 text-slate-300">

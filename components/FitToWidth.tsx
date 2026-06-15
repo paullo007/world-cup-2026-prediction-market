@@ -15,10 +15,12 @@ import { useCallback, useLayoutEffect, useRef, useState } from "react";
 export function FitToWidth({
   minScale = 0.5,
   className,
+  style,
   children,
 }: {
   minScale?: number;
   className?: string;
+  style?: React.CSSProperties;
   children: React.ReactNode;
 }) {
   const outerRef = useRef<HTMLDivElement>(null);
@@ -52,7 +54,14 @@ export function FitToWidth({
   }, [recompute]);
 
   return (
-    <div ref={outerRef} className={className} style={{ overflowX: scale <= minScale ? "auto" : "hidden" }}>
+    <div
+      ref={outerRef}
+      className={className}
+      // Only scroll when we've hit the min-scale floor; otherwise `clip` keeps the
+      // box from becoming a scroll container (which would break `position: sticky`
+      // for this element and for the bar's vertical pinning).
+      style={{ overflowX: scale <= minScale ? "auto" : "clip", ...style }}
+    >
       <div style={dims ? { width: dims.w * scale, height: dims.h * scale } : undefined}>
         <div ref={innerRef} style={{ transform: `scale(${scale})`, transformOrigin: "top left", width: "max-content" }}>
           {children}

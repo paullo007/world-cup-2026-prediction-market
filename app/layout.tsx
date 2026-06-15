@@ -36,7 +36,7 @@ export default function RootLayout({
         <Providers>
           {/* Sticky top region: the black header AND the category tab bar pin
               together at the top of the viewport while the page scrolls. */}
-          <div className="sticky top-0 z-40 border-b border-surface-border bg-surface">
+          <div id="wc-topbar" className="sticky top-0 z-40 border-b border-surface-border bg-surface">
             <Navbar />
             <div className="mx-auto max-w-6xl px-4 py-3">
               <Suspense fallback={<CategoryPills active={null} />}>

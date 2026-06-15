@@ -4,6 +4,7 @@ import type { Venue } from "@/lib/venues";
 import { flag } from "@/lib/flags";
 import { MatchStartTime } from "@/components/MatchStartTime";
 import { FitToWidth } from "@/components/FitToWidth";
+import { StickyUnderNav } from "@/components/StickyUnderNav";
 import { cn } from "@/lib/utils";
 
 // Borrow the real knockout schedule (same round keys + match counts) so each
@@ -94,18 +95,39 @@ function MatchCell({
   );
 }
 
+// One column header cell. Shared structure (flex-1) keeps the sticky label row
+// aligned with the body columns below it.
+function RoundLabel({ name, className }: { name: string; className: string }) {
+  return (
+    <div className="flex flex-1 items-end justify-center pb-2 pt-1 text-center">
+      <div className={cn("text-sm font-bold", className)}>{name}</div>
+    </div>
+  );
+}
+
 export function AiKnockoutBracket() {
   return (
-    <FitToWidth className="pb-4">
-      {/* Fixed design width; FitToWidth scales the whole tree (Champion included)
-          down to fit any screen, falling back to scroll only on very small ones. */}
-      <div className="flex w-[1180px] items-stretch gap-8 pr-2">
-        {AI_BRACKET.map((round) => (
-          <div key={round.key} className="flex flex-1 flex-col">
-            <div className="mb-3 flex h-12 items-end justify-center text-center">
-              <div className={cn("text-sm font-bold", THEMES[round.key].header)}>{round.name}</div>
-            </div>
-            <div className="flex flex-1 flex-col">
+    <>
+      {/* Round labels: pinned just under the global nav while the bracket scrolls.
+          Its own FitToWidth scales it identically to the body (same width/columns),
+          so the labels stay over their columns. Lives outside the body's transform,
+          so `position: sticky` works. */}
+      <StickyUnderNav className="border-b border-surface-border bg-surface">
+        <div className="flex w-[1180px] items-stretch gap-8 pr-2">
+          {AI_BRACKET.map((round) => (
+            <RoundLabel key={round.key} name={round.name} className={THEMES[round.key].header} />
+          ))}
+          <RoundLabel name="🏆 Champion" className="text-amber-500" />
+        </div>
+      </StickyUnderNav>
+
+      {/* Bracket body — headers now live in the sticky bar above. */}
+      <FitToWidth className="pb-4">
+        {/* Fixed design width; FitToWidth scales the whole tree (Champion included)
+            down to fit any screen, falling back to scroll only on very small ones. */}
+        <div className="flex w-[1180px] items-stretch gap-8 pr-2 pt-3">
+          {AI_BRACKET.map((round) => (
+            <div key={round.key} className="flex flex-1 flex-col">
               {round.matches.map((m, i) => (
                 <MatchCell
                   key={i}
@@ -116,14 +138,9 @@ export function AiKnockoutBracket() {
                 />
               ))}
             </div>
-          </div>
-        ))}
+          ))}
 
-        {/* Champion column — receives the Final's connector stub. */}
-        <div className="flex flex-1 flex-col">
-          <div className="mb-3 flex h-12 items-end justify-center text-center">
-            <div className="text-sm font-bold text-amber-500">🏆 Champion</div>
-          </div>
+          {/* Champion column — receives the Final's connector stub. */}
           <div className="flex flex-1 flex-col">
             <div className="relative flex flex-1 items-center">
               <div className="w-full rounded-xl border border-amber-300 border-t-4 border-t-amber-400 bg-gradient-to-br from-amber-50 to-white px-4 py-5 text-center shadow-md ring-1 ring-amber-300">
@@ -136,7 +153,7 @@ export function AiKnockoutBracket() {
             </div>
           </div>
         </div>
-      </div>
-    </FitToWidth>
+      </FitToWidth>
+    </>
   );
 }

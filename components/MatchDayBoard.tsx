@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Market } from "@prisma/client";
 import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import { MatchCard3Way } from "@/components/MatchCard3Way";
+import { useTopbarHeight } from "@/components/StickyUnderNav";
 import { cn } from "@/lib/utils";
 
 interface MatchEntry {
@@ -30,6 +31,9 @@ function dayKey(d: Date): string {
 export function MatchDayBoard({ matches }: { matches: MatchEntry[] }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  // Pin the day-selector bar just under the global nav while fixtures scroll.
+  const stickyTop = useTopbarHeight();
 
   // Unique kickoff days (local), sorted ascending — the strip's tabs.
   const days = useMemo(() => {
@@ -106,7 +110,10 @@ export function MatchDayBoard({ matches }: { matches: MatchEntry[] }) {
 
   return (
     <div className="space-y-5">
-      <div className="rounded-xl border border-surface-border bg-surface-raised">
+      {/* Sticky band: the day selector pins just under the nav; an opaque
+          bg-surface wrapper covers fixtures scrolling underneath it. */}
+      <div className="sticky z-30 bg-surface pb-3" style={{ top: stickyTop }}>
+        <div className="rounded-xl border border-surface-border bg-surface-raised">
         <div className="flex items-stretch">
           <button
             type="button"
@@ -178,6 +185,7 @@ export function MatchDayBoard({ matches }: { matches: MatchEntry[] }) {
             day: "numeric",
             year: "numeric",
           })}
+        </div>
         </div>
       </div>
 

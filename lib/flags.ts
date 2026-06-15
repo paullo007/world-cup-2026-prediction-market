@@ -62,9 +62,19 @@ const SUBDIVISION_FALLBACK: Record<string, string> = {
   "GB-SCT": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
 };
 
+// Countries that appear in historical / contextual data (e.g. the Brazil tab's
+// past World Cup finals and the coach's nationality) but are NOT among the 48
+// WC2026 teams — kept out of ISO so ALL_TEAMS stays exactly the 48. Czechoslovakia
+// uses the Czech flag (same design as the historical one).
+const EXTRA_ISO: Record<string, string> = {
+  Italy: "IT",
+  Chile: "CL",
+  Czechoslovakia: "CZ",
+};
+
 /** Flag emoji for a country name, or "" if unknown. */
 export function flag(country: string): string {
-  const code = ISO[country];
+  const code = ISO[country] ?? EXTRA_ISO[country];
   if (!code) return "";
   if (SUBDIVISION_FALLBACK[code]) return SUBDIVISION_FALLBACK[code];
   return codeToEmoji(code);

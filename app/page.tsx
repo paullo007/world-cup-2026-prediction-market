@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { MarketCard } from "@/components/MarketCard";
 import { MatchCard3Way } from "@/components/MatchCard3Way";
 import { MatchDayBoard } from "@/components/MatchDayBoard";
+import { PredictMyOwnWinner } from "@/components/PredictMyOwnWinner";
+import { canonicalTeam } from "@/lib/flags";
 import { awaitingResult } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -80,9 +82,21 @@ export default async function HomePage({
     markets.sort((a, b) => Number(awaitingResult(a)) - Number(awaitingResult(b)));
   }
 
-  // On the Predict World Cup Winner tab, apply the explicit team order.
-  if (category === "Tournament Winner") {
+  // On the Predict World Cup Winner tab, apply the explicit team order, and
+  // gather the canonical teams that already have a market so the "Predict My
+  // Own Winner" dropdown can leave them out (includes any resolved ones).
+  const isWinner = category === "Tournament Winner";
+  let existingWinnerTeams: string[] = [];
+  if (isWinner) {
     markets.sort((a, b) => winnerRank(a.question) - winnerRank(b.question));
+    const allWinners = await db.market.findMany({
+      where: { category: "Tournament Winner" },
+      select: { question: true },
+    });
+    existingWinnerTeams = allWinners
+      .map((m) => m.question.match(/^Will (.+?) win the 2026 FIFA World Cup\?$/)?.[1])
+      .filter((t): t is string => Boolean(t))
+      .map(canonicalTeam);
   }
 
   const volumes = await db.trade.groupBy({
@@ -147,6 +161,8 @@ export default async function HomePage({
           1,000 WC$.
         </p>
       </section>
+
+      {isWinner && <PredictMyOwnWinner existingTeams={existingWinnerTeams} />}
 
       {isMatches ? (
         <MatchDayBoard

@@ -93,6 +93,17 @@ export function matchTeams(question: string): [string, string] | null {
 const NAME_ALIASES: Record<string, string> = { USA: "United States" };
 
 /**
+ * Trim a team name and map known short forms to their canonical ISO spelling
+ * (e.g. "USA" -> "United States"). Used to dedupe winner markets and build a
+ * stable slug regardless of how the team was typed. Unknown names pass through
+ * trimmed (so free-text custom picks still get a deterministic canonical form).
+ */
+export function canonicalTeam(name: string): string {
+  const n = name.trim();
+  return NAME_ALIASES[n] ?? n;
+}
+
+/**
  * Parse a tournament-winner title like "Will {country} win the 2026 FIFA World
  * Cup?" -> the canonical country name, but only if it's a known team. null
  * otherwise (so it never misfires on match/other questions).

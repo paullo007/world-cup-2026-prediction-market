@@ -82,3 +82,27 @@ export function matchProbabilities(home: string, away: string): MatchProbs {
   const rest = 1 - draw;
   return { HOME: rest * we, DRAW: draw, AWAY: rest * (1 - we) };
 }
+
+// Elo -> linear strength on the standard scale (a 400-point gap = 10x stronger).
+const strength = (elo: number) => Math.pow(10, elo / 400);
+
+/**
+ * Rough STARTING tournament-win probability for one team, derived from Elo and
+ * normalized across the whole 48-team field (favourites land a few %, longshots
+ * well under 1%). Used only to seed a user-proposed "Will X win the World Cup?"
+ * market — the price then moves freely on trades. A team not in TEAM_ELO (a
+ * free-text custom pick) falls back to DEFAULT_ELO and is added to the field so
+ * the result stays a real probability in (0, 1).
+ */
+export function tournamentWinProbability(team: string): number {
+  const teamStrength = strength((TEAM_ELO[team] ?? DEFAULT_ELO) + (HOSTS.has(team) ? HOST_BONUS : 0));
+  const fieldTotal = Object.entries(TEAM_ELO).reduce(
+    (sum, [name, e]) => sum + strength(e + (HOSTS.has(name) ? HOST_BONUS : 0)),
+    0
+  );
+  // If the team isn't already one of the 48, its strength isn't in fieldTotal.
+  const denom = TEAM_ELO[team] ? fieldTotal : fieldTotal + teamStrength;
+  const p = teamStrength / denom;
+  // Clamp away from the 0/1 asymptotes that seedStateForProbability can't take.
+  return Math.min(0.9, Math.max(0.002, p));
+}

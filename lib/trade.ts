@@ -17,6 +17,44 @@ export interface TradeResult {
 }
 
 /**
+ * Transient connection/transaction errors from Supabase's transaction-mode
+ * pooler (pgbouncer) — the "Transaction not found / already closed" class that
+ * intermittently kills a Prisma transaction when the pooled backend is recycled
+ * mid-flight. These are safe to retry; a genuine TradeError (closed market,
+ * insufficient balance, …) is NOT and must surface immediately.
+ */
+function isTransientTxError(e: unknown): boolean {
+  if (e instanceof TradeError) return false;
+  const msg = e instanceof Error ? e.message : String(e);
+  const code = (e as { code?: string })?.code;
+  return (
+    code === "P2028" || // Prisma transaction API error
+    /Transaction (not found|already closed|API error)|obtained before disconnecting|Can't reach database|Connection (closed|reset|terminated)|ECONNRESET|terminating connection/i.test(msg)
+  );
+}
+
+/**
+ * Run a DB operation, retrying a few times with backoff on transient pooler
+ * errors. Because both the trade and the resolve transactions are short, a retry
+ * lands on a fresh connection and succeeds; non-transient errors propagate at
+ * once. Idempotency (resolve) / full-transaction atomicity (trade) make a retry
+ * of a half-applied attempt safe.
+ */
+async function withTxRetry<T>(fn: () => Promise<T>, tries = 4): Promise<T> {
+  let last: unknown;
+  for (let i = 0; i < tries; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      last = e;
+      if (!isTransientTxError(e)) throw e;
+      await new Promise((r) => setTimeout(r, 100 * (i + 1)));
+    }
+  }
+  throw last;
+}
+
+/**
  * Execute a trade atomically. BUY spends `coins`; SELL liquidates `shares`.
  * All reads/writes happen inside one transaction so concurrent trades
  * can't corrupt balances or AMM state.
@@ -33,7 +71,7 @@ export async function executeTrade(params: {
 }): Promise<TradeResult> {
   const { userId, marketSlug, outcome, action } = params;
 
-  return db.$transaction(async (tx) => {
+  return withTxRetry(() => db.$transaction(async (tx) => {
     const market = await tx.market.findUnique({ where: { slug: marketSlug } });
     if (!market) throw new TradeError("Market not found");
     if (market.status !== "OPEN" || market.closesAt < new Date())
@@ -116,7 +154,7 @@ export async function executeTrade(params: {
     });
 
     return { shares: Math.abs(shares), amount, newYesPrice: newPrice };
-  });
+  }));
 }
 
 /**
@@ -162,8 +200,12 @@ async function resolveMarketOps(
  * Executed as one batched (non-interactive) transaction — pooler-safe.
  */
 export async function resolveMarket(marketId: string, outcome: "YES" | "NO") {
-  const ops = await resolveMarketOps(marketId, outcome);
-  if (ops.length) await db.$transaction(ops);
+  // Rebuild ops inside the retry: a PrismaPromise can only be executed once, and
+  // re-reading also lets a retry no-op if a prior attempt actually committed.
+  await withTxRetry(async () => {
+    const ops = await resolveMarketOps(marketId, outcome);
+    if (ops.length) await db.$transaction(ops);
+  });
 }
 
 /**
@@ -177,12 +219,16 @@ export async function resolveMatchGroup(
   matchKey: string,
   winner: "HOME" | "DRAW" | "AWAY"
 ) {
-  const markets = await db.market.findMany({
-    where: { matchKey, status: { not: "RESOLVED" } },
+  // Rebuild markets + ops inside the retry (PrismaPromises are single-use; the
+  // re-read also makes a retry skip any market a prior attempt already settled).
+  await withTxRetry(async () => {
+    const markets = await db.market.findMany({
+      where: { matchKey, status: { not: "RESOLVED" } },
+    });
+    const ops: Prisma.PrismaPromise<unknown>[] = [];
+    for (const m of markets) {
+      ops.push(...(await resolveMarketOps(m.id, m.outcomeType === winner ? "YES" : "NO")));
+    }
+    if (ops.length) await db.$transaction(ops);
   });
-  const ops: Prisma.PrismaPromise<unknown>[] = [];
-  for (const m of markets) {
-    ops.push(...(await resolveMarketOps(m.id, m.outcomeType === winner ? "YES" : "NO")));
-  }
-  if (ops.length) await db.$transaction(ops);
 }

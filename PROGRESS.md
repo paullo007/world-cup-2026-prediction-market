@@ -2,10 +2,10 @@
 
 _You-are-here for a cheap resume. Durable map: `CLAUDE.md`. Deep archive: `../SESSION MD CODE HISTORY/SESSION_LOG.md`._
 
-**Last updated:** 2026-06-17 (end of Session 10 — "Predict My Own World Cup Winner": users can add a winner market for any team not on the pre-seeded list). Shipped live on `main`, Vercel deploy verified green. HEAD = `bd13b2d`.
+**Last updated:** 2026-06-18 (end of Session 11 — **fixed results never auto-resolving**: root cause was Prisma interactive transactions failing over the Supabase pooler; rebuilt resolution + added 3 robust triggers). Shipped live on `main`, backlog resolved, verified on the live Scores tab. HEAD = `09529db` + a docs commit.
 
 ## Current phase
-Session 10 **shipped and live** (commit `bd13b2d`, deploy `ndel235zo` ● Ready, button confirmed on the production domain). Nothing half-done in code.
+Session 11 **shipped and live**. The 4 stuck Jun16–17 matches are RESOLVED (France 3-1 Senegal, Norway 4-1 Iraq, Argentina 3-0 Algeria, Austria 3-1 Jordan); auto-resolve now self-heals. Nothing half-done in code.
 
 ## START HERE (next action)
 Nothing is in-flight. Pick whichever is most relevant:
@@ -16,6 +16,11 @@ Nothing is in-flight. Pick whichever is most relevant:
 5. **Countries data freshness** — rosters are a static snapshot from ESPN; re-run `npx tsx scripts/gen-countries.ts` to refresh squads as the tournament progresses.
 
 ## Done (high level)
+- **Session 11 (Jun17–18.26) — RESULTS PIPELINE FIX:**
+  - **Root cause:** match results never auto-resolved. Not the fetch/match logic (that works in prod) — `resolveMarket`/`resolveMatchGroup` used Prisma **interactive** transactions, which fail intermittently over Supabase's transaction-mode pooler (`Transaction API error: Transaction not found`, P2028). Every resolve silently threw → matches stuck "Closed — awaiting result". Hidden by: Vercel cron **never enabled** (`crons:[]`) and the manual button being **login-gated** (logged-out clicks no-op'd). Diagnosed by deploying a temporary read-only `/api/diag-sources` (since removed) that proved prod fetch=16/17/5 OK but live resolve threw P2028.
+  - **Fix — pooler-safe resolution:** `lib/trade.ts` now resolves via batched `$transaction([...])` (`resolveMarketOps()`: pre-read positions, then one atomic non-interactive batch). All trade + resolve transactions wrapped in `withTxRetry()` (retries P2028/connection drops; rebuilds ops each attempt since PrismaPromises are single-use). `executeTrade` kept interactive but now retried (a/ from this session).
+  - **Fix — 3 robust triggers (never silently stall again):** (1) `<AutoResolve>` in layout pings throttled public `/api/auto-resolve` (`ingestIfDue()` — SystemState cooldown + only-if-stale) on every page view, refreshing if anything published; (2) GitHub Actions cron every 15m → `/api/auto-resolve` (`.github/workflows/resolve-results.yml`, no secret, plan-independent); (3) manual button **opened to everyone** (login gate removed from `/api/refresh-results`; toast now reports failures too).
+  - **Backlog resolved live** + verified on the Scores tab. Temp diag endpoint removed.
 - **Session 10 (Jun17.26):**
   - **Predict My Own World Cup Winner (NEW):** collapsible button atop the Tournament Winner tab, styled like the Countries tab's "History of World Cup Winners" panel (`components/PredictMyOwnWinner.tsx`). A signed-in user picks from a dropdown of the remaining 48-team field (with flags) — or types their own via **"Other"** — and `POST /api/winner-markets` creates a live binary "Will X win the 2026 FIFA World Cup?" market, then jumps to it.
   - **Elo-derived starting odds:** `lib/elo.tournamentWinProbability()` (Elo → field-normalized win share, host bonus, clamped to (0.002, 0.9); `DEFAULT_ELO` fallback for off-list custom teams). Seeded via `seedStateForProbability` (unlike the 11 hand-set winner seeds).
@@ -39,6 +44,8 @@ Nothing is in-flight. Pick whichever is most relevant:
 
 ## Known issues / gotchas (see CLAUDE.md for full rules)
 - ⛔ No commit/push or live-DB write without Paul's explicit OK.
+- ⛔ **Never use Prisma interactive transactions on the hot path** — they fail intermittently over the Supabase pooler (P2028). Use batched `$transaction([...])` + `withTxRetry()` (see CLAUDE.md hard rules). This is what broke all result resolution.
+- 🟢 **Vercel cron does not fire on this plan** — results now settle via on-view self-heal + GitHub Actions cron (every 15m) + the public button. GH Actions schedule can take a few min to first activate / be delayed under load; the on-view self-heal covers gaps.
 - 🟢 **Sticky bars depend on the single `sticky top-0` wrapper having NO `overflow`/`transform` ancestor** (`app/layout.tsx`, now `id="wc-topbar"`). Sticky **table headers** need wrapper `overflow-x:clip`, never `auto`/`hidden`. `FitToWidth` uses `transform` → breaks `position:sticky` for descendants, so sticky bars live OUTSIDE it (`StickyUnderNav` wraps FitToWidth but the sticky is on its untransformed outer).
 - 🟢 **Countries rosters are a static ESPN snapshot** (`lib/countries.generated.ts`); re-run `scripts/gen-countries.ts` to refresh. Non-Brazil: club "—", no coach.
 - 🟠 **SEC-01** login rate-limit still open (Upstash). **next@16** migration deferred.

@@ -18,16 +18,24 @@ function minuteSort(m?: string): number {
 
 const sameTeam = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
 
-/** One goalscorer line: flag + player + minute, "(penalty)" after the time. */
+/**
+ * One goalscorer line: flag + player + minute, "(penalty)" after the time, with
+ * any assist(s) indented in italics on the line below ("Assist: A, B").
+ */
 function ScorerLine({ s }: { s: Scorer }) {
   return (
-    <li className="flex items-center gap-1.5">
-      <span className="shrink-0">{flag(s.team)}</span>
-      <span className="font-medium">{s.name}</span>
-      <span className="text-slate-400">
-        {s.minute ?? ""}
-        {s.penalty ? `${s.minute ? " " : ""}(penalty)` : ""}
-      </span>
+    <li>
+      <div className="flex items-center gap-1.5">
+        <span className="shrink-0">{flag(s.team)}</span>
+        <span className="font-medium">{s.name}</span>
+        <span className="text-slate-400">
+          {s.minute ?? ""}
+          {s.penalty ? `${s.minute ? " " : ""}(penalty)` : ""}
+        </span>
+      </div>
+      {s.assists && s.assists.length > 0 && (
+        <div className="pl-5 italic text-slate-400">Assist: {s.assists.join(", ")}</div>
+      )}
     </li>
   );
 }

@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { matchTeams } from "@/lib/flags";
-import { fetchAllSources, mergeForMarket } from "@/lib/results";
+import { fetchAllSources, mergeForMarket, fetchEspnAssists, attachAssists } from "@/lib/results";
 import { resolveMarket, resolveMatchGroup } from "@/lib/trade";
 
 export interface IngestSummary {
@@ -80,12 +80,17 @@ export async function ingestAndPublish(): Promise<IngestSummary> {
         // Resolve all three outcomes atomically, then commit the structured score
         // + scorers to the HOME market so Scores/Standings/Goals pick them up.
         await resolveMatchGroup(m.matchKey, merged.winner);
+        // Enrich scorers with assists from ESPN's summary endpoint (best-effort).
+        let scorers = merged.scorers;
+        if (merged.espnEventId && scorers.length) {
+          scorers = attachAssists(scorers, await fetchEspnAssists(merged.espnEventId));
+        }
         await db.market.update({
           where: { id: m.id },
           data: {
             homeGoals: merged.homeGoals,
             awayGoals: merged.awayGoals,
-            scorers: merged.scorers.length ? (merged.scorers as unknown as Prisma.InputJsonValue) : undefined,
+            scorers: scorers.length ? (scorers as unknown as Prisma.InputJsonValue) : undefined,
             resultSource: merged.sources.join("+"),
             resultDetail: merged.detail,
             fetchedAt: new Date(),

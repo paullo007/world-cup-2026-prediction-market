@@ -53,7 +53,7 @@ needs no key). Set `CRON_SECRET` + `THESPORTSDB_API_KEY` in Vercel env too.
 | `lib/elo.ts` | Elo strength ratings (48 teams) + `matchProbabilities()` → per-fixture 3-way **starting odds** (Session 8); `tournamentWinProbability()` → field-normalized **winner-market** starting odds (Session 10); seeded via `seedStateForProbability` |
 | `scripts/reprice-elo.ts` | re-runnable reprice of OPEN untraded match markets to Elo odds (dry-run default, `--apply`) |
 | `components/MatchDayBoard.tsx` (client) | ESPN-style match-day picker; groups outcome markets into 3-way fixtures |
-| `components/MatchCard3Way.tsx` | one fixture as Home/Draw/Away outcome prices; when RESOLVED, also lists **goalscorers** (team flag + player + minute, "(penalty)" after the time) from the HOME market's `scorers`, chronological |
+| `components/MatchCard3Way.tsx` | one fixture as Home/Draw/Away outcome prices; when RESOLVED, also lists **goalscorers** (team flag + player + minute, "(penalty)" after the time) from the HOME market's `scorers`, chronological, **split into two columns by side** — home-team scorers left, away-team right (matched via scorer `team` vs the fixture's home/away; empty column if a side didn't score). Uses `ScorerLine` + `sameTeam` helpers |
 | `components/CategoryNav.tsx` (client) | permanent pill nav (in layout); active-state + label overrides |
 | `components/SourceNote.tsx`, `ResolveMatchButtons.tsx` | numbered source list; manual 3-way resolve |
 | `app/standings`, `app/scores`, `app/goals`, `app/brazil` | the four data tabs |

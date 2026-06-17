@@ -62,6 +62,7 @@ export interface Scorer {
   team: string; // canonical team name
   minute?: string; // e.g. "9'"
   penalty?: boolean;
+  assists?: string[]; // assisting player name(s), from ESPN's summary endpoint
 }
 
 export interface FinishedMatch {
@@ -73,6 +74,7 @@ export interface FinishedMatch {
   winner: "HOME" | "AWAY" | "DRAW";
   date: string; // ISO-ish date from the source
   scorers?: Scorer[]; // goalscorers where the source provides them (ESPN only)
+  espnEventId?: string; // ESPN event id, used to fetch assists from the summary endpoint
 }
 
 const winnerFromScore = (h: number | null, a: number | null): "HOME" | "AWAY" | "DRAW" =>
@@ -173,6 +175,7 @@ export async function fetchEspn(daysBack = 4): Promise<FinishedMatch[]> {
         winner,
         date: ev.date,
         scorers: scorers.length ? scorers : undefined,
+        espnEventId: ev.id,
       });
     }
   }
@@ -180,6 +183,59 @@ export async function fetchEspn(daysBack = 4): Promise<FinishedMatch[]> {
   // Only surface an error if every day's request failed.
   if (okDays === 0 && lastError) throw new Error(lastError);
   return out;
+}
+
+const ESPN_SUMMARY_URL =
+  "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary";
+
+interface EspnSummary {
+  keyEvents?: Array<{
+    type?: { text?: string };
+    clock?: { displayValue?: string };
+    // For a goal: participants[0] is the scorer, the rest are the assist(s).
+    participants?: Array<{ athlete?: { displayName?: string } }>;
+  }>;
+}
+
+/**
+ * Fetch goal assists for one match from ESPN's per-match SUMMARY endpoint (the
+ * scoreboard feed carries only the scorer). Returns a map keyed by
+ * `normalize(scorer)|minute` → assisting player name(s). Best-effort: any error
+ * yields an empty map so assist enrichment never blocks resolution.
+ */
+export async function fetchEspnAssists(eventId: string): Promise<Map<string, string[]>> {
+  const out = new Map<string, string[]>();
+  try {
+    const res = await fetch(`${ESPN_SUMMARY_URL}?event=${eventId}`, { cache: "no-store" });
+    if (!res.ok) return out;
+    const data = (await res.json()) as EspnSummary;
+    for (const e of data.keyEvents ?? []) {
+      // Goal types include "Goal", "Goal - Header", "Penalty - Scored", etc.
+      if (!/goal|scored/i.test(e.type?.text ?? "")) continue;
+      const ppl = e.participants ?? [];
+      const scorer = ppl[0]?.athlete?.displayName;
+      if (!scorer) continue;
+      const assists = ppl
+        .slice(1)
+        .map((p) => p.athlete?.displayName)
+        .filter((n): n is string => Boolean(n));
+      if (!assists.length) continue;
+      out.set(`${normalize(scorer)}|${e.clock?.displayValue ?? ""}`, assists);
+    }
+  } catch {
+    // ignore — assists are optional enrichment
+  }
+  return out;
+}
+
+/** Return a copy of `scorers` with assists attached from a fetchEspnAssists map. */
+export function attachAssists(scorers: Scorer[], assists: Map<string, string[]>): Scorer[] {
+  if (!assists.size) return scorers;
+  return scorers.map((s) => {
+    const a =
+      assists.get(`${normalize(s.name)}|${s.minute ?? ""}`) ?? assists.get(`${normalize(s.name)}|`);
+    return a && a.length ? { ...s, assists: a } : s;
+  });
 }
 
 /** Fetch finished World Cup matches from TheSportsDB (free, documented). */
@@ -325,6 +381,7 @@ export interface MergedResult {
   homeGoals: number | null; // goals for the market's HOME team
   awayGoals: number | null; // goals for the market's AWAY team
   scorers: Scorer[]; // goalscorers (from whichever source provides them)
+  espnEventId?: string; // ESPN event id of the matched fixture, for assist lookup
 }
 
 /**
@@ -357,6 +414,8 @@ export function mergeForMarket(
   const awayGoals = homeIsMarketHome ? primary.awayGoals : primary.homeGoals;
   // Scorers come from whichever hit has them (ESPN); they already carry their team.
   const scorers = hits.find((h) => h.m.scorers?.length)?.m.scorers ?? [];
+  // ESPN event id (from the ESPN hit, if any) so ingest can fetch assists.
+  const espnEventId = hits.find((h) => h.m.source === "ESPN")?.m.espnEventId;
 
   const winner: "HOME" | "AWAY" | "DRAW" =
     homeGoals != null && awayGoals != null
@@ -382,5 +441,6 @@ export function mergeForMarket(
     homeGoals,
     awayGoals,
     scorers,
+    espnEventId,
   };
 }

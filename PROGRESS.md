@@ -2,7 +2,7 @@
 
 _You-are-here for a cheap resume. Durable map: `CLAUDE.md`. Deep archive: `../SESSION MD CODE HISTORY/SESSION_LOG.md`._
 
-**Last updated:** 2026-06-18 (end of Session 12 — UI additions: goalscorers in Matches boxes, "Predict My Own Winner" earlier, "Top-10 Goal Scorers of All Time" panel on the Goals tab). Shipped live on `main`, deploys verified green. HEAD = `d29c4e8`.
+**Last updated:** 2026-06-18 (end of Session 12 — Matches-tab goalscorers UI: list scorers, split home/away into two columns, then add goal **assists**; plus the "Top-10 Goal Scorers of All Time" panel on the Goals tab). Shipped live on `main`, deploys verified green, assists backfilled into the live DB. HEAD = `09d5678`.
 
 ## Current phase
 Session 12 **shipped and live**. Nothing half-done in code. (Session 11 fixed the big results-never-resolve bug; Session 12 is feature/UI work on top.)
@@ -17,7 +17,9 @@ Nothing is in-flight. Pick whichever is most relevant:
 
 ## Done (high level)
 - **Session 12 (Jun18.26) — UI features:**
-  - **Goalscorers in Matches boxes:** `components/MatchCard3Way.tsx` — when a fixture is RESOLVED, a "Goalscorers" block at the bottom lists each scorer (team flag + player + minute, `(penalty)` after the time for penalty goals), sorted chronologically (stoppage-time aware). Reads the HOME market's existing `scorers` JSON — no schema/pipeline change. Type-only import of `Scorer`.
+  - **Goalscorers in Matches boxes:** `components/MatchCard3Way.tsx` — when a fixture is RESOLVED, a "Goalscorers" block at the bottom lists each scorer (team flag + player + minute, `(penalty)` after the time for penalty goals), sorted chronologically (stoppage-time aware). Reads the HOME market's existing `scorers` JSON.
+  - **Split scorers home/away:** two-column layout — home-team scorers left, away-team right (matched via scorer `team` vs the fixture's home/away; empty column if a side didn't score). `ScorerLine` + `sameTeam` helpers.
+  - **Goal assists (NEW pipeline bit):** ESPN's scoreboard feed has no assists, but its per-match *summary* endpoint does (scorer = `participants[0]`, assists = the rest). Added `fetchEspnAssists()`/`attachAssists()` in `lib/results.ts`, threaded the ESPN event id through `FinishedMatch`/`mergeForMarket`, and `ingestAndPublish` enriches scorers at resolve time (best-effort — never blocks resolution). UI shows each scorer's assist(s) indented + italic ("Assist: A, B"). **Backfilled** the 16 already-resolved matches (45 assists) into the live DB via a one-off script (idempotent resolution won't rewrite their scorers, so a backfill was required).
   - **"Top-10 Goal Scorers of All Time" panel:** `lib/topScorers.ts` + `components/TopScorers.tsx` — collapsible panel cloning the Countries "History of World Cup Winners" box (amber pill + sticky `<th>` headers via `useTopbarHeight` + `overflow-x:clip`). Static all-time men's WC scorers through 2022 (Klose 16, Ronaldo 15, …). **Lives on the GOALS tab** (`app/goals/page.tsx`) — was briefly shipped on Scores by mistake, then moved.
   - **Predict My Own Winner** (was Session 10, still live): users add a winner market for any team not pre-listed.
 - **Session 11 (Jun17–18.26) — RESULTS PIPELINE FIX:**

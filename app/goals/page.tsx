@@ -2,6 +2,7 @@ import { getPlayedMatches } from "@/lib/playedMatches";
 import { GOALS_SOURCES } from "@/lib/sources";
 import { SourceNote } from "@/components/SourceNote";
 import { GoalscorersTable } from "@/components/GoalscorersTable";
+import { TopScorers } from "@/components/TopScorers";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +45,8 @@ export default async function GoalsPage() {
           appear. Own goals aren&apos;t credited.
         </p>
       </div>
+
+      <TopScorers />
 
       {scorers.length === 0 ? (
         <p className="py-12 text-center text-slate-400">

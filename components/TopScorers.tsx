@@ -8,7 +8,7 @@ import { useTopbarHeight } from "@/components/StickyUnderNav";
 import { cn } from "@/lib/utils";
 
 /**
- * Collapsible "Top-10 Goal Scorers of All Time" panel for the top of the Scores
+ * Collapsible "Top-10 Goal Scorers of All Time" panel for the top of the Goals
  * page. Mirrors the Countries tab's "History of World Cup Winners" panel: same
  * amber pill button + chevron, and table headers that stick under the nav while
  * scrolling (wrapper uses overflow-x: clip so the sticky <th> isn't trapped).

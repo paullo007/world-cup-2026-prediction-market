@@ -1,11 +1,20 @@
 import Link from "next/link";
 import type { Market } from "@prisma/client";
+import type { Scorer } from "@/lib/results";
 import { yesPrice } from "@/lib/amm";
 import { flag, matchTeams } from "@/lib/flags";
 import { VENUES } from "@/lib/venues";
 import { awaitingResult, formatPercent, formatWCD } from "@/lib/utils";
 import { MatchStartTime } from "@/components/MatchStartTime";
 import { Clock, MapPin } from "lucide-react";
+
+/** Sort key for a goal minute like "23'" or "45'+2'" (stoppage sorts after). */
+function minuteSort(m?: string): number {
+  if (!m) return 9999; // minute unknown → list last
+  const base = parseInt(m, 10) || 0;
+  const extra = m.includes("+") ? parseInt(m.split("+")[1], 10) || 0 : 0;
+  return base + extra / 100;
+}
 
 /**
  * One group-stage fixture as a three-way market: Home win / Draw / Away win.
@@ -32,6 +41,12 @@ export function MatchCard3Way({
   const venue = home.matchKey ? VENUES[home.matchKey] : undefined;
   const resolved = home.status === "RESOLVED";
   const awaiting = awaitingResult(home) && !resolved;
+
+  // Goalscorers (stored on the HOME market only), chronological. Shown once the
+  // match is resolved and the score is known.
+  const scorers = (Array.isArray(home.scorers) ? (home.scorers as unknown as Scorer[]) : [])
+    .slice()
+    .sort((a, b) => minuteSort(a.minute) - minuteSort(b.minute));
 
   // For a played fixture, the winning outcome is the one that resolved YES.
   const winner = markets.find((m) => m.resolvedOutcome === "YES")?.outcomeType;
@@ -94,6 +109,24 @@ export function MatchCard3Way({
           </div>
         )}
       </div>
+
+      {resolved && scorers.length > 0 && (
+        <div className="space-y-1 rounded-lg border border-surface-border bg-surface px-3 py-2">
+          <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Goalscorers</div>
+          <ul className="space-y-0.5 text-xs text-slate-300">
+            {scorers.map((s, i) => (
+              <li key={`${s.name}-${s.minute ?? i}`} className="flex items-center gap-1.5">
+                <span className="shrink-0">{flag(s.team)}</span>
+                <span className="font-medium">{s.name}</span>
+                <span className="text-slate-400">
+                  {s.minute ?? ""}
+                  {s.penalty ? `${s.minute ? " " : ""}(penalty)` : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="mt-auto text-xs text-slate-400">{formatWCD(Math.round(volume))} traded</div>
     </div>

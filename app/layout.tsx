@@ -5,6 +5,7 @@ import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Navbar } from "@/components/Navbar";
 import { CategoryNav, CategoryPills } from "@/components/CategoryNav";
+import { AutoResolve } from "@/components/AutoResolve";
 
 export const metadata: Metadata = {
   title: "World Cup 2026 Prediction Market",
@@ -34,6 +35,8 @@ export default function RootLayout({
           crawlSpeed={150}
         />
         <Providers>
+          {/* Self-heal: settle finished matches on any page view (throttled). */}
+          <AutoResolve />
           {/* Sticky top region: the black header AND the category tab bar pin
               together at the top of the viewport while the page scrolls. */}
           <div id="wc-topbar" className="sticky top-0 z-40 border-b border-surface-border bg-surface">

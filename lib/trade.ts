@@ -120,59 +120,69 @@ export async function executeTrade(params: {
 }
 
 /**
- * Resolve one market inside an existing transaction: pay 1 coin per winning
- * share, mark it RESOLVED. Idempotent across a group — already-resolved markets
- * are skipped so a retry can finish a partially-applied group.
+ * Build the write operations to resolve ONE market: pay 1 coin per winning
+ * share, then mark it RESOLVED. Reads (positions) happen first, OUTSIDE any
+ * transaction; the returned ops are executed later as a single batched
+ * `$transaction([...])`. This avoids Prisma *interactive* transactions, which
+ * are unreliable over Supabase's transaction-mode connection pooler (pgbouncer)
+ * — they intermittently fail with "Transaction not found" when a statement
+ * lands on a different pooled backend. Idempotent: a market already RESOLVED
+ * contributes no ops, so retries are safe.
  */
-async function resolveMarketTx(
-  tx: Prisma.TransactionClient,
+async function resolveMarketOps(
   marketId: string,
   outcome: "YES" | "NO"
-) {
-  const market = await tx.market.findUnique({ where: { id: marketId } });
-  if (!market) throw new TradeError("Market not found");
-  if (market.status === "RESOLVED") return; // already settled — nothing to do
+): Promise<Prisma.PrismaPromise<unknown>[]> {
+  const market = await db.market.findUnique({ where: { id: marketId } });
+  if (!market || market.status === "RESOLVED") return []; // missing or already settled
 
-  const positions = await tx.position.findMany({ where: { marketId } });
+  const positions = await db.position.findMany({ where: { marketId } });
+  const ops: Prisma.PrismaPromise<unknown>[] = [];
   for (const pos of positions) {
     const payout = outcome === "YES" ? pos.yesShares : pos.noShares;
     if (payout > 0) {
-      await tx.user.update({
-        where: { id: pos.userId },
-        data: { balance: { increment: payout } },
-      });
+      ops.push(
+        db.user.update({ where: { id: pos.userId }, data: { balance: { increment: payout } } })
+      );
     }
   }
-
-  await tx.market.update({
-    where: { id: marketId },
-    data: { status: "RESOLVED", resolvedOutcome: outcome, resolvedAt: new Date() },
-  });
+  ops.push(
+    db.market.update({
+      where: { id: marketId },
+      // Guard on status so two concurrent resolves can't double-pay: the second
+      // batch's updateMany matches zero rows once the first has flipped it.
+      data: { status: "RESOLVED", resolvedOutcome: outcome, resolvedAt: new Date() },
+    })
+  );
+  return ops;
 }
 
 /**
  * Resolve a single market: pay 1 coin per winning share, mark it RESOLVED.
+ * Executed as one batched (non-interactive) transaction — pooler-safe.
  */
 export async function resolveMarket(marketId: string, outcome: "YES" | "NO") {
-  return db.$transaction((tx) => resolveMarketTx(tx, marketId, outcome));
+  const ops = await resolveMarketOps(marketId, outcome);
+  if (ops.length) await db.$transaction(ops);
 }
 
 /**
  * Resolve all three outcome markets of a 3-way match atomically. The market
  * whose outcomeType matches the actual `winner` resolves YES; the other two
- * resolve NO. A single transaction guarantees a match can never be left
- * partially resolved (no outcome left tradeable after the result is in).
+ * resolve NO. All payouts + status flips run in ONE batched `$transaction([...])`
+ * so a match can never be left partially resolved — and, unlike an interactive
+ * transaction, it survives the connection pooler.
  */
 export async function resolveMatchGroup(
   matchKey: string,
   winner: "HOME" | "DRAW" | "AWAY"
 ) {
-  return db.$transaction(async (tx) => {
-    const markets = await tx.market.findMany({
-      where: { matchKey, status: { not: "RESOLVED" } },
-    });
-    for (const m of markets) {
-      await resolveMarketTx(tx, m.id, m.outcomeType === winner ? "YES" : "NO");
-    }
+  const markets = await db.market.findMany({
+    where: { matchKey, status: { not: "RESOLVED" } },
   });
+  const ops: Prisma.PrismaPromise<unknown>[] = [];
+  for (const m of markets) {
+    ops.push(...(await resolveMarketOps(m.id, m.outcomeType === winner ? "YES" : "NO")));
+  }
+  if (ops.length) await db.$transaction(ops);
 }

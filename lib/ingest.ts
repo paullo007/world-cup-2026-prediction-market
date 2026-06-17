@@ -109,3 +109,40 @@ export async function ingestAndPublish(): Promise<IngestSummary> {
 
   return { ok: true, sources: sourceSummary, sourceErrors, published, conflicts, unmatched, failed, errors };
 }
+
+const EMPTY: IngestSummary = { ok: true, sources: [], sourceErrors: [], published: 0, conflicts: 0, unmatched: 0, failed: 0, errors: [] };
+
+/**
+ * Throttled self-heal ingest, safe to call on every page view and from an
+ * external cron. Runs `ingestAndPublish()` only when (a) the cooldown has
+ * elapsed and (b) there is at least one closed-but-unresolved match to settle.
+ * Cooldown is tracked in the `SystemState` singleton so a burst of page loads
+ * triggers at most one fetch per window. Ingest is idempotent, so the small
+ * check-then-claim race is harmless.
+ */
+export async function ingestIfDue(cooldownMs = 3 * 60 * 1000): Promise<IngestSummary & { skipped?: boolean }> {
+  const now = Date.now();
+  const state = await db.systemState.findUnique({ where: { id: "singleton" } });
+  if (state?.resultsFetchedAt && now - state.resultsFetchedAt.getTime() < cooldownMs) {
+    return { ...EMPTY, skipped: true };
+  }
+
+  const stale = await db.market.count({
+    where: {
+      category: "Matches",
+      status: { not: "RESOLVED" },
+      closesAt: { lt: new Date() },
+      OR: [{ outcomeType: "HOME" }, { outcomeType: null }],
+    },
+  });
+  if (stale === 0) return { ...EMPTY, skipped: true };
+
+  // Claim the cooldown up front so concurrent callers don't all fetch.
+  await db.systemState.upsert({
+    where: { id: "singleton" },
+    create: { id: "singleton", resultsFetchedAt: new Date() },
+    update: { resultsFetchedAt: new Date() },
+  });
+
+  return ingestAndPublish();
+}

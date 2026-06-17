@@ -44,11 +44,11 @@ const LABELS: Record<string, string> = {
 
 /**
  * Permanent "Update Latest Results" pill. POSTs to /api/refresh-results, which
- * (for any signed-in user, on every click — no cooldown) fetches the score
+ * (for ANYONE — logged in or not, on every click, no cooldown) fetches the score
  * sources and auto-publishes any finished match on the spot, then re-queries the
  * page data via router.refresh() so everyone sees the fresh scores. A pop-up
  * message (toast) reports the outcome ("N matches were updated" / "No new
- * results" / an error). Anonymous visitors just get the display refresh.
+ * results" / "couldn't settle N — will retry" / an error).
  */
 function UpdateResultsButton() {
   const router = useRouter();
@@ -63,15 +63,20 @@ function UpdateResultsButton() {
     try {
       const res = await fetch("/api/refresh-results", { method: "POST" });
       const data = await res.json().catch(() => ({}));
-      if (data?.reason === "auth") {
-        msg = "Sign in to update results";
-        tone = "err";
-      } else if (data?.ok === false) {
+      if (data?.ok === false) {
         msg = "Couldn't reach the score sources — try again";
         tone = "err";
       } else if (typeof data?.published === "number") {
         const n = data.published as number;
-        msg = n > 0 ? `${n} ${n === 1 ? "match was" : "matches were"} updated` : "No new results to update";
+        const failed = typeof data?.failed === "number" ? data.failed : 0;
+        if (n > 0) {
+          msg = `${n} ${n === 1 ? "match was" : "matches were"} updated`;
+        } else if (failed > 0) {
+          msg = `Couldn't settle ${failed} finished ${failed === 1 ? "match" : "matches"} — will retry`;
+          tone = "err";
+        } else {
+          msg = "No new results to update";
+        }
       }
     } catch {
       // Network hiccup — still refresh to show whatever's already published.

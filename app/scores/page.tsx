@@ -4,6 +4,7 @@ import { getPlayedMatches } from "@/lib/playedMatches";
 import { MatchStartTime } from "@/components/MatchStartTime";
 import { SCORES_SOURCES } from "@/lib/sources";
 import { SourceNote } from "@/components/SourceNote";
+import { TopScorers } from "@/components/TopScorers";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +39,8 @@ export default async function ScoresPage() {
           tab.
         </p>
       </div>
+
+      <TopScorers />
 
       {played.length === 0 ? (
         <p className="py-12 text-center text-slate-400">

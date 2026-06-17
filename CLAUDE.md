@@ -53,7 +53,7 @@ needs no key). Set `CRON_SECRET` + `THESPORTSDB_API_KEY` in Vercel env too.
 | `lib/elo.ts` | Elo strength ratings (48 teams) + `matchProbabilities()` → per-fixture 3-way **starting odds** (Session 8); `tournamentWinProbability()` → field-normalized **winner-market** starting odds (Session 10); seeded via `seedStateForProbability` |
 | `scripts/reprice-elo.ts` | re-runnable reprice of OPEN untraded match markets to Elo odds (dry-run default, `--apply`) |
 | `components/MatchDayBoard.tsx` (client) | ESPN-style match-day picker; groups outcome markets into 3-way fixtures |
-| `components/MatchCard3Way.tsx` | one fixture as Home/Draw/Away outcome prices |
+| `components/MatchCard3Way.tsx` | one fixture as Home/Draw/Away outcome prices; when RESOLVED, also lists **goalscorers** (team flag + player + minute, "(penalty)" after the time) from the HOME market's `scorers`, chronological |
 | `components/CategoryNav.tsx` (client) | permanent pill nav (in layout); active-state + label overrides |
 | `components/SourceNote.tsx`, `ResolveMatchButtons.tsx` | numbered source list; manual 3-way resolve |
 | `app/standings`, `app/scores`, `app/goals`, `app/brazil` | the four data tabs |
@@ -61,6 +61,7 @@ needs no key). Set `CRON_SECRET` + `THESPORTSDB_API_KEY` in Vercel env too.
 | `lib/results.ts` | **Triple-source** results: `fetchEspn()` + `fetch365Scores()` (keyless, WC comp id 5930, `statusGroup===4`) + `fetchTheSportsDB()` (stale dead-weight), team-name normalize/alias, `mergeForMarket()` (resolves on ANY single source; flags ✓ agree / ⚠ disagree) |
 | `lib/countries.ts`, `lib/countries.generated.ts`, `scripts/gen-countries.ts` | Countries tab data: `getCountry()` (Brazil curated; other 47 from ESPN-generated rosters), `WORLD_CUP_TITLES`, fixtures, slug helpers. Re-gen squads with `npx tsx scripts/gen-countries.ts` |
 | `components/CountryDetail.tsx`, `components/SquadTable.tsx` | Shared country layout (Brazil + every `/countries/[slug]` render identically) + sticky-header squad table |
+| `lib/topScorers.ts`, `components/TopScorers.tsx` | "Top-10 Goal Scorers of All Time" collapsible panel (static all-time men's WC scorers through 2022) at the top of the **Goals** tab — clones the Countries "History" panel (amber pill + sticky `<th>` headers) |
 | `app/countries/`, `app/countries/[slug]/` | Countries list (by group A–L) + country detail page |
 | `lib/worldCupHistory.ts`, `components/WorldCupHistory.tsx` | "History of World Cup Winners" panel (22 finals 1930–2022, Final Score + PENALTIES) atop `/countries` |
 | `components/FitToWidth.tsx`, `components/StickyUnderNav.tsx` | Reusable UI: scale-to-fit wrapper (CSS transform); `useTopbarHeight()` + `StickyUnderNav` pin content under the nav (`#wc-topbar`) |

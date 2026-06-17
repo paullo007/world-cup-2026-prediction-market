@@ -2,10 +2,10 @@
 
 _You-are-here for a cheap resume. Durable map: `CLAUDE.md`. Deep archive: `../SESSION MD CODE HISTORY/SESSION_LOG.md`._
 
-**Last updated:** 2026-06-18 (end of Session 11 — **fixed results never auto-resolving**: root cause was Prisma interactive transactions failing over the Supabase pooler; rebuilt resolution + added 3 robust triggers). Shipped live on `main`, backlog resolved, verified on the live Scores tab. HEAD = `09529db` + a docs commit.
+**Last updated:** 2026-06-18 (end of Session 12 — UI additions: goalscorers in Matches boxes, "Predict My Own Winner" earlier, "Top-10 Goal Scorers of All Time" panel on the Goals tab). Shipped live on `main`, deploys verified green. HEAD = `d29c4e8`.
 
 ## Current phase
-Session 11 **shipped and live**. The 4 stuck Jun16–17 matches are RESOLVED (France 3-1 Senegal, Norway 4-1 Iraq, Argentina 3-0 Algeria, Austria 3-1 Jordan); auto-resolve now self-heals. Nothing half-done in code.
+Session 12 **shipped and live**. Nothing half-done in code. (Session 11 fixed the big results-never-resolve bug; Session 12 is feature/UI work on top.)
 
 ## START HERE (next action)
 Nothing is in-flight. Pick whichever is most relevant:
@@ -16,6 +16,10 @@ Nothing is in-flight. Pick whichever is most relevant:
 5. **Countries data freshness** — rosters are a static snapshot from ESPN; re-run `npx tsx scripts/gen-countries.ts` to refresh squads as the tournament progresses.
 
 ## Done (high level)
+- **Session 12 (Jun18.26) — UI features:**
+  - **Goalscorers in Matches boxes:** `components/MatchCard3Way.tsx` — when a fixture is RESOLVED, a "Goalscorers" block at the bottom lists each scorer (team flag + player + minute, `(penalty)` after the time for penalty goals), sorted chronologically (stoppage-time aware). Reads the HOME market's existing `scorers` JSON — no schema/pipeline change. Type-only import of `Scorer`.
+  - **"Top-10 Goal Scorers of All Time" panel:** `lib/topScorers.ts` + `components/TopScorers.tsx` — collapsible panel cloning the Countries "History of World Cup Winners" box (amber pill + sticky `<th>` headers via `useTopbarHeight` + `overflow-x:clip`). Static all-time men's WC scorers through 2022 (Klose 16, Ronaldo 15, …). **Lives on the GOALS tab** (`app/goals/page.tsx`) — was briefly shipped on Scores by mistake, then moved.
+  - **Predict My Own Winner** (was Session 10, still live): users add a winner market for any team not pre-listed.
 - **Session 11 (Jun17–18.26) — RESULTS PIPELINE FIX:**
   - **Root cause:** match results never auto-resolved. Not the fetch/match logic (that works in prod) — `resolveMarket`/`resolveMatchGroup` used Prisma **interactive** transactions, which fail intermittently over Supabase's transaction-mode pooler (`Transaction API error: Transaction not found`, P2028). Every resolve silently threw → matches stuck "Closed — awaiting result". Hidden by: Vercel cron **never enabled** (`crons:[]`) and the manual button being **login-gated** (logged-out clicks no-op'd). Diagnosed by deploying a temporary read-only `/api/diag-sources` (since removed) that proved prod fetch=16/17/5 OK but live resolve threw P2028.
   - **Fix — pooler-safe resolution:** `lib/trade.ts` now resolves via batched `$transaction([...])` (`resolveMarketOps()`: pre-read positions, then one atomic non-interactive batch). All trade + resolve transactions wrapped in `withTxRetry()` (retries P2028/connection drops; rebuilds ops each attempt since PrismaPromises are single-use). `executeTrade` kept interactive but now retried (a/ from this session).
@@ -44,6 +48,7 @@ Nothing is in-flight. Pick whichever is most relevant:
 
 ## Known issues / gotchas (see CLAUDE.md for full rules)
 - ⛔ No commit/push or live-DB write without Paul's explicit OK.
+- 🟡 **OneDrive resurrects deleted files** — the repo lives under OneDrive, which re-syncs locally-deleted files back to disk as **untracked** (e.g. `app/api/diag-sources/`, stray `scripts/*.ts`, `_tmp_*`/`_test_*`). Harmless to git/Vercel (untracked = not committed, not deployed) but can break a local `npm run build` (typechecks on-disk files). Stage only the specific files you mean; don't `git add -A`. A stale `.git/index.lock` from OneDrive can also block commits — safe to `rm` if no git process is running.
 - ⛔ **Never use Prisma interactive transactions on the hot path** — they fail intermittently over the Supabase pooler (P2028). Use batched `$transaction([...])` + `withTxRetry()` (see CLAUDE.md hard rules). This is what broke all result resolution.
 - 🟢 **Vercel cron does not fire on this plan** — results now settle via on-view self-heal + GitHub Actions cron (every 15m) + the public button. GH Actions schedule can take a few min to first activate / be delayed under load; the on-view self-heal covers gaps.
 - 🟢 **Sticky bars depend on the single `sticky top-0` wrapper having NO `overflow`/`transform` ancestor** (`app/layout.tsx`, now `id="wc-topbar"`). Sticky **table headers** need wrapper `overflow-x:clip`, never `auto`/`hidden`. `FitToWidth` uses `transform` → breaks `position:sticky` for descendants, so sticky bars live OUTSIDE it (`StickyUnderNav` wraps FitToWidth but the sticky is on its untransformed outer).

@@ -16,6 +16,22 @@ function minuteSort(m?: string): number {
   return base + extra / 100;
 }
 
+const sameTeam = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
+
+/** One goalscorer line: flag + player + minute, "(penalty)" after the time. */
+function ScorerLine({ s }: { s: Scorer }) {
+  return (
+    <li className="flex items-center gap-1.5">
+      <span className="shrink-0">{flag(s.team)}</span>
+      <span className="font-medium">{s.name}</span>
+      <span className="text-slate-400">
+        {s.minute ?? ""}
+        {s.penalty ? `${s.minute ? " " : ""}(penalty)` : ""}
+      </span>
+    </li>
+  );
+}
+
 /**
  * One group-stage fixture as a three-way market: Home win / Draw / Away win.
  * Each outcome is its own binary market — clicking it opens that market to
@@ -47,6 +63,9 @@ export function MatchCard3Way({
   const scorers = (Array.isArray(home.scorers) ? (home.scorers as unknown as Scorer[]) : [])
     .slice()
     .sort((a, b) => minuteSort(a.minute) - minuteSort(b.minute));
+  // Split scorers by side: home team in the left column, away team in the right.
+  const homeScorers = scorers.filter((s) => sameTeam(s.team, homeTeam));
+  const awayScorers = scorers.filter((s) => !sameTeam(s.team, homeTeam));
 
   // For a played fixture, the winning outcome is the one that resolved YES.
   const winner = markets.find((m) => m.resolvedOutcome === "YES")?.outcomeType;
@@ -113,18 +132,18 @@ export function MatchCard3Way({
       {resolved && scorers.length > 0 && (
         <div className="space-y-1 rounded-lg border border-surface-border bg-surface px-3 py-2">
           <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Goalscorers</div>
-          <ul className="space-y-0.5 text-xs text-slate-300">
-            {scorers.map((s, i) => (
-              <li key={`${s.name}-${s.minute ?? i}`} className="flex items-center gap-1.5">
-                <span className="shrink-0">{flag(s.team)}</span>
-                <span className="font-medium">{s.name}</span>
-                <span className="text-slate-400">
-                  {s.minute ?? ""}
-                  {s.penalty ? `${s.minute ? " " : ""}(penalty)` : ""}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-xs text-slate-300">
+            <ul className="space-y-0.5">
+              {homeScorers.map((s, i) => (
+                <ScorerLine key={`h-${s.name}-${s.minute ?? i}`} s={s} />
+              ))}
+            </ul>
+            <ul className="space-y-0.5 border-l border-surface-border pl-3">
+              {awayScorers.map((s, i) => (
+                <ScorerLine key={`a-${s.name}-${s.minute ?? i}`} s={s} />
+              ))}
+            </ul>
+          </div>
         </div>
       )}
 

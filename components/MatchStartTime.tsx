@@ -43,7 +43,7 @@ export function MatchStartTime({ iso }: { iso: string }) {
   if (!parts) return null;
   return (
     <span>
-      Start Time: <strong className="text-[1.15em] font-bold">{parts.time}</strong>
+      Start Time: <strong className="text-[1.15em] font-bold text-accent">{parts.time}</strong>
       {parts.rest}
     </span>
   );

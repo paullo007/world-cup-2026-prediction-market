@@ -39,6 +39,7 @@ export default async function PortfolioPage() {
       pos.market.resolvedOutcome === "YES" ? pos.yesShares : pos.noShares;
     return { pos, payout, pnl: payout - Math.max(pos.costBasis, 0) };
   });
+  const totalResolvedPnl = resolvedRows.reduce((s, r) => s + r.pnl, 0);
 
   return (
     <div className="space-y-8">
@@ -172,6 +173,25 @@ export default async function PortfolioPage() {
                   </tr>
                 ))}
               </tbody>
+              <tfoot>
+                <tr className="border-t-2 border-surface-border bg-surface-raised/60">
+                  <td
+                    colSpan={6}
+                    className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-400"
+                  >
+                    Total P&L
+                  </td>
+                  <td
+                    className={cn(
+                      "px-4 py-3 text-right text-base font-extrabold",
+                      totalResolvedPnl >= 0 ? "text-emerald-600" : "text-red-600"
+                    )}
+                  >
+                    {totalResolvedPnl >= 0 ? "+" : ""}
+                    {formatWCD(totalResolvedPnl)}
+                  </td>
+                </tr>
+              </tfoot>
             </table>
           </div>
         </section>

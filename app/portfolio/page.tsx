@@ -27,9 +27,16 @@ export default async function PortfolioPage() {
   const rows = openPositions.map((pos) => {
     const p = yesPrice(pos.market);
     const value = pos.yesShares * p + pos.noShares * (1 - p);
-    return { pos, price: p, value, pnl: value - Math.max(pos.costBasis, 0) };
+    // Payout if this prediction is correct: each winning share redeems for 1 WC$.
+    const predictionValue = pos.yesShares + pos.noShares;
+    return { pos, price: p, value, predictionValue, pnl: value - Math.max(pos.costBasis, 0) };
   });
   const totalValue = rows.reduce((s, r) => s + r.value, 0);
+  // If every open prediction wins: total payout − total cost basis = potential P&L.
+  const totalPotentialPnl = rows.reduce(
+    (s, r) => s + r.predictionValue - Math.max(r.pos.costBasis, 0),
+    0
+  );
 
   // Resolved positions — payout already credited to cash balance at resolution
   // (1.00 WC$ per winning share). Shown here as settled history with realized P&L.
@@ -70,12 +77,13 @@ export default async function PortfolioPage() {
                   <th className="px-4 py-3">My Prediction</th>
                   <th className="px-4 py-3">My Shares</th>
                   <th className="px-4 py-3">Price</th>
+                  <th className="px-4 py-3 text-right">My Prediction Value</th>
                   <th className="px-4 py-3 text-right">Value</th>
                   <th className="px-4 py-3 text-right">My P&L</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-surface-border">
-                {rows.map(({ pos, price, value, pnl }) => (
+                {rows.map(({ pos, price, value, predictionValue, pnl }) => (
                   <tr key={pos.id} className="hover:bg-surface-raised/50">
                     <td className="px-4 py-3">
                       <Link
@@ -92,6 +100,9 @@ export default async function PortfolioPage() {
                       <SharesCell yes={pos.yesShares} no={pos.noShares} />
                     </td>
                     <td className="px-4 py-3 text-slate-300">{formatPercent(price)}</td>
+                    <td className="px-4 py-3 text-right font-semibold text-emerald-600">
+                      {formatWCD(predictionValue)}
+                    </td>
                     <td className="px-4 py-3 text-right font-semibold">
                       {formatWCD(value)}
                     </td>
@@ -107,6 +118,25 @@ export default async function PortfolioPage() {
                   </tr>
                 ))}
               </tbody>
+              <tfoot>
+                <tr className="border-t-2 border-surface-border bg-surface-raised/60">
+                  <td
+                    colSpan={6}
+                    className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-400"
+                  >
+                    Total Potential P&L
+                  </td>
+                  <td
+                    className={cn(
+                      "px-4 py-3 text-right text-base font-extrabold",
+                      totalPotentialPnl >= 0 ? "text-emerald-600" : "text-red-600"
+                    )}
+                  >
+                    {totalPotentialPnl >= 0 ? "+" : ""}
+                    {formatWCD(totalPotentialPnl)}
+                  </td>
+                </tr>
+              </tfoot>
             </table>
           </div>
         )}

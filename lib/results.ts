@@ -153,13 +153,16 @@ export async function fetchEspn(daysBack = 4): Promise<FinishedMatch[]> {
       // Goalscorers: ESPN lists each scoring play in competition.details[].
       // Map the scoring team id back to our canonical name; skip own goals
       // (they don't count toward the scorer's tally) and any non-goal plays.
+      // NB: a scored penalty is typed "Penalty - Scored" (no "goal"), so match
+      // /goal|penalty/ — else penalty goals are silently dropped. Missed
+      // penalties have scoringPlay=false, so they're already excluded above.
       const teamById = new Map<string, string>();
       if (home.team?.id) teamById.set(home.team.id, homeName);
       if (away.team?.id) teamById.set(away.team.id, awayName);
       const scorers: Scorer[] = [];
       for (const d of comp?.details ?? []) {
         if (!d.scoringPlay || d.ownGoal) continue;
-        if (!/goal/i.test(d.type?.text ?? "")) continue;
+        if (!/goal|penalty/i.test(d.type?.text ?? "")) continue;
         const player = d.athletesInvolved?.[0]?.fullName ?? d.athletesInvolved?.[0]?.displayName;
         const team = d.team?.id ? teamById.get(d.team.id) : undefined;
         if (!player || !team) continue;

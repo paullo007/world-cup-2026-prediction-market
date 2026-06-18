@@ -1,5 +1,6 @@
 import { flag } from "@/lib/flags";
-import type { CountryData } from "@/lib/countries";
+import type { CountryData, MatchResult } from "@/lib/countries";
+import { cn } from "@/lib/utils";
 import { MatchStartTime } from "@/components/MatchStartTime";
 import { SourceNote } from "@/components/SourceNote";
 import { SquadTable } from "@/components/SquadTable";
@@ -21,9 +22,11 @@ function Box({ title, children }: { title: string; children: React.ReactNode }) 
 export function CountryDetail({
   data,
   goals,
+  results = {},
 }: {
   data: CountryData;
   goals: Record<string, number>;
+  results?: Record<string, MatchResult>;
 }) {
   const { name, group, roster, coach, titles, matches, sources } = data;
 
@@ -45,19 +48,52 @@ export function CountryDetail({
           <p className="text-sm text-slate-400">No group-stage fixtures found.</p>
         ) : (
           <div className="grid gap-3 sm:grid-cols-3">
-            {matches.map((m) => (
-              <div key={m.opponent} className="rounded-xl border border-surface-border bg-surface p-3">
-                <div className="flex items-center gap-2 font-semibold">
-                  <span>{flag(name)}</span> {name}
-                  <span className="mx-1 text-xs text-slate-400">vs</span>
-                  <span>{flag(m.opponent)}</span> {m.opponent}
+            {matches.map((m) => {
+              const r = results[m.opponent];
+              const done = Boolean(r);
+              return (
+                <div
+                  key={m.opponent}
+                  className={cn(
+                    "relative rounded-xl bg-surface p-3",
+                    // Upcoming (not yet played): bold green edge. Completed: normal border.
+                    done ? "border border-surface-border" : "border-2 border-yes"
+                  )}
+                >
+                  {done && (
+                    <span className="absolute right-3 top-3 text-[11px] font-bold text-red-600">
+                      COMPLETED
+                    </span>
+                  )}
+                  <div className="flex items-center gap-2 pr-20 font-semibold">
+                    <span>{flag(name)}</span> {name}
+                    <span className="mx-1 text-xs text-slate-400">vs</span>
+                    <span>{flag(m.opponent)}</span> {m.opponent}
+                  </div>
+                  {r && (
+                    <div className="mt-1.5 text-sm font-bold">
+                      FT {r.countryGoals} – {r.oppGoals}{" "}
+                      <span
+                        className={cn(
+                          "text-xs font-semibold",
+                          r.outcome === "W"
+                            ? "text-emerald-600"
+                            : r.outcome === "L"
+                              ? "text-red-600"
+                              : "text-slate-400"
+                        )}
+                      >
+                        · {r.outcome === "W" ? "Won" : r.outcome === "L" ? "Lost" : "Draw"}
+                      </span>
+                    </div>
+                  )}
+                  <div className="mt-2 space-y-0.5 text-[11px] leading-tight text-slate-400">
+                    <div><MatchStartTime iso={m.kickoffIso} /></div>
+                    {m.venue && <div>{m.venue.stadium}, {m.venue.city}, {m.venue.country}</div>}
+                  </div>
                 </div>
-                <div className="mt-2 space-y-0.5 text-[11px] leading-tight text-slate-400">
-                  <div><MatchStartTime iso={m.kickoffIso} /></div>
-                  {m.venue && <div>{m.venue.stadium}, {m.venue.city}, {m.venue.country}</div>}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </Box>

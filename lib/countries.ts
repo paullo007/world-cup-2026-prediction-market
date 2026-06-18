@@ -138,3 +138,39 @@ export function goalsForRoster(
   for (const p of roster) out[p.name] = byNorm[normalize(p.name)] ?? 0;
   return out;
 }
+
+/** Final score of a played fixture, oriented to the viewed country. */
+export interface MatchResult {
+  countryGoals: number;
+  oppGoals: number;
+  outcome: "W" | "L" | "D";
+}
+
+/**
+ * Map a country's fixtures → final results (keyed by opponent name) for the
+ * games that have an approved score. A fixture with no played result is absent,
+ * i.e. still upcoming. Score is oriented so `countryGoals` is always the viewed
+ * country's tally regardless of home/away.
+ */
+export function resultsForCountry(
+  matches: CountryMatch[],
+  played: { home: string; away: string; homeGoals: number; awayGoals: number }[],
+  country: string
+): Record<string, MatchResult> {
+  const out: Record<string, MatchResult> = {};
+  for (const m of matches) {
+    const pm = played.find((p) => {
+      const a = normalize(p.home);
+      const b = normalize(p.away);
+      const c = normalize(country);
+      const o = normalize(m.opponent);
+      return (a === c && b === o) || (b === c && a === o);
+    });
+    if (!pm) continue;
+    const home = normalize(pm.home) === normalize(country);
+    const cg = home ? pm.homeGoals : pm.awayGoals;
+    const og = home ? pm.awayGoals : pm.homeGoals;
+    out[m.opponent] = { countryGoals: cg, oppGoals: og, outcome: cg > og ? "W" : cg < og ? "L" : "D" };
+  }
+  return out;
+}

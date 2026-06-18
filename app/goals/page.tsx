@@ -3,6 +3,11 @@ import { GOALS_SOURCES } from "@/lib/sources";
 import { SourceNote } from "@/components/SourceNote";
 import { GoalscorersTable } from "@/components/GoalscorersTable";
 import { TopScorers } from "@/components/TopScorers";
+import { TOP_SCORERS } from "@/lib/topScorers";
+
+// Tolerant name match (strip accents/case/punct) for crediting WC2026 goals.
+const normName = (s: string) =>
+  s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z]/g, "");
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +40,16 @@ export default async function GoalsPage() {
 
   const totalGoals = scorers.reduce((sum, s) => sum + s.goals, 0);
 
+  // WC2026 goals for each all-time top-10 player (matched by name) → the
+  // TopScorers panel adds these to the ESPN all-time base.
+  const tallies = Array.from(byPlayer.values());
+  const wc2026: Record<string, number> = {};
+  for (const ts of TOP_SCORERS) {
+    let g = 0;
+    for (const t of tallies) if (normName(t.name) === normName(ts.name)) g += t.goals;
+    if (g > 0) wc2026[ts.name] = g;
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -46,7 +61,7 @@ export default async function GoalsPage() {
         </p>
       </div>
 
-      <TopScorers />
+      <TopScorers wc2026={wc2026} />
 
       {scorers.length === 0 ? (
         <p className="py-12 text-center text-slate-400">

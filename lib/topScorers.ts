@@ -9,8 +9,8 @@ export interface TopScorer {
   rank: number;
   name: string;
   country: string;
-  goals: number;
-  years: string; // World Cups they scored across
+  goals: number; // BASE: ESPN all-time total through 2022; live WC2026 goals are added on top in TopScorers
+  years: string; // World Cups they scored across (span extended to 2026 in the UI if they score this tournament)
 }
 
 export const TOP_SCORERS: TopScorer[] = [

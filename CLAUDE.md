@@ -85,7 +85,7 @@ needs no key). Set `CRON_SECRET` + `THESPORTSDB_API_KEY` in Vercel env too.
 | `app/bracket/`, `app/admin/bracket/` | public bracket; admin slot-assignment editor |
 | `app/admin/` | resolve markets (ADMIN role only) |
 | `components/FitText.tsx` | auto-fit title to box + scaled centered subtitle |
-| `components/MatchStartTime.tsx` | kickoff in viewer's local timezone + UTC offset; the **time portion is bold + 1.15em** (only the time) — the single shared time renderer, so this styling shows everywhere it's used (Matches, Scores, Market detail/cards, AI Knockouts, Country detail, Bracket) |
+| `components/MatchStartTime.tsx` | kickoff in viewer's local timezone + UTC offset; the **time portion is bold + 1.15em + accent-blue (`text-accent`)** (only the time) — the single shared time renderer, so this styling shows everywhere it's used (Matches, Scores, Market detail/cards, AI Knockouts, Country detail, Bracket) |
 | `components/MarketCard.tsx`, `Navbar.tsx`, `TradePanel.tsx`, `BracketEditor.tsx` | UI |
 
 ## Domain facts

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Info } from "lucide-react";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { yesPrice } from "@/lib/amm";
@@ -8,12 +7,32 @@ import { cn, formatPercent, formatWCD } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-// Hover tooltip (native title) explaining a column's formula.
-function InfoTip({ text }: { text: string }) {
+// Always-visible formula legend above a table: terse, numbers-first,
+// "term = formula = numbers = result" definitions (no hover needed).
+function FormulaBox({ lines }: { lines: React.ReactNode[] }) {
   return (
-    <span title={text} aria-label={text} className="ml-1 cursor-help text-slate-400">
-      <Info className="inline h-3.5 w-3.5 align-middle" />
-    </span>
+    <div className="mb-3 overflow-x-auto rounded-xl border border-surface-border bg-surface-raised px-4 py-3 font-mono text-xs leading-6">
+      {lines.map((line, i) => (
+        <div key={i} className="whitespace-nowrap">
+          {line}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// One formula line: bold term, plain math, green/red final result.
+function F({ term, math, result, up = true }: { term: string; math: string; result?: string; up?: boolean }) {
+  return (
+    <>
+      <span className="font-bold">{term}</span> = {math}
+      {result && (
+        <>
+          {" = "}
+          <span className={cn("font-bold", up ? "text-emerald-600" : "text-red-600")}>{result}</span>
+        </>
+      )}
+    </>
   );
 }
 
@@ -79,6 +98,15 @@ export default async function PortfolioPage() {
             to start trading.
           </p>
         ) : (
+          <>
+          <FormulaBox
+            lines={[
+              <F key="v" term="VALUE" math="shares × price = 437.8 × 0.3763" result="164.74 WC$" />,
+              <F key="p" term="MY P&L" math="VALUE − cost = 164.74 − 50.00" result="+114.74 WC$" />,
+              <F key="pv" term="MY PREDICTION VALUE" math="shares × 1.00 WC$" result="437.83 WC$" />,
+              <F key="t" term="TOTAL POTENTIAL P&L" math="Σ(prediction value) − Σ(cost)" />,
+            ]}
+          />
           <div className="overflow-x-auto rounded-xl border border-surface-border">
             <table className="w-full text-sm">
               <thead className="bg-surface-raised text-left text-xs uppercase tracking-wide text-slate-400">
@@ -87,18 +115,9 @@ export default async function PortfolioPage() {
                   <th className="px-4 py-3">My Prediction</th>
                   <th className="px-4 py-3">My Shares</th>
                   <th className="px-4 py-3">Price</th>
-                  <th className="px-4 py-3 text-right">
-                    My Prediction Value
-                    <InfoTip text="Payout if your prediction wins = your shares × 1.00 WC$ (each winning share redeems for 1 WC$)." />
-                  </th>
-                  <th className="px-4 py-3 text-right">
-                    Value
-                    <InfoTip text="Current worth at live prices = YES shares × price + NO shares × (1 − price)." />
-                  </th>
-                  <th className="px-4 py-3 text-right">
-                    My P&L
-                    <InfoTip text="Unrealized profit/loss = Value − cost (what you paid)." />
-                  </th>
+                  <th className="px-4 py-3 text-right">My Prediction Value</th>
+                  <th className="px-4 py-3 text-right">Value</th>
+                  <th className="px-4 py-3 text-right">My P&L</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-surface-border">
@@ -144,7 +163,6 @@ export default async function PortfolioPage() {
                     className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-400"
                   >
                     Total Potential P&L
-                    <InfoTip text="Profit if every open prediction wins = Σ(My Prediction Value) − Σ(cost)." />
                   </td>
                   <td
                     className={cn(
@@ -159,12 +177,20 @@ export default async function PortfolioPage() {
               </tfoot>
             </table>
           </div>
+          </>
         )}
       </section>
 
       {resolvedRows.length > 0 && (
         <section>
           <h2 className="mb-3 text-lg font-bold">Results ({resolvedRows.length})</h2>
+          <FormulaBox
+            lines={[
+              <F key="po" term="PAYOUT" math="winning shares × 1.00 WC$" result="120.6 WC$" />,
+              <F key="pl" term="MY P&L" math="PAYOUT − cost = 120.6 − 50.00" result="+70.60 WC$" />,
+              <F key="t" term="TOTAL P&L" math="Σ(MY P&L)" />,
+            ]}
+          />
           <div className="overflow-x-auto rounded-xl border border-surface-border">
             <table className="w-full text-sm">
               <thead className="bg-surface-raised text-left text-xs uppercase tracking-wide text-slate-400">
@@ -174,14 +200,8 @@ export default async function PortfolioPage() {
                   <th className="px-4 py-3">My Prediction</th>
                   <th className="px-4 py-3">My Shares</th>
                   <th className="px-4 py-3">My Result</th>
-                  <th className="px-4 py-3 text-right">
-                    Payout
-                    <InfoTip text="Coins paid out = winning shares × 1.00 WC$ (0 if your side lost)." />
-                  </th>
-                  <th className="px-4 py-3 text-right">
-                    My P&L
-                    <InfoTip text="Realized profit/loss = Payout − cost (what you paid)." />
-                  </th>
+                  <th className="px-4 py-3 text-right">Payout</th>
+                  <th className="px-4 py-3 text-right">My P&L</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-surface-border">
@@ -236,7 +256,6 @@ export default async function PortfolioPage() {
                     className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-400"
                   >
                     Total P&L
-                    <InfoTip text="Sum of realized P&L across all your settled bets." />
                   </td>
                   <td
                     className={cn(

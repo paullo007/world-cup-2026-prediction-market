@@ -9,7 +9,8 @@ import { useEffect, useState } from "react";
  * to avoid a hydration mismatch.
  */
 export function MatchStartTime({ iso }: { iso: string }) {
-  const [text, setText] = useState<string | null>(null);
+  // Split into the kickoff time (highlighted) and the rest of the line.
+  const [parts, setParts] = useState<{ time: string; rest: string } | null>(null);
 
   useEffect(() => {
     const d = new Date(iso);
@@ -36,9 +37,14 @@ export function MatchStartTime({ iso }: { iso: string }) {
     const wd = d.toLocaleDateString("en-US", { weekday: "short" });
     const date = `${mon}${d.getDate()}.${yy}/${wd}`;
 
-    setText(`Start Time: ${time} ${city} (${offset}), ${date}`);
+    setParts({ time, rest: ` ${city} (${offset}), ${date}` });
   }, [iso]);
 
-  if (!text) return null;
-  return <span>{text}</span>;
+  if (!parts) return null;
+  return (
+    <span>
+      Start Time: <strong className="text-[1.15em] font-bold">{parts.time}</strong>
+      {parts.rest}
+    </span>
+  );
 }

@@ -1,11 +1,21 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Info } from "lucide-react";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { yesPrice } from "@/lib/amm";
 import { cn, formatPercent, formatWCD } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+
+// Hover tooltip (native title) explaining a column's formula.
+function InfoTip({ text }: { text: string }) {
+  return (
+    <span title={text} aria-label={text} className="ml-1 cursor-help text-slate-400">
+      <Info className="inline h-3.5 w-3.5 align-middle" />
+    </span>
+  );
+}
 
 export default async function PortfolioPage() {
   const session = await auth();
@@ -77,9 +87,18 @@ export default async function PortfolioPage() {
                   <th className="px-4 py-3">My Prediction</th>
                   <th className="px-4 py-3">My Shares</th>
                   <th className="px-4 py-3">Price</th>
-                  <th className="px-4 py-3 text-right">My Prediction Value</th>
-                  <th className="px-4 py-3 text-right">Value</th>
-                  <th className="px-4 py-3 text-right">My P&L</th>
+                  <th className="px-4 py-3 text-right">
+                    My Prediction Value
+                    <InfoTip text="Payout if your prediction wins = your shares × 1.00 WC$ (each winning share redeems for 1 WC$)." />
+                  </th>
+                  <th className="px-4 py-3 text-right">
+                    Value
+                    <InfoTip text="Current worth at live prices = YES shares × price + NO shares × (1 − price)." />
+                  </th>
+                  <th className="px-4 py-3 text-right">
+                    My P&L
+                    <InfoTip text="Unrealized profit/loss = Value − cost (what you paid)." />
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-surface-border">
@@ -125,6 +144,7 @@ export default async function PortfolioPage() {
                     className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-400"
                   >
                     Total Potential P&L
+                    <InfoTip text="Profit if every open prediction wins = Σ(My Prediction Value) − Σ(cost)." />
                   </td>
                   <td
                     className={cn(
@@ -154,8 +174,14 @@ export default async function PortfolioPage() {
                   <th className="px-4 py-3">My Prediction</th>
                   <th className="px-4 py-3">My Shares</th>
                   <th className="px-4 py-3">My Result</th>
-                  <th className="px-4 py-3 text-right">Payout</th>
-                  <th className="px-4 py-3 text-right">My P&L</th>
+                  <th className="px-4 py-3 text-right">
+                    Payout
+                    <InfoTip text="Coins paid out = winning shares × 1.00 WC$ (0 if your side lost)." />
+                  </th>
+                  <th className="px-4 py-3 text-right">
+                    My P&L
+                    <InfoTip text="Realized profit/loss = Payout − cost (what you paid)." />
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-surface-border">
@@ -210,6 +236,7 @@ export default async function PortfolioPage() {
                     className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-400"
                   >
                     Total P&L
+                    <InfoTip text="Sum of realized P&L across all your settled bets." />
                   </td>
                   <td
                     className={cn(

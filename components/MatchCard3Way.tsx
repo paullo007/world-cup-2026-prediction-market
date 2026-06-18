@@ -31,6 +31,7 @@ function ScorerLine({ s }: { s: Scorer }) {
         <span className="text-slate-400">
           {s.minute ?? ""}
           {s.penalty ? `${s.minute ? " " : ""}(penalty)` : ""}
+          {s.ownGoal ? `${s.minute ? " " : ""}(own goal)` : ""}
         </span>
       </div>
       {s.assists && s.assists.length > 0 && (

@@ -85,6 +85,18 @@ export async function ingestAndPublish(): Promise<IngestSummary> {
         if (merged.espnEventId && scorers.length) {
           scorers = attachAssists(scorers, await fetchEspnAssists(merged.espnEventId));
         }
+        // Self-check (CQ): every goal — regular, penalty, OR own goal — should
+        // produce exactly one scorer. If we HAVE scorer data but it doesn't sum
+        // to the final score, a parse gap is dropping goals; surface it LOUDLY
+        // (logs + resultDetail) instead of silently shipping an incomplete list.
+        // This is the guard that was missing when penalties were being dropped.
+        let resultDetail = merged.detail;
+        const totalGoals = (merged.homeGoals ?? 0) + (merged.awayGoals ?? 0);
+        if (scorers.length > 0 && scorers.length !== totalGoals) {
+          const warn = `⚠ scorers ${scorers.length}/${totalGoals} — don't reconcile with score`;
+          console.warn(`[ingest] ${m.matchKey}: ${warn}`);
+          resultDetail = `${resultDetail} · ${warn}`;
+        }
         await db.market.update({
           where: { id: m.id },
           data: {
@@ -92,7 +104,7 @@ export async function ingestAndPublish(): Promise<IngestSummary> {
             awayGoals: merged.awayGoals,
             scorers: scorers.length ? (scorers as unknown as Prisma.InputJsonValue) : undefined,
             resultSource: merged.sources.join("+"),
-            resultDetail: merged.detail,
+            resultDetail,
             fetchedAt: new Date(),
           },
         });

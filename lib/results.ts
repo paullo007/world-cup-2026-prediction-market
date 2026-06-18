@@ -59,9 +59,10 @@ export function canonicalTeam(name: string): string {
 /** A single goal, attributed to a player and their (canonical) team. */
 export interface Scorer {
   name: string;
-  team: string; // canonical team name
+  team: string; // canonical team name (for own goals: the team the goal COUNTS for)
   minute?: string; // e.g. "9'"
   penalty?: boolean;
+  ownGoal?: boolean; // scored into own net; credited to `team` (the benefiting side)
   assists?: string[]; // assisting player name(s), from ESPN's summary endpoint
 }
 
@@ -82,6 +83,16 @@ const winnerFromScore = (h: number | null, a: number | null): "HOME" | "AWAY" | 
 
 const yyyymmdd = (d: Date) => d.toISOString().slice(0, 10).replace(/-/g, "");
 
+export interface EspnDetail {
+  type?: { text?: string };
+  clock?: { displayValue?: string };
+  team?: { id?: string };
+  scoringPlay?: boolean;
+  ownGoal?: boolean;
+  penaltyKick?: boolean;
+  athletesInvolved?: Array<{ displayName?: string; fullName?: string }>;
+}
+
 interface EspnScoreboard {
   events?: Array<{
     id?: string;
@@ -94,17 +105,40 @@ interface EspnScoreboard {
         winner?: boolean;
         team?: { id?: string; displayName?: string; name?: string };
       }>;
-      details?: Array<{
-        type?: { text?: string };
-        clock?: { displayValue?: string };
-        team?: { id?: string };
-        scoringPlay?: boolean;
-        ownGoal?: boolean;
-        penaltyKick?: boolean;
-        athletesInvolved?: Array<{ displayName?: string; fullName?: string }>;
-      }>;
+      details?: EspnDetail[];
     }>;
   }>;
+}
+
+/**
+ * Parse ESPN scoring plays (competition.details[]) into goalscorers. Pure — no
+ * network — so it can be unit-tested. `teamById` maps an ESPN team id to our
+ * canonical name. Rules, learned the hard way:
+ *  - A scored penalty is typed "Penalty - Scored" (no "goal") → match
+ *    /goal|penalty/, or penalty goals vanish.
+ *  - Missed penalties have scoringPlay=false → already excluded.
+ *  - Own goals (ownGoal=true) DO count: ESPN sets detail.team.id to the
+ *    BENEFITING team, so teamById gives the side the goal counts for; we keep
+ *    the own-scorer's name and flag ownGoal so every goal yields exactly one
+ *    scorer and the list reconciles with the score.
+ */
+export function parseEspnScorers(details: EspnDetail[], teamById: Map<string, string>): Scorer[] {
+  const scorers: Scorer[] = [];
+  for (const d of details) {
+    if (!d.scoringPlay) continue;
+    if (!/goal|penalty/i.test(d.type?.text ?? "")) continue;
+    const player = d.athletesInvolved?.[0]?.fullName ?? d.athletesInvolved?.[0]?.displayName;
+    const team = d.team?.id ? teamById.get(d.team.id) : undefined;
+    if (!player || !team) continue;
+    scorers.push({
+      name: player,
+      team,
+      minute: d.clock?.displayValue,
+      penalty: d.penaltyKick || undefined,
+      ownGoal: d.ownGoal || undefined,
+    });
+  }
+  return scorers;
 }
 
 /**
@@ -150,24 +184,11 @@ export async function fetchEspn(daysBack = 4): Promise<FinishedMatch[]> {
             ? "AWAY"
             : winnerFromScore(homeGoals, awayGoals);
 
-      // Goalscorers: ESPN lists each scoring play in competition.details[].
-      // Map the scoring team id back to our canonical name; skip own goals
-      // (they don't count toward the scorer's tally) and any non-goal plays.
-      // NB: a scored penalty is typed "Penalty - Scored" (no "goal"), so match
-      // /goal|penalty/ — else penalty goals are silently dropped. Missed
-      // penalties have scoringPlay=false, so they're already excluded above.
+      // Goalscorers from competition.details[] (see parseEspnScorers for the rules).
       const teamById = new Map<string, string>();
       if (home.team?.id) teamById.set(home.team.id, homeName);
       if (away.team?.id) teamById.set(away.team.id, awayName);
-      const scorers: Scorer[] = [];
-      for (const d of comp?.details ?? []) {
-        if (!d.scoringPlay || d.ownGoal) continue;
-        if (!/goal|penalty/i.test(d.type?.text ?? "")) continue;
-        const player = d.athletesInvolved?.[0]?.fullName ?? d.athletesInvolved?.[0]?.displayName;
-        const team = d.team?.id ? teamById.get(d.team.id) : undefined;
-        if (!player || !team) continue;
-        scorers.push({ name: player, team, minute: d.clock?.displayValue, penalty: d.penaltyKick });
-      }
+      const scorers = parseEspnScorers(comp?.details ?? [], teamById);
 
       out.push({
         source: "ESPN",

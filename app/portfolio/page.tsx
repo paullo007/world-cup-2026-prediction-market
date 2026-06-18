@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { yesPrice } from "@/lib/amm";
-import { cn, formatPercent, formatWCD } from "@/lib/utils";
+import { cn, formatWCD } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -77,6 +77,23 @@ export default async function PortfolioPage() {
   });
   const totalResolvedPnl = resolvedRows.reduce((s, r) => s + r.pnl, 0);
 
+  // Worked example for the formula boxes = THIS user's first row (dynamic, not
+  // fixed). exPrice is the price of the side they hold (YES → p, NO → 1 − p).
+  const ex = rows[0];
+  const exShares = (ex?.pos.yesShares ?? 0) + (ex?.pos.noShares ?? 0);
+  const exPrice = ex ? (ex.pos.yesShares > 0.001 ? ex.price : 1 - ex.price) : 0;
+  const exValue = ex?.value ?? 0;
+  const exCost = ex ? Math.max(ex.pos.costBasis, 0) : 0;
+  const exPnl = ex?.pnl ?? 0;
+  const exPredVal = ex?.predictionValue ?? 0;
+
+  const rex = resolvedRows[0];
+  const rexPayout = rex?.payout ?? 0;
+  const rexCost = rex ? Math.max(rex.pos.costBasis, 0) : 0;
+  const rexPnl = rex?.pnl ?? 0;
+
+  const signed = (n: number) => `${n >= 0 ? "+" : ""}${n.toFixed(2)}`;
+
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-extrabold">Portfolio</h1>
@@ -101,9 +118,25 @@ export default async function PortfolioPage() {
           <>
           <FormulaBox
             lines={[
-              <F key="v" term="VALUE" math="shares × price = 437.8 × 0.3763" result="164.74 WC$" />,
-              <F key="p" term="MY P&L" math="VALUE − cost = 164.74 − 50.00" result="+114.74 WC$" />,
-              <F key="pv" term="MY PREDICTION VALUE" math="shares × 1.00 WC$" result="437.83 WC$" />,
+              <F
+                key="v"
+                term="VALUE"
+                math={`shares × price = ${exShares.toFixed(1)} × ${exPrice.toFixed(4)}`}
+                result={`${exValue.toFixed(2)} WC$`}
+              />,
+              <F
+                key="p"
+                term="MY P&L"
+                math={`VALUE − cost = ${exValue.toFixed(2)} − ${exCost.toFixed(2)}`}
+                result={`${signed(exPnl)} WC$`}
+                up={exPnl >= 0}
+              />,
+              <F
+                key="pv"
+                term="MY PREDICTION VALUE"
+                math="shares × 1.00 WC$"
+                result={`${exPredVal.toFixed(2)} WC$`}
+              />,
               <F key="t" term="TOTAL POTENTIAL P&L" math="Σ(prediction value) − Σ(cost)" />,
             ]}
           />
@@ -137,7 +170,7 @@ export default async function PortfolioPage() {
                     <td className="px-4 py-3">
                       <SharesCell yes={pos.yesShares} no={pos.noShares} />
                     </td>
-                    <td className="px-4 py-3 text-slate-300">{formatPercent(price)}</td>
+                    <td className="px-4 py-3 text-slate-300">{(price * 100).toFixed(2)}%</td>
                     <td className="px-4 py-3 text-right font-semibold text-emerald-600">
                       {formatWCD(predictionValue)}
                     </td>
@@ -186,8 +219,20 @@ export default async function PortfolioPage() {
           <h2 className="mb-3 text-lg font-bold">Results ({resolvedRows.length})</h2>
           <FormulaBox
             lines={[
-              <F key="po" term="PAYOUT" math="winning shares × 1.00 WC$" result="120.6 WC$" />,
-              <F key="pl" term="MY P&L" math="PAYOUT − cost = 120.6 − 50.00" result="+70.60 WC$" />,
+              <F
+                key="po"
+                term="PAYOUT"
+                math="winning shares × 1.00 WC$"
+                result={`${rexPayout.toFixed(2)} WC$`}
+                up={rexPayout > 0.001}
+              />,
+              <F
+                key="pl"
+                term="MY P&L"
+                math={`PAYOUT − cost = ${rexPayout.toFixed(2)} − ${rexCost.toFixed(2)}`}
+                result={`${signed(rexPnl)} WC$`}
+                up={rexPnl >= 0}
+              />,
               <F key="t" term="TOTAL P&L" math="Σ(MY P&L)" />,
             ]}
           />

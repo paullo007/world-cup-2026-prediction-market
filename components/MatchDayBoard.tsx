@@ -28,7 +28,13 @@ function dayKey(d: Date): string {
  * times) and shows one day's fixtures at a time. Renders nothing day-specific
  * until mounted, to avoid a timezone-driven hydration mismatch.
  */
-export function MatchDayBoard({ matches }: { matches: MatchEntry[] }) {
+export function MatchDayBoard({
+  matches,
+  myResultByMatch = {},
+}: {
+  matches: MatchEntry[];
+  myResultByMatch?: Record<string, number>;
+}) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -199,6 +205,7 @@ export function MatchDayBoard({ matches }: { matches: MatchEntry[] }) {
               markets={g.markets}
               volume={g.volume}
               index={i + 1}
+              myResult={g.markets[0].matchKey ? myResultByMatch[g.markets[0].matchKey] : undefined}
             />
           ))}
         </div>

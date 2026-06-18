@@ -4,7 +4,7 @@ import type { Scorer } from "@/lib/results";
 import { yesPrice } from "@/lib/amm";
 import { flag, matchTeams } from "@/lib/flags";
 import { VENUES } from "@/lib/venues";
-import { awaitingResult, formatPercent, formatWCD } from "@/lib/utils";
+import { awaitingResult, cn, formatPercent, formatWCD } from "@/lib/utils";
 import { MatchStartTime } from "@/components/MatchStartTime";
 import { Clock, MapPin } from "lucide-react";
 
@@ -50,10 +50,13 @@ export function MatchCard3Way({
   markets,
   volume = 0,
   index,
+  myResult,
 }: {
   markets: Market[]; // the 1–3 outcome markets of one fixture
   volume?: number;
   index?: number;
+  /** Signed-in user's net P&L on this resolved fixture (undefined = no position). */
+  myResult?: number;
 }) {
   const byType = (t: string) => markets.find((m) => m.outcomeType === t);
   const home = byType("HOME") ?? markets[0];
@@ -156,7 +159,19 @@ export function MatchCard3Way({
         </div>
       )}
 
-      <div className="mt-auto text-xs text-slate-400">{formatWCD(Math.round(volume))} traded</div>
+      {resolved && myResult !== undefined ? (
+        <div
+          className={cn(
+            "mt-auto text-xs font-bold",
+            myResult >= 0 ? "text-emerald-600" : "text-red-600"
+          )}
+        >
+          {myResult >= 0 ? "MY WIN: " : "MY LOSS: "}
+          {formatWCD(Math.abs(myResult))}
+        </div>
+      ) : (
+        <div className="mt-auto text-xs text-slate-400">{formatWCD(Math.round(volume))} traded</div>
+      )}
     </div>
   );
 }

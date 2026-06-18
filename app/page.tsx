@@ -5,6 +5,7 @@ import { MarketCard } from "@/components/MarketCard";
 import { MatchCard3Way } from "@/components/MatchCard3Way";
 import { MatchDayBoard } from "@/components/MatchDayBoard";
 import { PredictMyOwnWinner } from "@/components/PredictMyOwnWinner";
+import { auth } from "@/lib/auth";
 import { canonicalTeam } from "@/lib/flags";
 import { awaitingResult } from "@/lib/utils";
 
@@ -99,6 +100,30 @@ export default async function HomePage({
       .map(canonicalTeam);
   }
 
+  // On the Matches tab, compute the signed-in user's realized result per finished
+  // fixture (net P&L across its Home/Draw/Away markets) so each resolved card can
+  // show "MY WIN / MY LOSS" in place of the traded volume. Keyed by matchKey.
+  const myResultByMatch: Record<string, number> = {};
+  if (isMatches) {
+    const session = await auth();
+    if (session?.user?.id) {
+      const myPos = await db.position.findMany({
+        where: {
+          userId: session.user.id,
+          market: { category: "Matches", status: "RESOLVED" },
+          OR: [{ yesShares: { gt: 0.001 } }, { noShares: { gt: 0.001 } }],
+        },
+        include: { market: { select: { matchKey: true, resolvedOutcome: true } } },
+      });
+      for (const p of myPos) {
+        const mk = p.market.matchKey;
+        if (!mk) continue;
+        const payout = p.market.resolvedOutcome === "YES" ? p.yesShares : p.noShares;
+        myResultByMatch[mk] = (myResultByMatch[mk] ?? 0) + (payout - Math.max(p.costBasis, 0));
+      }
+    }
+  }
+
   const volumes = await db.trade.groupBy({
     by: ["marketId"],
     _sum: { amount: true },
@@ -167,6 +192,7 @@ export default async function HomePage({
       {isMatches ? (
         <MatchDayBoard
           matches={markets.map((m) => ({ market: m, volume: volumeByMarket.get(m.id) ?? 0 }))}
+          myResultByMatch={myResultByMatch}
         />
       ) : isAll ? (
         allCards.length === 0 ? (

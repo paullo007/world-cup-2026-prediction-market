@@ -81,6 +81,7 @@ needs no key). Set `CRON_SECRET` + `THESPORTSDB_API_KEY` in Vercel env too.
 | `app/page.tsx` | home: hero + category pills (Matches · Bracket · Knockouts · …) |
 | `components/PredictMyOwnWinner.tsx`, `app/api/winner-markets/` | **Predict My Own Winner** (Session 10): collapsible button atop the Tournament Winner tab (styled like the Countries "History" panel) → combobox (remaining-field dropdown + "Other" free-text) → auth'd POST creates a live winner market at Elo odds, then jumps to it. Logged-in only, instant (no admin gate), idempotent by canonical team. |
 | `app/markets/[slug]/` | market detail: chart, trade panel, activity |
+| `app/portfolio/` | auth-gated: cash/positions/net-worth stats + **Open positions** (`Market \| My Prediction \| My Shares \| Price \| Value \| My P&L`) and **Results** (`Market \| Outcome \| My Prediction \| My Shares \| My Result(WIN/LOSS) \| Payout \| My P&L`). Prediction (YES/NO) is its own column, split from the share count; `PredictionCell`/`SharesCell`/`ResultBadge` helpers (WIN = payout > 0) |
 | `app/bracket/`, `app/admin/bracket/` | public bracket; admin slot-assignment editor |
 | `app/admin/` | resolve markets (ADMIN role only) |
 | `components/FitText.tsx` | auto-fit title to box + scaled centered subtitle |

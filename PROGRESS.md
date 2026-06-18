@@ -2,7 +2,7 @@
 
 _You-are-here for a cheap resume. Durable map: `CLAUDE.md`. Deep archive: `../SESSION MD CODE HISTORY/SESSION_LOG.md`._
 
-**Last updated:** 2026-06-18 (end of Session 12 — Matches-tab goalscorers UI: list scorers, split home/away, add **assists**, fix dropped **penalty goals**, then a **"never-again" self-verify guard** (score↔scorers reconciliation + own goals + regression test); plus the "Top-10 Goal Scorers of All Time" panel on the Goals tab). Shipped live on `main`, deploys verified green, scorers backfilled into the live DB. HEAD = `47872df`.
+**Last updated:** 2026-06-18 (end of Session 12 — Matches-tab goalscorers (list → split home/away → **assists** → fix dropped **penalty goals** → **self-verify guard**); "Top-10 Goal Scorers" panel on Goals; **Portfolio tables** split prediction from shares + WIN/LOSS column). Shipped live on `main`, deploys verified green, scorers backfilled into the live DB. HEAD = `011a53e`.
 
 ## Current phase
 Session 12 **shipped and live**. Nothing half-done in code. (Session 11 fixed the big results-never-resolve bug; Session 12 is feature/UI work on top.)
@@ -17,6 +17,7 @@ Nothing is in-flight. Pick whichever is most relevant:
 
 ## Done (high level)
 - **Session 12 (Jun18.26) — UI features:**
+  - **Portfolio tables redesigned (`app/portfolio/page.tsx`):** prediction (YES/NO) is now its own column, split from the share count. Open positions: `Market | My Prediction | My Shares | Price | Value | My P&L`. Results: `Market | Outcome | My Prediction | My Shares | My Result | Payout | My P&L`, where **My Result = WIN/LOSS badge** (WIN when payout > 0). Helpers `PredictionCell`/`SharesCell`/`ResultBadge`; both YES and NO stack if a position holds both.
   - **Goalscorers in Matches boxes:** `components/MatchCard3Way.tsx` — when a fixture is RESOLVED, a "Goalscorers" block at the bottom lists each scorer (team flag + player + minute, `(penalty)` after the time for penalty goals), sorted chronologically (stoppage-time aware). Reads the HOME market's existing `scorers` JSON.
   - **Split scorers home/away:** two-column layout — home-team scorers left, away-team right (matched via scorer `team` vs the fixture's home/away; empty column if a side didn't score). `ScorerLine` + `sameTeam` helpers.
   - **Goal assists (NEW pipeline bit):** ESPN's scoreboard feed has no assists, but its per-match *summary* endpoint does (scorer = `participants[0]`, assists = the rest). Added `fetchEspnAssists()`/`attachAssists()` in `lib/results.ts`, threaded the ESPN event id through `FinishedMatch`/`mergeForMarket`, and `ingestAndPublish` enriches scorers at resolve time (best-effort — never blocks resolution). UI shows each scorer's assist(s) indented + italic ("Assist: A, B"). **Backfilled** the 16 already-resolved matches (45 assists) into the live DB via a one-off script (idempotent resolution won't rewrite their scorers, so a backfill was required).

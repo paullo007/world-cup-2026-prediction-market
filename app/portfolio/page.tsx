@@ -66,10 +66,11 @@ export default async function PortfolioPage() {
               <thead className="bg-surface-raised text-left text-xs uppercase tracking-wide text-slate-400">
                 <tr>
                   <th className="px-4 py-3">Market</th>
-                  <th className="px-4 py-3">Shares</th>
+                  <th className="px-4 py-3">My Prediction</th>
+                  <th className="px-4 py-3">My Shares</th>
                   <th className="px-4 py-3">Price</th>
                   <th className="px-4 py-3 text-right">Value</th>
-                  <th className="px-4 py-3 text-right">P&L</th>
+                  <th className="px-4 py-3 text-right">My P&L</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-surface-border">
@@ -84,16 +85,10 @@ export default async function PortfolioPage() {
                       </Link>
                     </td>
                     <td className="px-4 py-3">
-                      {pos.yesShares > 0.001 && (
-                        <span className="mr-2 font-semibold text-yes">
-                          {pos.yesShares.toFixed(1)} YES
-                        </span>
-                      )}
-                      {pos.noShares > 0.001 && (
-                        <span className="font-semibold text-no">
-                          {pos.noShares.toFixed(1)} NO
-                        </span>
-                      )}
+                      <PredictionCell yes={pos.yesShares} no={pos.noShares} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <SharesCell yes={pos.yesShares} no={pos.noShares} />
                     </td>
                     <td className="px-4 py-3 text-slate-300">{formatPercent(price)}</td>
                     <td className="px-4 py-3 text-right font-semibold">
@@ -125,9 +120,11 @@ export default async function PortfolioPage() {
                 <tr>
                   <th className="px-4 py-3">Market</th>
                   <th className="px-4 py-3">Outcome</th>
-                  <th className="px-4 py-3">Your shares</th>
+                  <th className="px-4 py-3">My Prediction</th>
+                  <th className="px-4 py-3">My Shares</th>
+                  <th className="px-4 py-3">My Result</th>
                   <th className="px-4 py-3 text-right">Payout</th>
-                  <th className="px-4 py-3 text-right">P&L</th>
+                  <th className="px-4 py-3 text-right">My P&L</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-surface-border">
@@ -152,16 +149,13 @@ export default async function PortfolioPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      {pos.yesShares > 0.001 && (
-                        <span className="mr-2 font-semibold text-yes">
-                          {pos.yesShares.toFixed(1)} YES
-                        </span>
-                      )}
-                      {pos.noShares > 0.001 && (
-                        <span className="font-semibold text-no">
-                          {pos.noShares.toFixed(1)} NO
-                        </span>
-                      )}
+                      <PredictionCell yes={pos.yesShares} no={pos.noShares} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <SharesCell yes={pos.yesShares} no={pos.noShares} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <ResultBadge win={payout > 0.001} />
                     </td>
                     <td className="px-4 py-3 text-right font-semibold">
                       {formatWCD(payout)}
@@ -183,6 +177,41 @@ export default async function PortfolioPage() {
         </section>
       )}
     </div>
+  );
+}
+
+// The side(s) the user bet — its own column, split out from the share count.
+// Both render when a position holds YES and NO (rare), one line each so the
+// prediction and share columns line up.
+function PredictionCell({ yes, no }: { yes: number; no: number }) {
+  return (
+    <div className="space-y-0.5 font-bold">
+      {yes > 0.001 && <div className="text-yes">YES</div>}
+      {no > 0.001 && <div className="text-no">NO</div>}
+    </div>
+  );
+}
+
+function SharesCell({ yes, no }: { yes: number; no: number }) {
+  return (
+    <div className="space-y-0.5 font-semibold">
+      {yes > 0.001 && <div className="text-yes">{yes.toFixed(1)}</div>}
+      {no > 0.001 && <div className="text-no">{no.toFixed(1)}</div>}
+    </div>
+  );
+}
+
+// WIN when the resolved bet paid out (held the winning side), else LOSS.
+function ResultBadge({ win }: { win: boolean }) {
+  return (
+    <span
+      className={cn(
+        "inline-block rounded px-2 py-0.5 text-xs font-bold",
+        win ? "bg-emerald-500/10 text-emerald-600" : "bg-red-500/10 text-red-600"
+      )}
+    >
+      {win ? "WIN" : "LOSS"}
+    </span>
   );
 }
 

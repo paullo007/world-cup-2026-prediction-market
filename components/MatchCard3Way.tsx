@@ -22,11 +22,11 @@ const sameTeam = (a: string, b: string) => a.trim().toLowerCase() === b.trim().t
  * One goalscorer line: flag + player + minute, "(penalty)" after the time, with
  * any assist(s) indented in italics on the line below ("Assist: A, B").
  */
-function ScorerLine({ s }: { s: Scorer }) {
+function ScorerLine({ s, flagTeam }: { s: Scorer; flagTeam: string }) {
   return (
     <li>
       <div className="flex items-center gap-1.5">
-        <span className="shrink-0">{flag(s.team)}</span>
+        <span className="shrink-0">{flag(flagTeam)}</span>
         <span className="font-medium">{s.name}</span>
         <span className="text-slate-400">
           {s.minute ?? ""}
@@ -78,6 +78,13 @@ export function MatchCard3Way({
   // Split scorers by side: home team in the left column, away team in the right.
   const homeScorers = scorers.filter((s) => sameTeam(s.team, homeTeam));
   const awayScorers = scorers.filter((s) => !sameTeam(s.team, homeTeam));
+  // Flag to show next to a scorer = the player's OWN team. For an own goal,
+  // `s.team` is the team it COUNTS for (placement/column), but the player
+  // belongs to the other side — so show the opponent's flag (FIFA convention:
+  // own goal sits in the beneficiary's tally but is attributed to the player's
+  // own nationality, marked "(own goal)").
+  const flagTeamFor = (s: Scorer) =>
+    s.ownGoal ? (sameTeam(s.team, homeTeam) ? awayTeam : homeTeam) : s.team;
 
   // For a played fixture, the winning outcome is the one that resolved YES.
   const winner = markets.find((m) => m.resolvedOutcome === "YES")?.outcomeType;
@@ -147,12 +154,12 @@ export function MatchCard3Way({
           <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-xs text-slate-300">
             <ul className="space-y-0.5">
               {homeScorers.map((s, i) => (
-                <ScorerLine key={`h-${s.name}-${s.minute ?? i}`} s={s} />
+                <ScorerLine key={`h-${s.name}-${s.minute ?? i}`} s={s} flagTeam={flagTeamFor(s)} />
               ))}
             </ul>
             <ul className="space-y-0.5 border-l border-surface-border pl-3">
               {awayScorers.map((s, i) => (
-                <ScorerLine key={`a-${s.name}-${s.minute ?? i}`} s={s} />
+                <ScorerLine key={`a-${s.name}-${s.minute ?? i}`} s={s} flagTeam={flagTeamFor(s)} />
               ))}
             </ul>
           </div>

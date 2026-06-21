@@ -1,11 +1,19 @@
-import { AI_BRACKET, AI_CHAMPION, predWinner, type PredMatch } from "@/lib/aiKnockouts";
+"use client";
+
+import { useState } from "react";
+import { AI_BRACKET, predWinner, type PredMatch } from "@/lib/aiKnockouts";
 import { BRACKET } from "@/lib/bracket";
 import type { Venue } from "@/lib/venues";
 import { flag } from "@/lib/flags";
 import { MatchStartTime } from "@/components/MatchStartTime";
 import { FitToWidth } from "@/components/FitToWidth";
 import { StickyUnderNav } from "@/components/StickyUnderNav";
-import { cn } from "@/lib/utils";
+import { cn, formatPercent } from "@/lib/utils";
+
+export interface ChampionPick {
+  team: string;
+  pct: number | null; // win-the-WC probability (0–1), or null if unavailable
+}
 
 // Borrow the real knockout schedule (same round keys + match counts) so each
 // predicted box can show a real kickoff time + venue on hover.
@@ -105,9 +113,37 @@ function RoundLabel({ name, className }: { name: string; className: string }) {
   );
 }
 
-export function AiKnockoutBracket() {
+export function AiKnockoutBracket({
+  brazil,
+  dynamic,
+}: {
+  brazil: ChampionPick;
+  dynamic: ChampionPick;
+}) {
+  const [mode, setMode] = useState<"brazil" | "dynamic">("brazil");
+  const sel = mode === "brazil" ? brazil : dynamic;
+  const btn = (active: boolean) =>
+    cn(
+      "rounded-full px-4 py-1.5 text-sm font-semibold transition",
+      active ? "bg-accent text-white" : "bg-surface-raised text-slate-300 hover:bg-surface-hover"
+    );
+
   return (
     <>
+      {/* Champion-prediction toggle: static Brazil pick (live market %) vs the
+          dynamic form+Elo pick (highest computed chance). */}
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <span className="mr-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+          Predicted champion:
+        </span>
+        <button type="button" onClick={() => setMode("brazil")} className={btn(mode === "brazil")}>
+          Brazil Prediction
+        </button>
+        <button type="button" onClick={() => setMode("dynamic")} className={btn(mode === "dynamic")}>
+          Dynamic Prediction
+        </button>
+      </div>
+
       {/* Round labels: pinned just under the global nav while the bracket scrolls.
           Its own FitToWidth scales it identically to the body (same width/columns),
           so the labels stay over their columns. Lives outside the body's transform,
@@ -144,10 +180,21 @@ export function AiKnockoutBracket() {
           <div className="flex flex-1 flex-col">
             <div className="relative flex flex-1 items-center">
               <div className="w-full rounded-xl border border-amber-300 border-t-4 border-t-amber-400 bg-gradient-to-br from-amber-50 to-white px-4 py-5 text-center shadow-md ring-1 ring-amber-300">
-                <div className="text-5xl leading-none">{flag(AI_CHAMPION)}</div>
-                <div className="mt-2 text-xl font-extrabold">{AI_CHAMPION}</div>
+                <div className="text-5xl leading-none">{flag(sel.team)}</div>
+                <div className="mt-2 text-xl font-extrabold">{sel.team}</div>
                 <div className="mt-1 text-[11px] font-bold uppercase tracking-wide text-amber-600">
                   Predicted Champion
+                </div>
+                {sel.pct != null && (
+                  <div className="mt-1.5 text-lg font-extrabold text-accent">
+                    {formatPercent(sel.pct)}{" "}
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                      chance
+                    </span>
+                  </div>
+                )}
+                <div className="mt-0.5 text-[10px] text-slate-400">
+                  {mode === "brazil" ? "live market" : "form + Elo"}
                 </div>
               </div>
             </div>

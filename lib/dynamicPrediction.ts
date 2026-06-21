@@ -1,30 +1,27 @@
-import { ALL_TEAMS } from "@/lib/flags";
-import { TEAM_ELO } from "@/lib/elo";
-
-const DEFAULT_ELO = 1700;
-
-export interface DynamicRow {
-  team: string;
-  g: number;
-  w: number;
-  d: number;
-  l: number;
-  gf: number;
-  ga: number;
-  pct: number; // dynamic chance to win the World Cup (0–1), sums to 1 across teams
-}
-
 type Played = { home: string; away: string; homeGoals: number; awayGoals: number };
 
+/** A team's live "win the World Cup" market chance (YES price, 0–1). */
+export interface WinnerChance {
+  team: string; // canonical name
+  pct: number; // 0–1
+}
+
 /**
- * Dynamic "who wins the World Cup" prediction. Each team's chance blends:
- *  - Elo base strength (so pedigree / few-games teams stay sane), as a win share
- *    `10^(elo/400) / Σ`, and
- *  - current performance FORM from played group games — points/game + goal
- *    difference/game + a small goals-scored bonus — as a form share.
- * Blend 50/50, renormalize to a probability. Champion = the highest.
+ * Dynamic champion = the team with the highest CURRENT-FORM-ADJUSTED chance to
+ * win the World Cup, on the SAME scale as the live market (so it's directly
+ * comparable to the "Brazil Prediction" market %).
+ *
+ * Base = each team's live winner-market chance (which already encodes pedigree).
+ * Adjustment = a multiplier from current performance form (points/game + goal
+ * difference/game + a small goals-scored bonus) relative to the field average,
+ * capped to ±50% so form nudges the ranking but can't fabricate a champion. So
+ * Brazil at 38% beats Argentina at 16% unless Argentina's form is dramatically
+ * better — it can still flip to another team if one clearly outperforms.
  */
-export function computeDynamic(played: Played[]): { champion: string; pct: number; table: DynamicRow[] } {
+export function computeDynamic(
+  winnerMarkets: WinnerChance[],
+  played: Played[]
+): { champion: string; pct: number } {
   const form = new Map<string, { g: number; w: number; d: number; l: number; gf: number; ga: number }>();
   const get = (t: string) => {
     let r = form.get(t);
@@ -42,28 +39,29 @@ export function computeDynamic(played: Played[]): { champion: string; pct: numbe
     else { h.d++; a.d++; }
   }
 
-  const eloStrength = (t: string) => Math.pow(10, (TEAM_ELO[t] ?? DEFAULT_ELO) / 400);
-  const eloSum = ALL_TEAMS.reduce((s, t) => s + eloStrength(t), 0);
-
-  const formScore = (t: string) => {
+  const formScore = (t: string): number | null => {
     const r = form.get(t);
-    if (!r || r.g === 0) return 0;
-    const ppg = (3 * r.w + r.d) / r.g; // 0–3
-    const gdpg = (r.gf - r.ga) / r.g;
-    const gfpg = r.gf / r.g;
-    return Math.max(0, ppg + 0.3 * gdpg + 0.05 * gfpg);
+    if (!r || r.g === 0) return null; // no games → no form signal
+    return (3 * r.w + r.d) / r.g + 0.3 * (r.gf - r.ga) / r.g + 0.05 * (r.gf / r.g);
   };
-  const formSum = ALL_TEAMS.reduce((s, t) => s + formScore(t), 0) || 1;
 
-  const ELO_W = 0.5;
-  const FORM_W = 0.5;
-  const rows: DynamicRow[] = ALL_TEAMS.map((t) => {
-    const blended = ELO_W * (eloStrength(t) / eloSum) + FORM_W * (formScore(t) / formSum);
-    const r = form.get(t) ?? { g: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0 };
-    return { team: t, ...r, pct: blended };
-  });
-  const total = rows.reduce((s, r) => s + r.pct, 0) || 1;
-  for (const r of rows) r.pct /= total;
-  rows.sort((a, b) => b.pct - a.pct);
-  return { champion: rows[0].team, pct: rows[0].pct, table: rows };
+  // Field-average form (teams that have played) → the baseline a team is judged against.
+  const scores: number[] = [];
+  for (const t of Array.from(form.keys())) {
+    const s = formScore(t);
+    if (s != null) scores.push(s);
+  }
+  const avg = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+
+  let best: { team: string; pct: number } | null = null;
+  for (const m of winnerMarkets) {
+    const s = formScore(m.team);
+    const factor = s == null ? 1 : Math.min(1.5, Math.max(0.5, 1 + 0.25 * (s - avg)));
+    const chance = Math.min(0.99, Math.max(0, m.pct * factor));
+    if (!best || chance > best.pct) best = { team: m.team, pct: chance };
+  }
+  return {
+    champion: best?.team ?? winnerMarkets[0]?.team ?? "Brazil",
+    pct: best?.pct ?? winnerMarkets[0]?.pct ?? 0,
+  };
 }

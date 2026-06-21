@@ -1,24 +1,32 @@
 import { db } from "@/lib/db";
 import { yesPrice } from "@/lib/amm";
+import { canonicalTeam } from "@/lib/flags";
 import { getPlayedMatches } from "@/lib/playedMatches";
-import { computeDynamic } from "@/lib/dynamicPrediction";
+import { computeDynamic, type WinnerChance } from "@/lib/dynamicPrediction";
 import { AiKnockoutBracket } from "@/components/AiKnockoutBracket";
 import { AI_CHAMPION } from "@/lib/aiKnockouts";
 
 export const dynamic = "force-dynamic";
 
 export default async function AiKnockoutsPage() {
-  const [played, brazilMarket] = await Promise.all([
+  const [played, winnerMarkets] = await Promise.all([
     getPlayedMatches(),
-    db.market.findFirst({
-      where: { category: "Tournament Winner", question: { startsWith: "Will Brazil win" } },
-    }),
+    db.market.findMany({ where: { category: "Tournament Winner" } }),
   ]);
 
-  // Brazil Prediction = the live market chance for "Will Brazil win the WC?".
-  const brazilPick = { team: "Brazil", pct: brazilMarket ? yesPrice(brazilMarket) : null };
-  // Dynamic Prediction = highest form+Elo chance across all teams.
-  const dyn = computeDynamic(played);
+  // Each team's live "win the WC" chance (YES price), team canonicalized to
+  // match results/flags (e.g. USA → United States).
+  const chances: WinnerChance[] = winnerMarkets
+    .map((m) => {
+      const team = m.question.match(/^Will (.+?) win the 2026 FIFA World Cup\?$/)?.[1];
+      return team ? { team: canonicalTeam(team), pct: yesPrice(m) } : null;
+    })
+    .filter((c): c is WinnerChance => c !== null);
+
+  // Brazil Prediction = Brazil's live market chance. Dynamic = highest
+  // form-adjusted market chance (same scale, so 38% correctly beats 16%).
+  const brazilPick = { team: "Brazil", pct: chances.find((c) => c.team === "Brazil")?.pct ?? null };
+  const dyn = computeDynamic(chances, played);
   const dynamicPick = { team: dyn.champion, pct: dyn.pct };
 
   return (

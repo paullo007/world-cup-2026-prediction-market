@@ -130,30 +130,28 @@ export function AiKnockoutBracket({
 
   return (
     <>
-      {/* Champion-prediction toggle: static Brazil pick (live market %) vs the
-          dynamic form+Elo pick (highest computed chance). */}
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <span className="mr-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
-          Predicted champion:
-        </span>
-        <button type="button" onClick={() => setMode("brazil")} className={btn(mode === "brazil")}>
-          Brazil Prediction
-        </button>
-        <button type="button" onClick={() => setMode("dynamic")} className={btn(mode === "dynamic")}>
-          Dynamic Prediction
-        </button>
-      </div>
-
-      {/* Round labels: pinned just under the global nav while the bracket scrolls.
-          Its own FitToWidth scales it identically to the body (same width/columns),
-          so the labels stay over their columns. Lives outside the body's transform,
-          so `position: sticky` works. */}
+      {/* Sticky bar: the champion-prediction toggle AND the round labels pin
+          together just under the global nav while the bracket scrolls (both
+          inside one StickyUnderNav so they scale identically to the body). */}
       <StickyUnderNav className="border-b border-surface-border bg-surface">
-        <div className="flex w-[1180px] items-stretch gap-8 pr-2">
-          {AI_BRACKET.map((round) => (
-            <RoundLabel key={round.key} name={round.name} className={THEMES[round.key].header} />
-          ))}
-          <RoundLabel name="🏆 Champion" className="text-amber-500" />
+        <div className="w-[1180px] pr-2">
+          <div className="flex flex-wrap items-center gap-2 py-2">
+            <span className="mr-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Predicted champion:
+            </span>
+            <button type="button" onClick={() => setMode("brazil")} className={btn(mode === "brazil")}>
+              Brazil Prediction
+            </button>
+            <button type="button" onClick={() => setMode("dynamic")} className={btn(mode === "dynamic")}>
+              Dynamic Prediction
+            </button>
+          </div>
+          <div className="flex items-stretch gap-8">
+            {AI_BRACKET.map((round) => (
+              <RoundLabel key={round.key} name={round.name} className={THEMES[round.key].header} />
+            ))}
+            <RoundLabel name="🏆 Champion" className="text-amber-500" />
+          </div>
         </div>
       </StickyUnderNav>
 
@@ -194,7 +192,7 @@ export function AiKnockoutBracket({
                   </div>
                 )}
                 <div className="mt-0.5 text-[10px] text-slate-400">
-                  {mode === "brazil" ? "live market" : "form + Elo"}
+                  {mode === "brazil" ? "live market" : "market + current form"}
                 </div>
               </div>
             </div>

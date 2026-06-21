@@ -47,6 +47,15 @@ model SystemState {
   resultsFetchedAt DateTime?
 }
 
+// One snapshot per day of the performance-adjusted (dynamic) AI champion, so the
+// AI Knockouts page can flag a day-over-day change. date = "YYYY-MM-DD" (UTC).
+model DailyChampion {
+  date      String   @id
+  champion  String
+  pct       Float
+  updatedAt DateTime @updatedAt
+}
+
 model User {
   id               String     @id @default(cuid())
   // Nickname auth (new users): public display name + case-insensitive unique key.

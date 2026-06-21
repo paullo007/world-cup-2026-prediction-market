@@ -21,7 +21,7 @@ export interface WinnerChance {
 export function computeDynamic(
   winnerMarkets: WinnerChance[],
   played: Played[]
-): { champion: string; pct: number } {
+): { champion: string; pct: number; marketPct: number } {
   const form = new Map<string, { g: number; w: number; d: number; l: number; gf: number; ga: number }>();
   const get = (t: string) => {
     let r = form.get(t);
@@ -53,15 +53,17 @@ export function computeDynamic(
   }
   const avg = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
 
-  let best: { team: string; pct: number } | null = null;
+  let best: { team: string; pct: number; marketPct: number } | null = null;
   for (const m of winnerMarkets) {
     const s = formScore(m.team);
     const factor = s == null ? 1 : Math.min(1.5, Math.max(0.5, 1 + 0.25 * (s - avg)));
     const chance = Math.min(0.99, Math.max(0, m.pct * factor));
-    if (!best || chance > best.pct) best = { team: m.team, pct: chance };
+    if (!best || chance > best.pct) best = { team: m.team, pct: chance, marketPct: m.pct };
   }
+  const fallback = winnerMarkets[0];
   return {
-    champion: best?.team ?? winnerMarkets[0]?.team ?? "Brazil",
-    pct: best?.pct ?? winnerMarkets[0]?.pct ?? 0,
+    champion: best?.team ?? fallback?.team ?? "Brazil",
+    pct: best?.pct ?? fallback?.pct ?? 0,
+    marketPct: best?.marketPct ?? fallback?.pct ?? 0,
   };
 }

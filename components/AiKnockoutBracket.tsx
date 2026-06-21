@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AI_BRACKET, predWinner, type PredMatch } from "@/lib/aiKnockouts";
+import { AI_BRACKET, predWinner, eloScores, type PredMatch } from "@/lib/aiKnockouts";
 import { BRACKET } from "@/lib/bracket";
 import type { Venue } from "@/lib/venues";
 import { flag } from "@/lib/flags";
@@ -13,6 +13,7 @@ import { cn, formatPercent } from "@/lib/utils";
 export interface ChampionPick {
   team: string;
   pct: number | null; // win-the-WC probability (0–1), or null if unavailable
+  marketPct?: number | null; // raw market % before form adjustment (dynamic pick only)
 }
 
 // Borrow the real knockout schedule (same round keys + match counts) so each
@@ -63,6 +64,7 @@ function MatchCell({
 }) {
   const theme = THEMES[roundKey];
   const w = predWinner(m);
+  const score = eloScores(m); // displayed scoreline (Elo-derived, winner preserved)
   return (
     <div
       className={cn(
@@ -83,9 +85,9 @@ function MatchCell({
           theme.border
         )}
       >
-        <TeamRow team={m.a.team} score={m.a.score} won={w.team === m.a.team} />
+        <TeamRow team={m.a.team} score={score.a} won={w.team === m.a.team} />
         <div className="my-1 h-px bg-slate-200" />
-        <TeamRow team={m.b.team} score={m.b.score} won={w.team === m.b.team} />
+        <TeamRow team={m.b.team} score={score.b} won={w.team === m.b.team} />
 
         {/* Kickoff (in the viewer's local time) + venue on hover. */}
         {meta && (
@@ -143,7 +145,7 @@ export function AiKnockoutBracket({
               Brazil Prediction
             </button>
             <button type="button" onClick={() => setMode("dynamic")} className={btn(mode === "dynamic")}>
-              Dynamic Prediction
+              Performance-adjusted Prediction
             </button>
           </div>
           <div className="flex items-stretch gap-8">
@@ -183,17 +185,40 @@ export function AiKnockoutBracket({
                 <div className="mt-1 text-[11px] font-bold uppercase tracking-wide text-amber-600">
                   Predicted Champion
                 </div>
-                {sel.pct != null && (
-                  <div className="mt-1.5 text-lg font-extrabold text-accent">
-                    {formatPercent(sel.pct)}{" "}
-                    <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                      chance
-                    </span>
+                {mode === "brazil" ? (
+                  sel.pct != null && (
+                    <>
+                      <div className="mt-1.5 text-lg font-extrabold text-accent">
+                        {formatPercent(sel.pct)}{" "}
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                          chance
+                        </span>
+                      </div>
+                      <div className="mt-0.5 text-[10px] text-slate-400">live market</div>
+                    </>
+                  )
+                ) : (
+                  // Performance-adjusted: show BOTH the raw market % and the
+                  // form-adjusted % for the champion, each labelled.
+                  <div className="mt-1.5 space-y-1">
+                    {sel.marketPct != null && (
+                      <div className="text-sm font-bold text-slate-500">
+                        {formatPercent(sel.marketPct)}{" "}
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                          market prediction
+                        </span>
+                      </div>
+                    )}
+                    {sel.pct != null && (
+                      <div className="text-lg font-extrabold text-accent">
+                        {formatPercent(sel.pct)}{" "}
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                          performance-adjusted prediction
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
-                <div className="mt-0.5 text-[10px] text-slate-400">
-                  {mode === "brazil" ? "live market" : "market + current form"}
-                </div>
               </div>
             </div>
           </div>

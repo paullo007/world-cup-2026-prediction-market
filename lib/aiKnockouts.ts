@@ -23,6 +23,48 @@ export function predWinner(m: PredMatch): PredSlot {
   return m.a.score >= m.b.score ? m.a : m.b;
 }
 
+import { TEAM_ELO } from "@/lib/elo";
+
+const DEFAULT_ELO = 1700;
+
+// Stable per-match nudge so two matchups with the same Elo gap don't always get
+// the identical scoreline (de-clusters the bracket). Deterministic → stable.
+function seedFrom(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return (h % 100) / 100; // 0–0.99
+}
+
+/**
+ * Derive a plausible scoreline from the two teams' Elo gap (winner preserved).
+ * Bigger gap → wider margin; heavyweight clashes (high average quality) trend
+ * higher-scoring; a deterministic per-match nudge spreads the results so they're
+ * not all the same. Deterministic (Elo is static), so the bracket is stable.
+ */
+function eloScoreline(winnerElo: number, loserElo: number, nudge: number): { w: number; l: number } {
+  const sup = (winnerElo - loserElo) / 120; // winner's expected goal edge
+  const quality = (winnerElo + loserElo) / 2; // open, higher-scoring when both are strong
+  const j = nudge - 0.5; // −0.5 … +0.5
+  let l = Math.round(0.8 - 0.45 * sup + (quality - 1820) / 350 + j * 1.4);
+  l = Math.max(0, Math.min(3, l));
+  const margin = Math.max(1, Math.min(3, Math.round(0.7 + sup + j * 1.2)));
+  const w = Math.min(5, l + margin);
+  return { w, l };
+}
+
+/** Elo-derived scoreline for a predicted match, oriented to a/b, winner kept. */
+export function eloScores(m: PredMatch): { a: number; b: number } {
+  const winner = predWinner(m).team; // authored winner (from the static scores)
+  const aWins = winner === m.a.team;
+  const loserTeam = aWins ? m.b.team : m.a.team;
+  const { w, l } = eloScoreline(
+    TEAM_ELO[winner] ?? DEFAULT_ELO,
+    TEAM_ELO[loserTeam] ?? DEFAULT_ELO,
+    seedFrom(`${m.a.team}|${m.b.team}`)
+  );
+  return aWins ? { a: w, b: l } : { a: l, b: w };
+}
+
 export const AI_BRACKET: PredRound[] = [
   {
     key: "r32",

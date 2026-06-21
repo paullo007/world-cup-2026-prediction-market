@@ -138,7 +138,7 @@ export function AiKnockoutBracket({
       <StickyUnderNav className="border-b border-surface-border bg-surface">
         <div className="w-[1180px] pr-2">
           <div className="flex flex-wrap items-center gap-2 py-2">
-            <span className="mr-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+            <span className="mr-1 text-xs font-bold uppercase tracking-wide text-amber-400">
               Predicted champion:
             </span>
             <button type="button" onClick={() => setMode("brazil")} className={btn(mode === "brazil")}>

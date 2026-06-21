@@ -31,13 +31,10 @@ export function formatWCD(n: number): string {
 }
 
 export function formatDate(d: Date): string {
-  const base = d.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  // Compact global date stamp, e.g. "Jul19/Sat" (no year).
+  const mon = d.toLocaleDateString("en-US", { month: "short" });
   const wd = d.toLocaleDateString("en-US", { weekday: "short" });
-  return `${base}/${wd}`;
+  return `${mon}${d.getDate()}/${wd}`;
 }
 
 export function cn(...classes: (string | false | null | undefined)[]): string {

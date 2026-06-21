@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Navbar } from "@/components/Navbar";
@@ -21,19 +20,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {/* Global navigation progress bar: fires on every <Link> click and
-            back/forward nav, so any tab/menu/link gives instant feedback while
-            the server renders the next page. Gold to match the FIFA wordmark.
-            position:fixed — does NOT add overflow/transform to body/main, so the
-            sticky top region stays intact. */}
-        <NextTopLoader
-          color="#fbbf24"
-          height={3}
-          shadow="0 0 10px #fbbf24,0 0 5px #fbbf24"
-          showSpinner={false}
-          speed={300}
-          crawlSpeed={150}
-        />
+        {/* Nav progress bar lives at the BOTTOM EDGE of the black header box
+            (see components/NavProgress, rendered inside components/Navbar). */}
         <Providers>
           {/* Self-heal: settle finished matches on any page view (throttled). */}
           <AutoResolve />

@@ -33,9 +33,8 @@ export function MatchStartTime({ iso }: { iso: string }) {
     const offset = `UTC${sign}${oh}${om ? ":" + String(om).padStart(2, "0") : ""}`;
 
     const mon = d.toLocaleString("en-US", { month: "short" });
-    const yy = String(d.getFullYear()).slice(-2);
     const wd = d.toLocaleDateString("en-US", { weekday: "short" });
-    const date = `${mon}${d.getDate()}.${yy}/${wd}`;
+    const date = `${mon}${d.getDate()}/${wd}`; // e.g. "Jun21/Sun" (no year)
 
     setParts({ time, rest: ` ${city} (${offset}), ${date}` });
   }, [iso]);

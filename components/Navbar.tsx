@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { Trophy, Coins } from "lucide-react";
 import { formatWCD } from "@/lib/utils";
+import { NavProgress } from "@/components/NavProgress";
 
 export function Navbar() {
   const { status } = useSession();
@@ -33,7 +34,10 @@ export function Navbar() {
   return (
     <header className="bg-surface">
       <div className="mx-auto max-w-6xl px-4">
-        <div className="flex items-center gap-4 border-b-2 border-amber-500/50 bg-gradient-to-r from-black via-zinc-900 to-black px-6 py-3">
+        <div className="relative flex items-center gap-4 border-b-2 border-amber-500/50 bg-gradient-to-r from-black via-zinc-900 to-black px-6 py-3">
+        <Suspense fallback={null}>
+          <NavProgress />
+        </Suspense>
         <Link href="/" className="mr-auto flex min-w-0 items-center gap-3">
           <Trophy className="h-16 w-16 shrink-0 text-amber-400 sm:h-20 sm:w-20 lg:h-28 lg:w-28" />
           {/* Wordmark with the badge stacked + centered beneath it. */}

@@ -43,7 +43,7 @@ export function NavProgress() {
   const width = phase === "loading" ? "90%" : phase === "done" ? "100%" : "0%";
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[3px] overflow-hidden">
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[4px] overflow-hidden">
       <div
         className="h-full bg-amber-400"
         style={{

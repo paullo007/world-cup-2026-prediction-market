@@ -2,6 +2,7 @@ import { flag } from "@/lib/flags";
 import type { CountryData, MatchResult } from "@/lib/countries";
 import { cn } from "@/lib/utils";
 import { MatchStartTime } from "@/components/MatchStartTime";
+import { GoalscorersBlock } from "@/components/GoalscorersBlock";
 import { SourceNote } from "@/components/SourceNote";
 import { SquadTable } from "@/components/SquadTable";
 
@@ -91,6 +92,15 @@ export function CountryDetail({
                     <div><MatchStartTime iso={m.kickoffIso} /></div>
                     {m.venue && <div>{m.venue.stadium}, {m.venue.city}, {m.venue.country}</div>}
                   </div>
+                  {r && (
+                    <div className="mt-2">
+                      <GoalscorersBlock
+                        scorers={r.scorers}
+                        leftTeam={name}
+                        rightTeam={m.opponent}
+                      />
+                    </div>
+                  )}
                 </div>
               );
             })}

@@ -1,7 +1,7 @@
 import { KICKOFFS } from "@/lib/kickoffs";
 import { VENUES, type Venue } from "@/lib/venues";
 import { GROUPS, groupOf } from "@/lib/groups";
-import { normalize } from "@/lib/results";
+import { normalize, type Scorer } from "@/lib/results";
 import type { SourceLink } from "@/lib/sources";
 import { COUNTRY_ROSTERS } from "@/lib/countries.generated";
 import {
@@ -144,17 +144,20 @@ export interface MatchResult {
   countryGoals: number;
   oppGoals: number;
   outcome: "W" | "L" | "D";
+  /** Goalscorers for the fixture (both sides); split by `team` in the UI. */
+  scorers: Scorer[];
 }
 
 /**
  * Map a country's fixtures → final results (keyed by opponent name) for the
  * games that have an approved score. A fixture with no played result is absent,
  * i.e. still upcoming. Score is oriented so `countryGoals` is always the viewed
- * country's tally regardless of home/away.
+ * country's tally regardless of home/away. Goalscorers are carried through
+ * unchanged (each `Scorer.team` tells the UI which side to place it on).
  */
 export function resultsForCountry(
   matches: CountryMatch[],
-  played: { home: string; away: string; homeGoals: number; awayGoals: number }[],
+  played: { home: string; away: string; homeGoals: number; awayGoals: number; scorers: Scorer[] }[],
   country: string
 ): Record<string, MatchResult> {
   const out: Record<string, MatchResult> = {};
@@ -170,7 +173,12 @@ export function resultsForCountry(
     const home = normalize(pm.home) === normalize(country);
     const cg = home ? pm.homeGoals : pm.awayGoals;
     const og = home ? pm.awayGoals : pm.homeGoals;
-    out[m.opponent] = { countryGoals: cg, oppGoals: og, outcome: cg > og ? "W" : cg < og ? "L" : "D" };
+    out[m.opponent] = {
+      countryGoals: cg,
+      oppGoals: og,
+      outcome: cg > og ? "W" : cg < og ? "L" : "D",
+      scorers: pm.scorers ?? [],
+    };
   }
   return out;
 }

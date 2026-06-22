@@ -15,11 +15,46 @@ import {
 export type Position = "Goalkeeper" | "Defender" | "Midfielder" | "Forward";
 
 export interface CountryPlayer {
-  number: number | null;
+  number?: number | null; // optional: a few players have no jersey number
   name: string;
-  age: number | null;
+  age?: number | null;
   position: Position;
-  club: string | null;
+  club?: string | null; // optional: ~14% of players have no club source
+  // Rich detail (optional) — populated by scripts/gen-countries.ts from ESPN
+  // (bio) + TheSportsDB (club / photo). Absent for hand-curated entries that
+  // weren't matched, and the player page degrades gracefully.
+  espnId?: string;
+  fullName?: string;
+  dob?: string; // ISO date, e.g. "1992-06-15"
+  nationality?: string;
+  height?: string; // ESPN displayHeight, e.g. "5' 9\""
+  weight?: string; // ESPN displayWeight, e.g. "159 lbs"
+  birthPlace?: string;
+  espnUrl?: string; // ESPN profile (full career stats live here)
+  photo?: string; // TheSportsDB cutout/thumbnail
+  detailedPosition?: string; // TheSportsDB position, e.g. "Right Winger"
+}
+
+/** Stable URL slug for a player within their country (unique even on dup names). */
+export interface SluggedPlayer extends CountryPlayer {
+  slug: string;
+}
+
+/** Assign each roster player a unique slug (name-based; jersey suffix on clash). */
+export function withPlayerSlugs(roster: CountryPlayer[]): SluggedPlayer[] {
+  const base = roster.map((p) => slugifyCountry(p.name) || "player");
+  const counts: Record<string, number> = {};
+  for (const b of base) counts[b] = (counts[b] ?? 0) + 1;
+  return roster.map((p, i) => {
+    const b = base[i];
+    const slug = counts[b] > 1 ? `${b}-${p.number ?? i}` : b;
+    return { ...p, slug };
+  });
+}
+
+/** Resolve a player within a roster by their URL slug. */
+export function findPlayerBySlug(roster: CountryPlayer[], slug: string): SluggedPlayer | null {
+  return withPlayerSlugs(roster).find((p) => p.slug === slug) ?? null;
 }
 
 // Historical World Cup wins for the past champions among the 48 WC2026 teams
@@ -105,6 +140,18 @@ export interface CountryData {
   sources: SourceLink[];
 }
 
+/** Graft generated rich fields (dob/photo/espnId/…) onto a curated roster,
+ *  matched by normalized name. Curated values win; the generated entry only
+ *  fills fields the curated one lacks (so Brazil keeps its sourced clubs). */
+function enrichRoster(curated: CountryPlayer[], generated: CountryPlayer[]): CountryPlayer[] {
+  if (!generated.length) return curated;
+  const byName = new Map(generated.map((g) => [normalize(g.name), g]));
+  return curated.map((p) => {
+    const g = byName.get(normalize(p.name));
+    return g ? { ...g, ...p, club: p.club ?? g.club } : p;
+  });
+}
+
 /** Assemble everything the country detail page needs. Brazil keeps its richer
  *  curated data (sourced clubs, coach, full sources); others come from ESPN. */
 export function getCountry(name: string): CountryData | null {
@@ -113,7 +160,10 @@ export function getCountry(name: string): CountryData | null {
   return {
     name,
     group: groupOf(name),
-    roster: isBrazil ? BRAZIL_ROSTER : COUNTRY_ROSTERS[name] ?? [],
+    // Brazil: curated roster enriched with generated bio/photo where names match.
+    roster: isBrazil
+      ? enrichRoster(BRAZIL_ROSTER, COUNTRY_ROSTERS["Brazil"] ?? [])
+      : COUNTRY_ROSTERS[name] ?? [],
     coach: isBrazil ? BRAZIL_COACH : null,
     titles: WORLD_CUP_TITLES[name] ?? [],
     matches: getCountryMatches(name),
@@ -132,6 +182,25 @@ export function goalsForRoster(
     for (const s of m.scorers) {
       if (normalize(s.team) !== normalize(country)) continue;
       byNorm[normalize(s.name)] = (byNorm[normalize(s.name)] ?? 0) + 1;
+    }
+  }
+  const out: Record<string, number> = {};
+  for (const p of roster) out[p.name] = byNorm[normalize(p.name)] ?? 0;
+  return out;
+}
+
+/** Live WC2026 assists per roster player, resolved by name. Only assists on the
+ *  country's OWN goals count (so a same-named opponent isn't credited). */
+export function assistsForRoster(
+  roster: CountryPlayer[],
+  played: { scorers: { team: string; assists?: string[] }[] }[],
+  country: string
+): Record<string, number> {
+  const byNorm: Record<string, number> = {};
+  for (const m of played) {
+    for (const s of m.scorers) {
+      if (normalize(s.team) !== normalize(country)) continue;
+      for (const a of s.assists ?? []) byNorm[normalize(a)] = (byNorm[normalize(a)] ?? 0) + 1;
     }
   }
   const out: Record<string, number> = {};

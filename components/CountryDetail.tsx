@@ -1,5 +1,6 @@
 import { flag } from "@/lib/flags";
 import type { CountryData, MatchResult } from "@/lib/countries";
+import { slugifyCountry } from "@/lib/countries";
 import { cn } from "@/lib/utils";
 import { MatchStartTime } from "@/components/MatchStartTime";
 import { GoalscorersBlock } from "@/components/GoalscorersBlock";
@@ -23,13 +24,16 @@ function Box({ title, children }: { title: string; children: React.ReactNode }) 
 export function CountryDetail({
   data,
   goals,
+  assists = {},
   results = {},
 }: {
   data: CountryData;
   goals: Record<string, number>;
+  assists?: Record<string, number>;
   results?: Record<string, MatchResult>;
 }) {
   const { name, group, roster, coach, titles, matches, sources } = data;
+  const countrySlug = slugifyCountry(name);
 
   return (
     <div className="space-y-6">
@@ -110,11 +114,11 @@ export function CountryDetail({
 
       {/* 2) Squad table */}
       <Box title="Squad — 2026 World Cup">
-        <SquadTable roster={roster} goals={goals} />
+        <SquadTable roster={roster} goals={goals} assists={assists} countrySlug={countrySlug} />
         <p className="mt-3 text-xs italic text-slate-400">
-          Player name, age, number and position from ESPN&apos;s official roster; goals update live
-          from approved match results. Club is shown where a source confirms it; caps and assists
-          aren&apos;t tracked by our data feed (shown as — / 0).
+          Click any player for their full profile. Name, age, number and position from ESPN; club
+          from TheSportsDB where available. Goals and assists update live from approved 2026 match
+          results; caps aren&apos;t tracked by our data feed (shown as —).
         </p>
       </Box>
 

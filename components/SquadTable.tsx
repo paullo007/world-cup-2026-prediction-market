@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import type { CountryPlayer } from "@/lib/countries";
+import { withPlayerSlugs } from "@/lib/countries";
 import { useTopbarHeight } from "@/components/StickyUnderNav";
 import { cn } from "@/lib/utils";
 
@@ -9,12 +11,24 @@ import { cn } from "@/lib/utils";
  * while the page scrolls — same technique as the AI Knockouts labels. The `<th>`
  * cells are individually `position: sticky` (the cross-browser-reliable way for
  * table headers); the wrapper uses `overflow-x: clip` rather than `auto` so it
- * isn't a scroll container that would break the pinning. Live goals are computed
- * on the server and passed in keyed by player name.
+ * isn't a scroll container that would break the pinning. Live goals/assists are
+ * computed on the server and passed in keyed by player name. Each row links to
+ * the player detail page (`/countries/<countrySlug>/<playerSlug>`).
  */
-export function SquadTable({ roster, goals }: { roster: CountryPlayer[]; goals: Record<string, number> }) {
+export function SquadTable({
+  roster,
+  goals,
+  assists = {},
+  countrySlug,
+}: {
+  roster: CountryPlayer[];
+  goals: Record<string, number>;
+  assists?: Record<string, number>;
+  countrySlug: string;
+}) {
   const top = useTopbarHeight();
   const th = "sticky z-20 border-b border-surface-border bg-surface-raised px-2 py-2 font-semibold";
+  const slugged = withPlayerSlugs(roster);
 
   return (
     <div style={{ overflowX: "clip" }}>
@@ -32,16 +46,26 @@ export function SquadTable({ roster, goals }: { roster: CountryPlayer[]; goals: 
           </tr>
         </thead>
         <tbody>
-          {roster.map((p) => (
-            <tr key={`${p.number ?? "x"}-${p.name}`} className="border-t border-surface-border">
+          {slugged.map((p) => (
+            <tr
+              key={p.slug}
+              className="border-t border-surface-border transition hover:bg-surface"
+            >
               <td className="px-2 py-2 text-slate-400">{p.number ?? "—"}</td>
-              <td className="px-2 py-2 font-semibold">{p.name}</td>
+              <td className="px-2 py-2 font-semibold">
+                <Link
+                  href={`/countries/${countrySlug}/${p.slug}`}
+                  className="text-accent hover:underline"
+                >
+                  {p.name}
+                </Link>
+              </td>
               <td className="px-2 py-2 text-right text-slate-300">{p.age ?? "—"}</td>
               <td className="px-2 py-2 text-slate-300">{p.position}</td>
               <td className="px-2 py-2 text-slate-300">{p.club ?? "—"}</td>
               <td className="px-2 py-2 text-right text-slate-300">—</td>
               <td className="px-2 py-2 text-right font-bold tabular-nums">{goals[p.name] ?? 0}</td>
-              <td className="px-2 py-2 text-right tabular-nums text-slate-300">0</td>
+              <td className="px-2 py-2 text-right tabular-nums text-slate-300">{assists[p.name] ?? 0}</td>
             </tr>
           ))}
         </tbody>

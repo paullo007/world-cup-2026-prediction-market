@@ -17,6 +17,25 @@ const NAME_FIX: Record<string, string> = {
   "Congo DR": "DR Congo",
 };
 
+// TheSportsDB labels some nationalities differently from our canonical country
+// names — accept these as a nationality match in the fallback picker.
+const COUNTRY_NAT_ALIAS: Record<string, string[]> = {
+  "Türkiye": ["Turkey"],
+  "Czechia": ["Czech Republic"],
+  "South Korea": ["Korea Republic", "South Korea"],
+  "DR Congo": ["Congo DR", "DR Congo"],
+  "United States": ["USA", "United States"],
+};
+
+// Curated `country|ESPN name` -> alternate TheSportsDB search string, for players
+// whose ESPN name doesn't match how TheSportsDB indexes them (nicknames,
+// transliteration, diacritics). Verified to return a photo on the free tier.
+const PLAYER_ALIAS: Record<string, string> = {
+  "Egypt|Mostafa Zico": "Zizo",
+  "Spain|Pedri": "Pedri Gonzalez",
+  "Türkiye|Ugurcan Çakir": "Uğurcan Çakır",
+};
+
 const posBucket = (raw?: string): "Goalkeeper" | "Defender" | "Midfielder" | "Forward" => {
   const s = (raw || "").toLowerCase();
   if (s.includes("goal")) return "Goalkeeper";
@@ -46,54 +65,72 @@ const saveCache = () => writeFileSync(CACHE_FILE, JSON.stringify(cache));
 /** Look up one player on TheSportsDB. Accept a result only if its name matches
  *  closely or its nationality matches the team country, to avoid common-name
  *  false positives. Returns null when nothing trustworthy is found. */
-async function sdbLookup(name: string, country: string): Promise<SdbHit | null> {
-  const key = `${normalize(name)}|${normalize(country)}`;
-  if (key in cache) return cache[key]; // only genuine responses are ever cached
-
-  const nn = normalize(name);
-  const nc = normalize(country);
-  // Retry on rate-limit (429) / transient failure with exponential backoff. A
-  // failed lookup returns null WITHOUT caching, so a re-run retries it.
+/** Search TheSportsDB for one query string. Returns the players array (possibly
+ *  empty = genuine no-match) or null when the request fails after retries
+ *  (transient — so the caller leaves it uncached for the next run). */
+async function sdbSearch(query: string): Promise<any[] | null> {
   for (let attempt = 0; attempt < 5; attempt++) {
     let res: Response;
     try {
-      res = await fetch(`${SDB}/searchplayers.php?p=${encodeURIComponent(name)}`);
+      res = await fetch(`${SDB}/searchplayers.php?p=${encodeURIComponent(query)}`);
     } catch {
       await sleep(1500 * (attempt + 1));
       continue;
     }
     if (res.status === 429 || res.status >= 500) {
-      await sleep(2000 * (attempt + 1)); // backoff and retry
+      await sleep(2000 * (attempt + 1)); // rate-limited → backoff and retry
       continue;
     }
-    if (!res.ok) return null; // other client error → give up, don't poison cache
-    let j: { player?: any[] };
+    if (!res.ok) return []; // other client error → treat as genuine no-match
     try {
-      j = (await res.json()) as { player?: any[] };
+      return ((await res.json()) as { player?: any[] }).player ?? [];
     } catch {
       await sleep(1500 * (attempt + 1));
-      continue;
     }
-    const players = j.player ?? [];
-    const pick =
-      players.find((p) => normalize(p.strPlayer ?? "") === nn && normalize(p.strNationality ?? "") === nc) ??
-      players.find((p) => normalize(p.strNationality ?? "") === nc) ??
-      players.find((p) => normalize(p.strPlayer ?? "") === nn) ??
-      null;
-    const hit: SdbHit | null = pick
-      ? {
-          club: pick.strTeam || null,
-          photo: pick.strCutout || pick.strThumb || null,
-          detailedPosition: pick.strPosition || null,
-          nationality: pick.strNationality || null,
-          dob: pick.dateBorn || null,
-        }
-      : null;
-    cache[key] = hit; // genuine result (match or confirmed no-match) → cache it
-    if (++cacheDirty % 25 === 0) saveCache();
-    return hit;
   }
-  return null; // exhausted retries (still rate-limited) → uncached, retry next run
+  return null; // still rate-limited after retries
+}
+
+async function sdbLookup(rawName: string, country: string): Promise<SdbHit | null> {
+  const name = rawName.trim();
+  const key = `${normalize(name)}|${normalize(country)}`;
+  if (key in cache) return cache[key]; // only genuine responses are ever cached
+
+  const nn = normalize(name);
+  // Acceptable nationality strings (canonical + TheSportsDB aliases).
+  const nats = new Set([normalize(country), ...(COUNTRY_NAT_ALIAS[country] ?? []).map(normalize)]);
+  const alias = PLAYER_ALIAS[`${country}|${name}`];
+  const queries = alias ? [name, alias] : [name];
+
+  let sawGenuine = false; // at least one query returned a real (non-transient) result
+  for (const q of queries) {
+    const players = await sdbSearch(q);
+    if (players === null) continue; // transient failure → try next / leave uncached
+    sawGenuine = true;
+    const isAlias = q !== name;
+    const pick =
+      players.find((p) => normalize(p.strPlayer ?? "") === nn && nats.has(normalize(p.strNationality ?? ""))) ??
+      players.find((p) => nats.has(normalize(p.strNationality ?? ""))) ??
+      (isAlias ? players[0] : players.find((p) => normalize(p.strPlayer ?? "") === nn)) ??
+      null;
+    if (pick) {
+      const hit: SdbHit = {
+        club: pick.strTeam || null,
+        photo: pick.strCutout || pick.strThumb || null,
+        detailedPosition: pick.strPosition || null,
+        nationality: pick.strNationality || null,
+        dob: pick.dateBorn || null,
+      };
+      cache[key] = hit;
+      if (++cacheDirty % 25 === 0) saveCache();
+      return hit;
+    }
+  }
+  if (sawGenuine) {
+    cache[key] = null; // confirmed no-match across all queries → cache it
+    if (++cacheDirty % 25 === 0) saveCache();
+  }
+  return null; // (all transient → uncached, retried next run)
 }
 
 async function main() {
@@ -120,12 +157,12 @@ async function main() {
         null;
       const player: any = {
         number: a.jersey != null && a.jersey !== "" ? Number(a.jersey) : null,
-        name: a.displayName as string,
+        name: ((a.displayName as string) || "").trim(),
         age: typeof a.age === "number" ? a.age : null,
         position: posBucket(a.position?.name),
         club: null,
         espnId: a.id ? String(a.id) : null,
-        fullName: a.fullName || null,
+        fullName: a.fullName ? a.fullName.trim() : null,
         dob: typeof a.dateOfBirth === "string" ? a.dateOfBirth.slice(0, 10) : null,
         nationality: a.citizenship || null,
         height: a.displayHeight || null,

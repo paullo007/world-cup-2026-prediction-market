@@ -906,6 +906,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Jordan Bos",
       "age": 23,
       "position": "Defender",
+      "club": "Feyenoord",
       "espnId": "328541",
       "fullName": "Jordan Bos",
       "dob": "2002-10-29",
@@ -913,7 +914,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 0\"",
       "weight": "183 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/328541/jordan-bos",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/u0rnwo1758189333.png",
+      "detailedPosition": "Left-Back"
     },
     {
       "number": 6,
@@ -937,6 +939,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Kai Trewin",
       "age": 25,
       "position": "Defender",
+      "club": "New York City FC",
       "espnId": "291697",
       "fullName": "Kai Trewin",
       "dob": "2001-05-18",
@@ -944,7 +947,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 0\"",
       "weight": "161 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/291697/kai-trewin",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/31j0fa1778272651.png",
+      "detailedPosition": "Defensive Midfield"
     },
     {
       "number": 16,
@@ -968,6 +972,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Harry Souttar",
       "age": 27,
       "position": "Defender",
+      "club": "Leicester City",
       "espnId": "207461",
       "fullName": "Harry Souttar",
       "dob": "1998-10-22",
@@ -975,7 +980,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 6\"",
       "weight": "218 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/207461/harry-souttar",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/219opn1761861817.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 21,
@@ -1014,6 +1020,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Jacob Italiano",
       "age": 24,
       "position": "Midfielder",
+      "club": "Grazer AK",
       "espnId": "267053",
       "fullName": "Jacob Italiano",
       "dob": "2001-07-30",
@@ -1021,7 +1028,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "159 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/267053/jacob-italiano",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/i6ol421769372005.png",
+      "detailedPosition": "Right-Back"
     },
     {
       "number": 8,
@@ -1446,6 +1454,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Nicolas Seiwald",
       "age": 25,
       "position": "Midfielder",
+      "club": "RB Leipzig",
       "espnId": "305956",
       "fullName": "Nicolas Seiwald",
       "dob": "2001-05-04",
@@ -1453,7 +1462,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 11\"",
       "weight": "174 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/305956/nicolas-seiwald",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/h7mvys1763561377.png",
+      "detailedPosition": "Defensive Midfield"
     },
     {
       "number": 9,
@@ -1492,6 +1502,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Carney Chukwuemeka",
       "age": 22,
       "position": "Midfielder",
+      "club": "Borussia Dortmund",
       "espnId": "294317",
       "fullName": "Carney Chukwuemeka",
       "dob": "2003-10-20",
@@ -1499,7 +1510,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 2\"",
       "weight": "170 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/294317/carney-chukwuemeka",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/oa3p4i1741868651.png",
+      "detailedPosition": "Central Midfield"
     },
     {
       "number": 18,
@@ -1538,6 +1550,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Patrick Wimmer",
       "age": 25,
       "position": "Midfielder",
+      "club": "Wolfsburg",
       "espnId": "300095",
       "fullName": "Patrick Wimmer",
       "dob": "2001-05-30",
@@ -1545,13 +1558,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 0\"",
       "weight": "170 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/300095/patrick-wimmer",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/4vcyyu1763669658.png",
+      "detailedPosition": "Right Winger"
     },
     {
       "number": 24,
       "name": "Paul Wanner",
       "age": 20,
       "position": "Midfielder",
+      "club": "PSV Eindhoven",
       "espnId": "333399",
       "fullName": "Paul Wanner",
       "dob": "2005-12-23",
@@ -1559,7 +1574,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 1\"",
       "weight": "163 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/333399/paul-wanner",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/rbijya1764608918.png",
+      "detailedPosition": "Attacking Midfield"
     },
     {
       "number": 26,
@@ -2098,6 +2114,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Nihad Mujakic",
       "age": 28,
       "position": "Defender",
+      "club": "Gaziantep",
       "espnId": "257942",
       "fullName": "Nihad Mujakic",
       "dob": "1998-04-15",
@@ -2105,7 +2122,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 2\"",
       "weight": "172 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/257942/nihad-mujakic",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/b961ge1779017042.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 3,
@@ -2128,6 +2146,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Tarik Muharemovic",
       "age": 23,
       "position": "Defender",
+      "club": "Sassuolo",
       "espnId": "318390",
       "fullName": "Tarik Muharemovic",
       "dob": "2003-02-28",
@@ -2135,7 +2154,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 4\"",
       "weight": "183 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/318390/tarik-muharemovic",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/84oh1y1781347465.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 5,
@@ -2158,6 +2178,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Amar Dedic",
       "age": 23,
       "position": "Defender",
+      "club": "Benfica",
       "espnId": "308979",
       "fullName": "Amar Dedic",
       "dob": "2002-08-18",
@@ -2165,7 +2186,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 11\"",
       "weight": "161 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/308979/amar-dedic",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/w3npc31781347204.png",
+      "detailedPosition": "Right-Back"
     },
     {
       "number": 18,
@@ -2188,6 +2210,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Stjepan Radeljic",
       "age": 28,
       "position": "Defender",
+      "club": "Rijeka",
       "espnId": "275414",
       "fullName": "Stjepan Radeljic",
       "dob": "1997-09-05",
@@ -2195,7 +2218,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 7\"",
       "weight": "192 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/275414/stjepan-radeljic",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/umezbz1779017106.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 24,
@@ -2478,7 +2502,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "position": "Goalkeeper",
       "club": "Grêmio",
       "espnId": "198983",
-      "fullName": "Weverton ",
+      "fullName": "Weverton",
       "dob": "1987-12-13",
       "nationality": "Brazil",
       "height": "6' 2\"",
@@ -2489,12 +2513,12 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
     },
     {
       "number": 23,
-      "name": "Ederson ",
+      "name": "Ederson",
       "age": 32,
       "position": "Goalkeeper",
       "club": "Fenerbahçe",
       "espnId": "176948",
-      "fullName": "Ederson ",
+      "fullName": "Ederson",
       "dob": "1993-08-17",
       "nationality": "Brazil",
       "height": "6' 2\"",
@@ -2526,7 +2550,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "position": "Defender",
       "club": "Paris SG",
       "espnId": "159047",
-      "fullName": "Marquinhos ",
+      "fullName": "Marquinhos",
       "dob": "1994-05-14",
       "nationality": "Brazil",
       "height": "6' 0\"",
@@ -2542,7 +2566,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "position": "Defender",
       "club": "Flamengo",
       "espnId": "125514",
-      "fullName": "Alex Sandro ",
+      "fullName": "Alex Sandro",
       "dob": "1991-01-26",
       "nationality": "Brazil",
       "height": "5' 11\"",
@@ -2558,7 +2582,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "position": "Defender",
       "club": "Flamengo",
       "espnId": "170369",
-      "fullName": "Danilo ",
+      "fullName": "Danilo",
       "dob": "1991-07-15",
       "nationality": "Brazil",
       "height": "6' 0\"",
@@ -2575,7 +2599,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "position": "Defender",
       "club": "Juventus",
       "espnId": "258307",
-      "fullName": "Bremer ",
+      "fullName": "Bremer",
       "dob": "1997-03-18",
       "nationality": "Brazil",
       "height": "6' 2\"",
@@ -2639,7 +2663,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "position": "Midfielder",
       "club": "Fenerbahçe",
       "espnId": "278210",
-      "fullName": "Éderson ",
+      "fullName": "Éderson",
       "dob": "1999-07-07",
       "nationality": "Brazil",
       "height": "6' 0\"",
@@ -2655,7 +2679,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "position": "Midfielder",
       "club": "Manchester United",
       "espnId": "173666",
-      "fullName": "Casemiro ",
+      "fullName": "Casemiro",
       "dob": "1992-02-23",
       "nationality": "Brazil",
       "height": "6' 1\"",
@@ -2687,7 +2711,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "position": "Midfielder",
       "club": "Al-Ittihad",
       "espnId": "176287",
-      "fullName": "Fabinho ",
+      "fullName": "Fabinho",
       "dob": "1993-10-23",
       "nationality": "Brazil",
       "height": "6' 2\"",
@@ -2701,6 +2725,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Danilo Santos",
       "age": 25,
       "position": "Midfielder",
+      "club": "Botafogo",
       "espnId": "306764",
       "fullName": "Danilo Santos",
       "dob": "2001-04-29",
@@ -2708,13 +2733,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "152 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/306764/danilo-santos",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/uo3gja1755115907.png",
+      "detailedPosition": "Central Midfield"
     },
     {
       "number": 20,
       "name": "Lucas Paquetá",
       "age": 28,
       "position": "Midfielder",
+      "club": "Flamengo",
       "espnId": "234715",
       "fullName": "Lucas Paquetá",
       "dob": "1997-08-27",
@@ -2722,7 +2749,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 0\"",
       "weight": "161 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/234715/lucas-paqueta",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/wz75kq1770378434.png",
+      "detailedPosition": "Attacking Midfield"
     },
     {
       "number": 7,
@@ -2731,7 +2759,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "position": "Forward",
       "club": "Real Madrid",
       "espnId": "252107",
-      "fullName": "Vinícius Júnior ",
+      "fullName": "Vinícius Júnior",
       "dob": "2000-07-12",
       "nationality": "Brazil",
       "height": "5' 9\"",
@@ -2761,28 +2789,32 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Neymar",
       "age": 34,
       "position": "Forward",
+      "club": "Santos",
       "espnId": "132948",
-      "fullName": "Neymar ",
+      "fullName": "Neymar",
       "dob": "1992-02-05",
       "nationality": "Brazil",
       "height": "5' 9\"",
       "weight": "161 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/132948/neymar",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/av4ar01767782947.png",
+      "detailedPosition": "Left Wing"
     },
     {
       "number": 11,
-      "name": "Raphinha ",
+      "name": "Raphinha",
       "age": 29,
       "position": "Forward",
+      "club": "Barcelona",
       "espnId": "231050",
-      "fullName": "Raphinha ",
+      "fullName": "Raphinha",
       "dob": "1996-12-14",
       "nationality": "Brazil",
       "height": "5' 9\"",
       "weight": "139 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/231050/raphinha",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/w94spe1726510018.png",
+      "detailedPosition": "Left Wing"
     },
     {
       "number": 19,
@@ -2791,7 +2823,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "position": "Forward",
       "club": "Lyon",
       "espnId": "346612",
-      "fullName": "Endrick ",
+      "fullName": "Endrick",
       "dob": "2006-07-21",
       "nationality": "Brazil",
       "height": "5' 8\"",
@@ -2854,7 +2886,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "age": 19,
       "position": "Forward",
       "espnId": "357719",
-      "fullName": "Rayan ",
+      "fullName": "Rayan",
       "dob": "2006-08-03",
       "nationality": "Brazil",
       "height": "6' 2\"",
@@ -3331,6 +3363,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Stopira",
       "age": 38,
       "position": "Defender",
+      "club": "Torreense",
       "espnId": "148146",
       "fullName": "Stopira",
       "dob": "1988-05-20",
@@ -3338,13 +3371,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "159 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/148146/stopira",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/mtv4pd1779198227.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 3,
       "name": "Diney Borges",
       "age": 31,
       "position": "Defender",
+      "club": "Al Bataeh",
       "espnId": "214683",
       "fullName": "Diney Borges",
       "dob": "1995-01-17",
@@ -3352,7 +3387,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 1\"",
       "weight": "172 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/214683/diney-borges",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/kh64f51779202283.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 4,
@@ -3407,6 +3443,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Steven Moreira",
       "age": 31,
       "position": "Defender",
+      "club": "Columbus Crew",
       "espnId": "180113",
       "fullName": "Steven Moreira",
       "dob": "1994-08-13",
@@ -3414,7 +3451,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "159 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/180113/steven-moreira",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/2mxyy11766428190.png",
+      "detailedPosition": "Right-Back"
     },
     {
       "number": 24,
@@ -3900,6 +3938,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Jorge Carrascal",
       "age": 28,
       "position": "Midfielder",
+      "club": "Flamengo",
       "espnId": "208700",
       "fullName": "Jorge Carrascal",
       "dob": "1998-05-25",
@@ -3907,7 +3946,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 11\"",
       "weight": "163 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/208700/jorge-carrascal",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/bf3o7s1770029750.png",
+      "detailedPosition": "Attacking Midfield"
     },
     {
       "number": 10,
@@ -3930,6 +3970,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Jhon Arias",
       "age": 28,
       "position": "Midfielder",
+      "club": "Palmeiras",
       "espnId": "239566",
       "fullName": "Jhon Arias",
       "dob": "1997-09-21",
@@ -3937,7 +3978,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 6\"",
       "weight": "181 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/239566/jhon-arias",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/z3xhar1777628018.png",
+      "detailedPosition": "Right Winger"
     },
     {
       "number": 14,
@@ -3976,6 +4018,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Jefferson Lerma",
       "age": 31,
       "position": "Midfielder",
+      "club": "Crystal Palace",
       "espnId": "197399",
       "fullName": "Jefferson Lerma",
       "dob": "1994-10-25",
@@ -3983,7 +4026,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "183 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/197399/jefferson-lerma",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/5h7eyz1772141174.png",
+      "detailedPosition": "Defensive Midfield"
     },
     {
       "number": 20,
@@ -4006,6 +4050,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Jáminton Campaz",
       "age": 26,
       "position": "Midfielder",
+      "club": "Rosario Central",
       "espnId": "255295",
       "fullName": "Jáminton Campaz",
       "dob": "2000-05-24",
@@ -4013,7 +4058,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 5\"",
       "weight": "163 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/255295/jaminton-campaz",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/rw6zrc1765295874.png",
+      "detailedPosition": "Left Wing"
     },
     {
       "number": 7,
@@ -4408,6 +4454,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Nathanaël Mbuku",
       "age": 24,
       "position": "Forward",
+      "club": "Montpellier",
       "espnId": "291750",
       "fullName": "Nathanaël Mbuku",
       "dob": "2002-03-16",
@@ -4415,13 +4462,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 7\"",
       "weight": "152 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/291750/nathanael-mbuku",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/a661rc1680190507.png",
+      "detailedPosition": "Left Wing"
     },
     {
       "number": 9,
       "name": "Brian Cipenga",
       "age": 28,
       "position": "Forward",
+      "club": "Castellón",
       "espnId": "352285",
       "fullName": "Brian Cipenga",
       "dob": "1998-03-11",
@@ -4429,13 +4478,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 8\"",
       "weight": "148 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/352285/brian-cipenga",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/ge8mdw1779188106.png",
+      "detailedPosition": "Left Wing"
     },
     {
       "number": 13,
       "name": "Meschack Elia",
       "age": 28,
       "position": "Forward",
+      "club": "_Retired-Soccer",
       "espnId": "232492",
       "fullName": "Meschack Elia",
       "dob": "1997-08-06",
@@ -4466,6 +4517,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Fiston Mayele",
       "age": 31,
       "position": "Forward",
+      "club": "Pyramids",
       "espnId": "299324",
       "fullName": "Fiston Mayele",
       "dob": "1994-06-24",
@@ -4473,7 +4525,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 1\"",
       "weight": "185 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/299324/fiston-mayele",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/px5jnt1779189866.png",
+      "detailedPosition": "Centre-Forward"
     },
     {
       "number": 20,
@@ -4980,6 +5033,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Shurandy Sambo",
       "age": 24,
       "position": "Defender",
+      "club": "Sparta Rotterdam",
       "espnId": "301456",
       "fullName": "Shurandy Sambo",
       "dob": "2001-08-19",
@@ -4987,7 +5041,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 9\"",
       "weight": "148 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/301456/shurandy-sambo",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/q64ulf1764623574.png",
+      "detailedPosition": "Right-Back"
     },
     {
       "number": 3,
@@ -5042,6 +5097,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Livano Comenencia",
       "age": 22,
       "position": "Defender",
+      "club": "Zürich",
       "espnId": "317285",
       "fullName": "Livano Comenencia",
       "dob": "2004-02-03",
@@ -5049,7 +5105,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 2\"",
       "weight": "172 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/317285/livano-comenencia",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/psqavr1779193387.png",
+      "detailedPosition": "Right-Back"
     },
     {
       "number": 13,
@@ -5120,6 +5177,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Deveron Fonville",
       "age": 23,
       "position": "Defender",
+      "club": "NEC Nijmegen",
       "espnId": "335203",
       "fullName": "Deveron Fonville",
       "dob": "2003-05-16",
@@ -5127,7 +5185,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 2\"",
       "weight": "181 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/335203/deveron-fonville",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/hw2j9p1764536584.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 6,
@@ -5166,6 +5225,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Leandro Bacuna",
       "age": 34,
       "position": "Midfielder",
+      "club": "Iğdır",
       "espnId": "138664",
       "fullName": "Leandro Bacuna",
       "dob": "1991-08-21",
@@ -5173,7 +5233,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 11\"",
       "weight": "170 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/138664/leandro-bacuna",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/13dolh1726605947.png",
+      "detailedPosition": "Right-Back"
     },
     {
       "number": 15,
@@ -5598,6 +5659,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "David Doudera",
       "age": 28,
       "position": "Midfielder",
+      "club": "Slavia Prague",
       "espnId": "343937",
       "fullName": "David Doudera",
       "dob": "1998-05-31",
@@ -5605,7 +5667,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 9\"",
       "weight": "146 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/343937/david-doudera",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/ecwvvp1718736744.png",
+      "detailedPosition": "Right Midfield"
     },
     {
       "number": 22,
@@ -5628,6 +5691,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Alexandr Sojka",
       "age": 23,
       "position": "Midfielder",
+      "club": "Viktoria Plzeň",
       "espnId": "387865",
       "fullName": "Alexandr Sojka",
       "dob": "2003-04-02",
@@ -5635,13 +5699,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 2\"",
       "weight": "170 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/387865/alexandr-sojka",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/wttul91780306360.png",
+      "detailedPosition": "Central Midfield"
     },
     {
       "number": 25,
       "name": "Hugo Sochurek",
       "age": 18,
       "position": "Midfielder",
+      "club": "Sparta Prague",
       "espnId": "403974",
       "fullName": "Hugo Sochurek",
       "dob": "2008-06-07",
@@ -5649,13 +5715,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 0\"",
       "weight": "172 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/403974/hugo-sochurek",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/qhraaw1780306321.png",
+      "detailedPosition": "Central Midfield"
     },
     {
       "number": 26,
       "name": "Denis Visinský",
       "age": 23,
       "position": "Midfielder",
+      "club": "Viktoria Plzeň",
       "espnId": "310027",
       "fullName": "Denis Visinský",
       "dob": "2003-03-21",
@@ -5663,7 +5731,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "163 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/310027/denis-visinsky",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/zqcrfr1780306396.png",
+      "detailedPosition": "Attacking Midfield"
     },
     {
       "number": 9,
@@ -6151,6 +6220,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Jeremy Arévalo",
       "age": 21,
       "position": "Forward",
+      "club": "Stuttgart",
       "espnId": "367725",
       "fullName": "Jeremy Arévalo",
       "dob": "2005-03-19",
@@ -6158,7 +6228,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 0\"",
       "weight": "192 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/367725/jeremy-arevalo",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/r8virz1780328155.png",
+      "detailedPosition": "Centre-Forward"
     }
   ],
   "Egypt": [
@@ -6167,6 +6238,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Mohamed El Shenawy",
       "age": 37,
       "position": "Goalkeeper",
+      "club": "Al Ahly",
       "espnId": "205212",
       "fullName": "Mohamed El Shenawy",
       "dob": "1988-12-18",
@@ -6174,6 +6246,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 3\"",
       "weight": "196 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/205212/mohamed-el-shenawy",
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/kg0q741750395330.png",
       "detailedPosition": "Goalkeeper"
     },
     {
@@ -6181,6 +6254,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Mahdy Soliman",
       "age": 39,
       "position": "Goalkeeper",
+      "club": "Zamalek",
       "espnId": "265426",
       "fullName": "Mahdy Soliman",
       "dob": "1987-06-08",
@@ -6188,6 +6262,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 2\"",
       "weight": "196 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/265426/mahdy-soliman",
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/6bxnus1779981244.png",
       "detailedPosition": "Goalkeeper"
     },
     {
@@ -6367,6 +6442,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Mostafa Zico",
       "age": 29,
       "position": "Midfielder",
+      "club": "Al Ahly",
       "espnId": "378495",
       "fullName": "Mostafa Zico",
       "dob": "1997-04-27",
@@ -6374,7 +6450,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "161 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/378495/mostafa-zico",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/94q8zp1750398220.png",
+      "detailedPosition": "Right Winger"
     },
     {
       "number": 14,
@@ -6761,6 +6838,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Declan Rice",
       "age": 27,
       "position": "Midfielder",
+      "club": "Arsenal",
       "espnId": "238262",
       "fullName": "Declan Rice",
       "dob": "1999-01-14",
@@ -6768,13 +6846,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 2\"",
       "weight": "168 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/238262/declan-rice",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/do2pew1694204464.png",
+      "detailedPosition": "Defensive Midfield"
     },
     {
       "number": 8,
       "name": "Elliot Anderson",
       "age": 23,
       "position": "Midfielder",
+      "club": "Nottingham Forest",
       "espnId": "238472",
       "fullName": "Elliot Anderson",
       "dob": "2002-11-06",
@@ -6782,7 +6862,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "150 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/238472/elliot-anderson",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/rhm8q21757162869.png",
+      "detailedPosition": "Central Midfield"
     },
     {
       "number": 10,
@@ -6805,6 +6886,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Jordan Henderson",
       "age": 36,
       "position": "Midfielder",
+      "club": "Brentford",
       "espnId": "127262",
       "fullName": "Jordan Henderson",
       "dob": "1990-06-17",
@@ -6812,7 +6894,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 0\"",
       "weight": "172 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/127262/jordan-henderson",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/by7qs71756903473.png",
+      "detailedPosition": "Defensive Midfield"
     },
     {
       "number": 16,
@@ -6835,6 +6918,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Eberechi Eze",
       "age": 27,
       "position": "Midfielder",
+      "club": "Arsenal",
       "espnId": "251400",
       "fullName": "Eberechi Eze",
       "dob": "1998-06-29",
@@ -6842,7 +6926,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "161 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/251400/eberechi-eze",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/jcabmd1769330240.png",
+      "detailedPosition": "Attacking Midfield"
     },
     {
       "number": 7,
@@ -7864,6 +7949,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Alidu Seidu",
       "age": 26,
       "position": "Defender",
+      "club": "Rennes",
       "espnId": "305669",
       "fullName": "Alidu Seidu",
       "dob": "2000-06-04",
@@ -7871,6 +7957,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 8\"",
       "weight": "159 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/305669/alidu-seidu",
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/cb7p4h1766137895.png",
       "detailedPosition": "Defender"
     },
     {
@@ -7894,6 +7981,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Abdul Mumin",
       "age": 28,
       "position": "Defender",
+      "club": "Rayo Vallecano",
       "espnId": "241139",
       "fullName": "Abdul Mumin",
       "dob": "1998-06-06",
@@ -7901,13 +7989,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 2\"",
       "weight": "172 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/241139/abdul-mumin",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/hx14dq1762549858.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 14,
       "name": "Gideon Mensah",
       "age": 27,
       "position": "Defender",
+      "club": "Auxerre",
       "espnId": "264484",
       "fullName": "Gideon Mensah",
       "dob": "1998-07-18",
@@ -7915,6 +8005,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "152 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/264484/gideon-mensah",
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/gvciqz1765920565.png",
       "detailedPosition": "Defender"
     },
     {
@@ -7938,6 +8029,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Jerome Opoku",
       "age": 27,
       "position": "Defender",
+      "club": "İstanbul Başakşehir",
       "espnId": "261505",
       "fullName": "Jerome Opoku",
       "dob": "1998-10-14",
@@ -7945,6 +8037,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 4\"",
       "weight": "172 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/261505/jerome-opoku",
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/r61mj91780607378.png",
       "detailedPosition": "Defender"
     },
     {
@@ -8401,6 +8494,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Carl Sainté",
       "age": 23,
       "position": "Midfielder",
+      "club": "El Paso Locomotive",
       "espnId": "297177",
       "fullName": "Carl Sainté",
       "dob": "2002-08-09",
@@ -8408,7 +8502,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 0\"",
       "weight": "163 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/297177/carl-sainte",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/o82wng1779134186.png",
+      "detailedPosition": "Defensive Midfield"
     },
     {
       "number": 10,
@@ -8447,6 +8542,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Danley Jean Jacques",
       "age": 26,
       "position": "Midfielder",
+      "club": "Philadelphia Union",
       "espnId": "333939",
       "fullName": "Danley Jean Jacques",
       "dob": "2000-05-20",
@@ -8454,7 +8550,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 0\"",
       "weight": "159 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/333939/danley-jean-jacques",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/ms0fhw1778670096.png",
+      "detailedPosition": "Defensive Midfield"
     },
     {
       "number": 19,
@@ -8477,6 +8574,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Dominique Simon",
       "age": 25,
       "position": "Midfielder",
+      "club": "Tatran Prešov",
       "espnId": "342631",
       "fullName": "Dominique Simon",
       "dob": "2000-07-29",
@@ -8484,13 +8582,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "152 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/342631/dominique-simon",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/grzki51779134695.png",
+      "detailedPosition": "Defensive Midfield"
     },
     {
       "number": 26,
       "name": "Woodensky Pierre",
       "age": 21,
       "position": "Midfielder",
+      "club": "Violette",
       "espnId": "359946",
       "fullName": "Woodensky Pierre",
       "dob": "2004-12-30",
@@ -8498,7 +8598,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "168 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/359946/woodensky-pierre",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/s788e41779133440.png",
+      "detailedPosition": "Defensive Midfield"
     },
     {
       "number": 7,
@@ -8997,6 +9098,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Amirhossein Hosseinzadeh",
       "age": 25,
       "position": "Forward",
+      "club": "Tractor",
       "espnId": "266729",
       "fullName": "Amirhossein Hosseinzadeh",
       "dob": "2000-10-30",
@@ -9004,7 +9106,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "179 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/266729/amirhossein-hosseinzadeh",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/hvfsmv1780431985.png",
+      "detailedPosition": "Right Winger"
     },
     {
       "number": 20,
@@ -9041,6 +9144,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Fahad Talib",
       "age": 31,
       "position": "Goalkeeper",
+      "club": "Al-Talaba",
       "espnId": "235231",
       "fullName": "Fahad Talib",
       "dob": "1994-10-21",
@@ -9048,6 +9152,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 4\"",
       "weight": "190 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/235231/fahad-talib",
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/4v2ozk1780589189.png",
       "detailedPosition": "Goalkeeper"
     },
     {
@@ -9621,6 +9726,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Jean Michaël Seri",
       "age": 34,
       "position": "Midfielder",
+      "club": "Maribor",
       "espnId": "193539",
       "fullName": "Jean Michaël Seri",
       "dob": "1991-07-19",
@@ -9628,13 +9734,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 7\"",
       "weight": "161 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/193539/jean-michael-seri",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/hlszmt1694794523.png",
+      "detailedPosition": "Defensive Midfield"
     },
     {
       "number": 6,
       "name": "Seko Fofana",
       "age": 31,
       "position": "Midfielder",
+      "club": "FC Porto",
       "espnId": "184118",
       "fullName": "Seko Fofana",
       "dob": "1995-05-07",
@@ -9642,13 +9750,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 1\"",
       "weight": "183 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/184118/seko-fofana",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/hu70nu1766137589.png",
+      "detailedPosition": "Central Midfield"
     },
     {
       "number": 8,
       "name": "Franck Kessié",
       "age": 29,
       "position": "Midfielder",
+      "club": "Al-Ahli",
       "espnId": "194711",
       "fullName": "Franck Kessié",
       "dob": "1996-12-19",
@@ -9656,7 +9766,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 0\"",
       "weight": "196 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/194711/franck-kessie",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/wcmpma1771663848.png",
+      "detailedPosition": "Central Midfield"
     },
     {
       "number": 15,
@@ -9679,6 +9790,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Ibrahim Sangaré",
       "age": 28,
       "position": "Midfielder",
+      "club": "Nottingham Forest",
       "espnId": "213718",
       "fullName": "Ibrahim Sangaré",
       "dob": "1997-12-02",
@@ -9686,7 +9798,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 3\"",
       "weight": "170 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/213718/ibrahim-sangare",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/qc7kcv1757163183.png",
+      "detailedPosition": "Defensive Midfield"
     },
     {
       "number": 22,
@@ -10142,6 +10255,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Takefusa Kubo",
       "age": 25,
       "position": "Forward",
+      "club": "Real Sociedad",
       "espnId": "256587",
       "fullName": "Takefusa Kubo",
       "dob": "2001-06-04",
@@ -10149,7 +10263,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 8\"",
       "weight": "148 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/256587/takefusa-kubo",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/bb8sw01762709094.png",
+      "detailedPosition": "Right Winger"
     },
     {
       "number": 9,
@@ -10188,6 +10303,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Keito Nakamura",
       "age": 25,
       "position": "Forward",
+      "club": "Stade de Reims",
       "espnId": "265953",
       "fullName": "Keito Nakamura",
       "dob": "2000-07-28",
@@ -10195,7 +10311,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 11\"",
       "weight": "161 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/265953/keito-nakamura",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/rvg6ub1678454947.png",
+      "detailedPosition": "Left Wing"
     },
     {
       "number": 14,
@@ -10218,6 +10335,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Ayase Ueda",
       "age": 27,
       "position": "Forward",
+      "club": "Feyenoord",
       "espnId": "274277",
       "fullName": "Ayase Ueda",
       "dob": "1998-08-28",
@@ -10225,13 +10343,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 0\"",
       "weight": "168 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/274277/ayase-ueda",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/5ezc8v1758188908.png",
+      "detailedPosition": "Centre-Forward"
     },
     {
       "number": 19,
       "name": "Koki Ogawa",
       "age": 28,
       "position": "Forward",
+      "club": "NEC Nijmegen",
       "espnId": "238016",
       "fullName": "Koki Ogawa",
       "dob": "1997-08-08",
@@ -10239,7 +10359,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 1\"",
       "weight": "172 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/238016/koki-ogawa",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/8lo6s51759758672.png",
+      "detailedPosition": "Centre-Forward"
     },
     {
       "number": 26,
@@ -10756,6 +10877,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Johan Vásquez",
       "age": 27,
       "position": "Defender",
+      "club": "Genoa",
       "espnId": "259975",
       "fullName": "Johan Vásquez",
       "dob": "1998-10-22",
@@ -10763,13 +10885,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 0\"",
       "weight": "172 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/259975/johan-vasquez",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/7q4sks1758997735.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 15,
       "name": "Israel Reyes",
       "age": 26,
       "position": "Defender",
+      "club": "América",
       "espnId": "290414",
       "fullName": "Israel Reyes",
       "dob": "2000-05-23",
@@ -10777,7 +10901,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "161 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/290414/israel-reyes",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/gopczi1750327134.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 23,
@@ -10912,6 +11037,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Mateo Chávez",
       "age": 22,
       "position": "Midfielder",
+      "club": "AZ Alkmaar",
       "espnId": "379193",
       "fullName": "Mateo Chávez",
       "dob": "2004-05-12",
@@ -10919,7 +11045,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "161 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/379193/mateo-chavez",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/jlz1uf1759781173.png",
+      "detailedPosition": "Left-Back"
     },
     {
       "number": 21,
@@ -10942,6 +11069,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Luis Chávez",
       "age": 30,
       "position": "Midfielder",
+      "club": "Dynamo Moscow",
       "espnId": "104497",
       "fullName": "Luis Chávez",
       "dob": "1996-01-15",
@@ -10949,7 +11077,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "161 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/104497/luis-chavez",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/9thmwa1668718994.png",
+      "detailedPosition": "Defensive Midfield"
     },
     {
       "number": 26,
@@ -11296,6 +11425,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Ayyoub Bouaddi",
       "age": 18,
       "position": "Midfielder",
+      "club": "Lille",
       "espnId": "373927",
       "fullName": "Ayyoub Bouaddi",
       "dob": "2007-10-02",
@@ -11303,7 +11433,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 1\"",
       "weight": "163 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/373927/ayyoub-bouaddi",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/g1bppf1766077416.png",
+      "detailedPosition": "Central Midfield"
     },
     {
       "number": 8,
@@ -11358,6 +11489,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Samir El Mourabet",
       "age": 20,
       "position": "Midfielder",
+      "club": "Strasbourg",
       "espnId": "378491",
       "fullName": "Samir El Mourabet",
       "dob": "2005-10-06",
@@ -11365,7 +11497,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 2\"",
       "weight": "159 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/378491/samir-el-mourabet",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/5ay7vj1766053550.png",
+      "detailedPosition": "Central Midfield"
     },
     {
       "number": 23,
@@ -11420,6 +11553,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Soufiane Rahimi",
       "age": 30,
       "position": "Forward",
+      "club": "Al Ain",
       "espnId": "276139",
       "fullName": "Soufiane Rahimi",
       "dob": "1996-06-02",
@@ -11427,7 +11561,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 11\"",
       "weight": "163 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/276139/soufiane-rahimi",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/wekute1750753090.png",
+      "detailedPosition": "Left Wing"
     },
     {
       "number": 16,
@@ -11466,6 +11601,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Ayoub El Kaabi",
       "age": 32,
       "position": "Forward",
+      "club": "Olympiacos",
       "espnId": "269562",
       "fullName": "Ayoub El Kaabi",
       "dob": "1993-06-25",
@@ -11473,7 +11609,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 0\"",
       "weight": "174 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/269562/ayoub-el-kaabi",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/uq61lq1762288890.png",
+      "detailedPosition": "Centre-Forward"
     },
     {
       "number": 21,
@@ -11782,6 +11919,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "detailedPosition": "Right Winger"
     },
     {
+      "number": null,
       "name": "Quinten Timber",
       "age": 25,
       "position": "Midfielder",
@@ -11915,6 +12053,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Max Crocombe",
       "age": 32,
       "position": "Goalkeeper",
+      "club": "Millwall",
       "espnId": "168747",
       "fullName": "Max Crocombe",
       "dob": "1993-08-12",
@@ -11922,6 +12061,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 4\"",
       "weight": "185 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/168747/max-crocombe",
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/a7h8e21761768992.png",
       "detailedPosition": "Goalkeeper"
     },
     {
@@ -11929,6 +12069,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Alex Paulsen",
       "age": 23,
       "position": "Goalkeeper",
+      "club": "Lechia Gdańsk",
       "espnId": "297800",
       "fullName": "Alex Paulsen",
       "dob": "2002-07-04",
@@ -11936,6 +12077,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 0\"",
       "weight": "183 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/297800/alex-paulsen",
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/n3p2581716230939.png",
       "detailedPosition": "Goalkeeper"
     },
     {
@@ -11943,6 +12085,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Michael Woud",
       "age": 27,
       "position": "Goalkeeper",
+      "club": "Auckland FC",
       "espnId": "228288",
       "fullName": "Michael Woud",
       "dob": "1999-01-16",
@@ -11950,6 +12093,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 5\"",
       "weight": "194 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/228288/michael-woud",
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/ff78ig1765702427.png",
       "detailedPosition": "Goalkeeper"
     },
     {
@@ -12005,6 +12149,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Michael Boxall",
       "age": 37,
       "position": "Defender",
+      "club": "Minnesota United",
       "espnId": "101934",
       "fullName": "Michael Boxall",
       "dob": "1988-08-18",
@@ -12013,7 +12158,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "weight": "207 lbs",
       "birthPlace": "Auckland, USA",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/101934/michael-boxall",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/qk0evh1766426076.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 13,
@@ -12538,6 +12684,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Patrick Berg",
       "age": 28,
       "position": "Midfielder",
+      "club": "Bodø/Glimt",
       "espnId": "205924",
       "fullName": "Patrick Berg",
       "dob": "1997-11-24",
@@ -12545,13 +12692,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "161 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/205924/patrick-berg",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/s8sr041769181767.png",
+      "detailedPosition": "Defensive Midfield"
     },
     {
       "number": 8,
       "name": "Sander Berge",
       "age": 28,
       "position": "Midfielder",
+      "club": "Fulham",
       "espnId": "218998",
       "fullName": "Sander Berge",
       "dob": "1998-02-14",
@@ -12559,7 +12708,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 5\"",
       "weight": "212 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/218998/sander-berge",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/plhdsy1757070706.png",
+      "detailedPosition": "Defensive Midfield"
     },
     {
       "number": 10,
@@ -12582,6 +12732,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Fredrik Aursnes",
       "age": 30,
       "position": "Midfielder",
+      "club": "Benfica",
       "espnId": "212900",
       "fullName": "Fredrik Aursnes",
       "dob": "1995-12-10",
@@ -12589,7 +12740,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 11\"",
       "weight": "157 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/212900/fredrik-aursnes",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/vabjep1681328214.png",
+      "detailedPosition": "Central Midfield"
     },
     {
       "number": 18,
@@ -12660,6 +12812,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Jens Petter Hauge",
       "age": 26,
       "position": "Midfielder",
+      "club": "Bodø/Glimt",
       "espnId": "235789",
       "fullName": "Jens Petter Hauge",
       "dob": "1999-10-12",
@@ -12667,7 +12820,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 0\"",
       "weight": "163 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/235789/jens-petter-hauge",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/ccgqei1769181969.png",
+      "detailedPosition": "Left Wing"
     },
     {
       "number": 7,
@@ -13139,6 +13293,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Azarias Londoño",
       "age": 25,
       "position": "Forward",
+      "club": "Universidad Católica del Ecuador",
       "espnId": "340539",
       "fullName": "Azarias Londoño",
       "dob": "2001-06-21",
@@ -13146,7 +13301,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 1\"",
       "weight": "192 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/340539/azarias-londono",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/tq1xvp1779873758.png",
+      "detailedPosition": "Centre-Forward"
     }
   ],
   "Paraguay": [
@@ -13155,6 +13311,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Gatito Fernández",
       "age": 38,
       "position": "Goalkeeper",
+      "club": "Cerro Porteño",
       "espnId": "164262",
       "fullName": "Gatito Fernández",
       "dob": "1988-03-29",
@@ -13162,6 +13319,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 3\"",
       "weight": "190 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/164262/gatito-fernandez",
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/w9i0ss1749546987.png",
       "detailedPosition": "Goalkeeper"
     },
     {
@@ -13169,6 +13327,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Orlando Gil",
       "age": 26,
       "position": "Goalkeeper",
+      "club": "_Retired-Soccer",
       "espnId": "301648",
       "fullName": "Orlando Gil",
       "dob": "2000-06-11",
@@ -13183,6 +13342,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Gastón Olveira",
       "age": 33,
       "position": "Goalkeeper",
+      "club": "Club Olimpia",
       "espnId": "190375",
       "fullName": "Gastón Olveira",
       "dob": "1993-04-21",
@@ -13190,6 +13350,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 3\"",
       "weight": "179 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/190375/gaston-olveira",
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/b4snvr1780405496.png",
       "detailedPosition": "Goalkeeper"
     },
     {
@@ -13645,6 +13806,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Tomás Araújo",
       "age": 24,
       "position": "Defender",
+      "club": "Benfica",
       "espnId": "329691",
       "fullName": "Tomás Araújo",
       "dob": "2002-05-16",
@@ -13652,7 +13814,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 2\"",
       "weight": "185 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/329691/tomas-araujo",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/0l8tzn1741768720.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 5,
@@ -13675,6 +13838,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Gonçalo Inácio",
       "age": 24,
       "position": "Defender",
+      "club": "Sporting CP",
       "espnId": "304106",
       "fullName": "Gonçalo Inácio",
       "dob": "2001-08-25",
@@ -13682,7 +13846,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 1\"",
       "weight": "172 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/304106/goncalo-inacio",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/m00erp1762291029.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 20,
@@ -13705,6 +13870,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Nuno Mendes",
       "age": 24,
       "position": "Defender",
+      "club": "Paris SG",
       "espnId": "290591",
       "fullName": "Nuno Mendes",
       "dob": "2002-06-19",
@@ -13712,7 +13878,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 11\"",
       "weight": "152 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/290591/nuno-mendes",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/zhdk3h1766335452.png",
+      "detailedPosition": "Left-Back"
     },
     {
       "number": 6,
@@ -13767,6 +13934,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Renato Veiga",
       "age": 22,
       "position": "Midfielder",
+      "club": "Villarreal",
       "espnId": "337011",
       "fullName": "Renato Veiga",
       "dob": "2003-07-29",
@@ -13774,7 +13942,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 3\"",
       "weight": "192 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/337011/renato-veiga",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/rxefp81762889381.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 15,
@@ -13810,12 +13979,12 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
     },
     {
       "number": 23,
-      "name": "Vitinha ",
+      "name": "Vitinha",
       "age": 26,
       "position": "Midfielder",
       "club": "Paris SG",
       "espnId": "288897",
-      "fullName": "Vitinha ",
+      "fullName": "Vitinha",
       "dob": "2000-02-13",
       "nationality": "Portugal",
       "height": "5' 8\"",
@@ -14246,6 +14415,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Ahmed Alaaeldin",
       "age": 33,
       "position": "Forward",
+      "club": "Al-Rayyan",
       "espnId": "263311",
       "fullName": "Ahmed Alaaeldin",
       "dob": "1993-01-31",
@@ -14253,7 +14423,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "146 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/263311/ahmed-alaaeldin",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/0vj7zr1668609076.png",
+      "detailedPosition": "Centre-Forward"
     },
     {
       "number": 8,
@@ -14262,7 +14433,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "position": "Forward",
       "club": "Al-Duhail",
       "espnId": "109204",
-      "fullName": "Edmílson Junior ",
+      "fullName": "Edmílson Junior",
       "dob": "1994-08-19",
       "nationality": "Qatar",
       "height": "5' 11\"",
@@ -14292,6 +14463,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Hassan Al-Haydos",
       "age": 35,
       "position": "Forward",
+      "club": "Al-Sadd",
       "espnId": "236586",
       "fullName": "Hassan Al-Haydos",
       "dob": "1990-12-11",
@@ -14299,13 +14471,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 9\"",
       "weight": "137 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/236586/hassan-al-haydos",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/3xhwao1707597905.png",
+      "detailedPosition": "Right Winger"
     },
     {
       "number": 11,
       "name": "Akram Afif",
       "age": 29,
       "position": "Forward",
+      "club": "Al-Sadd",
       "espnId": "219258",
       "fullName": "Akram Afif",
       "dob": "1996-11-18",
@@ -14313,13 +14487,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "152 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/219258/akram-afif",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/rv8cvv1707592143.png",
+      "detailedPosition": "Left Wing"
     },
     {
       "number": 15,
       "name": "Yusuf Abdurisag",
       "age": 26,
       "position": "Forward",
+      "club": "Al-Wakrah",
       "espnId": "274164",
       "fullName": "Yusuf Abdurisag",
       "dob": "1999-08-06",
@@ -14327,7 +14503,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 9\"",
       "weight": "139 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/274164/yusuf-abdurisag",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/6wq2k61707599411.png",
+      "detailedPosition": "Centre-Forward"
     },
     {
       "number": 17,
@@ -14796,6 +14973,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Angus Gunn",
       "age": 30,
       "position": "Goalkeeper",
+      "club": "Nottingham Forest",
       "espnId": "181299",
       "fullName": "Angus Gunn",
       "dob": "1996-01-22",
@@ -14803,6 +14981,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 5\"",
       "weight": "170 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/181299/angus-gunn",
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/7mdhk31757163014.png",
       "detailedPosition": "Goalkeeper"
     },
     {
@@ -14858,6 +15037,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Andy Robertson",
       "age": 32,
       "position": "Defender",
+      "club": "Tottenham Hotspur",
       "espnId": "104943",
       "fullName": "Andy Robertson",
       "dob": "1994-03-11",
@@ -14865,13 +15045,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "139 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/104943/andy-robertson",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/t0yil51757088652.png",
+      "detailedPosition": "Left-Back"
     },
     {
       "number": 5,
       "name": "Grant Hanley",
       "age": 34,
       "position": "Defender",
+      "club": "Hibernian",
       "espnId": "146577",
       "fullName": "Grant Hanley",
       "dob": "1991-11-20",
@@ -14879,7 +15061,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 2\"",
       "weight": "185 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/146577/grant-hanley",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/2zn65k1695292590.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 6,
@@ -14918,6 +15101,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "John Souttar",
       "age": 29,
       "position": "Defender",
+      "club": "Rangers",
       "espnId": "181394",
       "fullName": "John Souttar",
       "dob": "1996-09-25",
@@ -14925,7 +15109,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 1\"",
       "weight": "163 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/181394/john-souttar",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/hzf3kb1717838290.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 16,
@@ -15366,6 +15551,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Idrissa Gueye",
       "age": 36,
       "position": "Midfielder",
+      "club": "Everton",
       "espnId": "144517",
       "fullName": "Idrissa Gueye",
       "dob": "1989-09-26",
@@ -15373,7 +15559,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 9\"",
       "weight": "146 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/144517/idrissa-gueye",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/ag9fm11756976825.png",
+      "detailedPosition": "Defensive Midfield"
     },
     {
       "number": 6,
@@ -15396,6 +15583,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Lamine Camara",
       "age": 22,
       "position": "Midfielder",
+      "club": "Monaco",
       "espnId": "38721",
       "fullName": "Lamine Camara",
       "dob": "2004-01-01",
@@ -15403,13 +15591,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 8\"",
       "weight": "141 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/38721/lamine-camara",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/1fl2tg1766237973.png",
+      "detailedPosition": "Central Midfield"
     },
     {
       "number": 15,
       "name": "Krépin Diatta",
       "age": 27,
       "position": "Midfielder",
+      "club": "Monaco",
       "espnId": "253992",
       "fullName": "Krépin Diatta",
       "dob": "1999-02-25",
@@ -15417,7 +15607,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 9\"",
       "weight": "150 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/253992/krepin-diatta",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/5uag2g1766238000.png",
+      "detailedPosition": "Right Midfield"
     },
     {
       "number": 17,
@@ -15472,6 +15663,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Pape Gueye",
       "age": 27,
       "position": "Midfielder",
+      "club": "Villarreal",
       "espnId": "255889",
       "fullName": "Pape Gueye",
       "dob": "1999-01-24",
@@ -15479,7 +15671,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 2\"",
       "weight": "172 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/255889/pape-gueye",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/9e7ql31762888843.png",
+      "detailedPosition": "Central Midfield"
     },
     {
       "number": 7,
@@ -15936,6 +16129,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Tshepang Moremi",
       "age": 25,
       "position": "Forward",
+      "club": "Orlando Pirates",
       "espnId": "313399",
       "fullName": "Tshepang Moremi",
       "dob": "2000-10-02",
@@ -15943,7 +16137,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 6\"",
       "weight": "152 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/313399/tshepang-moremi",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/6zan8z1779972227.png",
+      "detailedPosition": "Left Wing"
     },
     {
       "number": 9,
@@ -15966,6 +16161,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Relebohile Mofokeng",
       "age": 21,
       "position": "Forward",
+      "club": "Orlando Pirates",
       "espnId": "361211",
       "fullName": "Relebohile Mofokeng",
       "dob": "2004-10-23",
@@ -15973,13 +16169,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 7\"",
       "weight": "150 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/361211/relebohile-mofokeng",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/mw8id81779972149.png",
+      "detailedPosition": "Left Wing"
     },
     {
       "number": 12,
       "name": "Thapelo Maseko",
       "age": 22,
       "position": "Forward",
+      "club": "Mamelodi Sundowns",
       "espnId": "335450",
       "fullName": "Thapelo Maseko",
       "dob": "2003-11-11",
@@ -15987,7 +16185,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 10\"",
       "weight": "161 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/335450/thapelo-maseko",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/6uwojl1779971640.png",
+      "detailedPosition": "Left Wing"
     },
     {
       "number": 15,
@@ -16010,6 +16209,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Evidence Makgopa",
       "age": 26,
       "position": "Forward",
+      "club": "Orlando Pirates",
       "espnId": "303312",
       "fullName": "Evidence Makgopa",
       "dob": "2000-06-05",
@@ -16017,7 +16217,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 2\"",
       "weight": "161 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/303312/evidence-makgopa",
-      "detailedPosition": "Forward"
+      "photo": "https://www.thesportsdb.com/images/media/player/cutout/5hspcm1779970805.png",
+      "detailedPosition": "Centre-Forward"
     }
   ],
   "South Korea": [
@@ -16506,6 +16707,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Alejandro Grimaldo",
       "age": 30,
       "position": "Defender",
+      "club": "_Retired-Soccer",
       "espnId": "166396",
       "fullName": "Alejandro Grimaldo",
       "dob": "1995-09-20",
@@ -16513,7 +16715,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 7\"",
       "weight": "139 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/166396/alejandro-grimaldo",
-      "detailedPosition": "Defender"
+      "detailedPosition": "Left-Back"
     },
     {
       "number": 4,
@@ -16536,6 +16738,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Pedro Porro",
       "age": 26,
       "position": "Defender",
+      "club": "Tottenham Hotspur",
       "espnId": "268533",
       "fullName": "Pedro Porro",
       "dob": "1999-09-13",
@@ -16543,13 +16746,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 8\"",
       "weight": "150 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/268533/pedro-porro",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/cy918t1762021683.png",
+      "detailedPosition": "Right-Back"
     },
     {
       "number": 14,
       "name": "Aymeric Laporte",
       "age": 32,
       "position": "Defender",
+      "club": "Athletic Bilbao",
       "espnId": "159317",
       "fullName": "Aymeric Laporte",
       "dob": "1994-05-27",
@@ -16557,7 +16762,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 2\"",
       "weight": "190 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/159317/aymeric-laporte",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/q4eqw31762285953.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 22,
@@ -16580,6 +16786,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Marc Cucurella",
       "age": 27,
       "position": "Defender",
+      "club": "Real Madrid",
       "espnId": "259910",
       "fullName": "Marc Cucurella",
       "dob": "1998-07-22",
@@ -16587,7 +16794,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 9\"",
       "weight": "146 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/259910/marc-cucurella",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/j7i66q1757002736.png",
+      "detailedPosition": "Left-Back"
     },
     {
       "number": 5,
@@ -16639,11 +16847,11 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
     },
     {
       "number": 9,
-      "name": "Gavi ",
+      "name": "Gavi",
       "age": 21,
       "position": "Midfielder",
       "espnId": "323702",
-      "fullName": "Gavi ",
+      "fullName": "Gavi",
       "dob": "2004-08-05",
       "nationality": "Spain",
       "height": "5' 9\"",
@@ -16701,11 +16909,11 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
     },
     {
       "number": 16,
-      "name": "Rodri ",
+      "name": "Rodri",
       "age": 30,
       "position": "Midfielder",
       "espnId": "231828",
-      "fullName": "Rodri ",
+      "fullName": "Rodri",
       "dob": "1996-06-22",
       "nationality": "Spain",
       "height": "6' 3\"",
@@ -16732,17 +16940,19 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
     },
     {
       "number": 20,
-      "name": "Pedri ",
+      "name": "Pedri",
       "age": 23,
       "position": "Midfielder",
+      "club": "Barcelona",
       "espnId": "250465",
-      "fullName": "Pedri ",
+      "fullName": "Pedri",
       "dob": "2002-11-25",
       "nationality": "Spain",
       "height": "5' 9\"",
       "weight": "150 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/250465/pedri",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/82xtuu1726509836.png",
+      "detailedPosition": "Central Midfield"
     },
     {
       "number": 7,
@@ -17039,6 +17249,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Lucas Bergvall",
       "age": 20,
       "position": "Midfielder",
+      "club": "Tottenham Hotspur",
       "espnId": "356379",
       "fullName": "Lucas Bergvall",
       "dob": "2006-02-02",
@@ -17046,7 +17257,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 2\"",
       "weight": "163 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/356379/lucas-bergvall",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/6hbkx51757016291.png",
+      "detailedPosition": "Central Midfield"
     },
     {
       "number": 13,
@@ -17117,6 +17329,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Besfort Zeneli",
       "age": 23,
       "position": "Midfielder",
+      "club": "Union Saint-Gilloise",
       "espnId": "334024",
       "fullName": "Besfort Zeneli",
       "dob": "2002-11-21",
@@ -17124,13 +17337,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 2\"",
       "weight": "157 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/334024/besfort-zeneli",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/z6kdc01717844452.png",
+      "detailedPosition": "Central Midfield"
     },
     {
       "number": 24,
       "name": "Elliot Stroud",
       "age": 24,
       "position": "Midfielder",
+      "club": "Mjällby",
       "espnId": "357145",
       "fullName": "Elliot Stroud",
       "dob": "2002-06-22",
@@ -17138,7 +17353,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 1\"",
       "weight": "163 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/357145/elliot-stroud",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/9u94c51718821528.png",
+      "detailedPosition": "Left Midfield"
     },
     {
       "number": 26,
@@ -17161,6 +17377,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Alexander Isak",
       "age": 26,
       "position": "Forward",
+      "club": "Liverpool",
       "espnId": "235662",
       "fullName": "Alexander Isak",
       "dob": "1999-09-21",
@@ -17168,7 +17385,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 3\"",
       "weight": "161 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/235662/alexander-isak",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/3qj7z41757088281.png",
+      "detailedPosition": "Centre-Forward"
     },
     {
       "number": 10,
@@ -17641,6 +17859,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Zeki Amdouni",
       "age": 25,
       "position": "Forward",
+      "club": "Burnley",
       "espnId": "320757",
       "fullName": "Zeki Amdouni",
       "dob": "2000-12-04",
@@ -17648,7 +17867,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 1\"",
       "weight": "172 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/320757/zeki-amdouni",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/2exh3l1757175582.png",
+      "detailedPosition": "Centre-Forward"
     },
     {
       "number": 26,
@@ -17687,6 +17907,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Aymen Dahmen",
       "age": 29,
       "position": "Goalkeeper",
+      "club": "CS Sfaxien",
       "espnId": "265272",
       "fullName": "Aymen Dahmen",
       "dob": "1997-01-28",
@@ -17694,6 +17915,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 2\"",
       "weight": "174 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/265272/aymen-dahmen",
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/x3irao1669130503.png",
       "detailedPosition": "Goalkeeper"
     },
     {
@@ -17701,6 +17923,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Sabri Ben Hessen",
       "age": 30,
       "position": "Goalkeeper",
+      "club": "Étoile du Sahel",
       "espnId": "195253",
       "fullName": "Sabri Ben Hessen",
       "dob": "1996-06-13",
@@ -17708,6 +17931,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 2\"",
       "weight": "174 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/195253/sabri-ben-hessen",
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/i37mkh1779187130.png",
       "detailedPosition": "Goalkeeper"
     },
     {
@@ -18116,6 +18340,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Ugurcan Çakir",
       "age": 30,
       "position": "Goalkeeper",
+      "club": "Galatasaray",
       "espnId": "222922",
       "fullName": "Ugurcan Çakir",
       "dob": "1996-04-05",
@@ -18123,6 +18348,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 3\"",
       "weight": "185 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/222922/ugurcan-cakir",
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/c98xoe1769177452.png",
       "detailedPosition": "Goalkeeper"
     },
     {
@@ -18130,6 +18356,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Zeki Çelik",
       "age": 29,
       "position": "Defender",
+      "club": "Roma",
       "espnId": "271873",
       "fullName": "Zeki Çelik",
       "dob": "1997-02-17",
@@ -18137,13 +18364,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 11\"",
       "weight": "172 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/271873/zeki-celik",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/b8hg8o1758816005.png",
+      "detailedPosition": "Right-Back"
     },
     {
       "number": 3,
       "name": "Merih Demiral",
       "age": 28,
       "position": "Defender",
+      "club": "Al-Ahli",
       "espnId": "267178",
       "fullName": "Merih Demiral",
       "dob": "1998-03-05",
@@ -18151,7 +18380,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 3\"",
       "weight": "190 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/267178/merih-demiral",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/mqjb7n1777237989.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 4,
@@ -18202,6 +18432,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Ozan Kabak",
       "age": 26,
       "position": "Defender",
+      "club": "Hoffenheim",
       "espnId": "266565",
       "fullName": "Ozan Kabak",
       "dob": "2000-03-25",
@@ -18209,13 +18440,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 2\"",
       "weight": "190 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/266565/ozan-kabak",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/gtnzmr1763494412.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 18,
       "name": "Mert Müldür",
       "age": 27,
       "position": "Defender",
+      "club": "Fenerbahçe",
       "espnId": "266002",
       "fullName": "Mert Müldür",
       "dob": "1999-04-03",
@@ -18223,7 +18456,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 0\"",
       "weight": "161 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/266002/mert-muldur",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/l5nngn1724845876.png",
+      "detailedPosition": "Right-Back"
     },
     {
       "number": 20,
@@ -18804,6 +19038,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Max Arfsten",
       "age": 25,
       "position": "Midfielder",
+      "club": "Columbus Crew",
       "espnId": "359542",
       "fullName": "Max Arfsten",
       "dob": "2001-04-19",
@@ -18811,7 +19046,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 1\"",
       "weight": "172 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/359542/max-arfsten",
-      "detailedPosition": "Midfielder"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/wk51wq1766427990.png",
+      "detailedPosition": "Left Wing"
     },
     {
       "number": 9,
@@ -18834,6 +19070,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Haji Wright",
       "age": 28,
       "position": "Forward",
+      "club": "Coventry City",
       "espnId": "220474",
       "fullName": "Haji Wright",
       "dob": "1998-03-27",
@@ -18842,7 +19079,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "weight": "174 lbs",
       "birthPlace": "Los Angeles, USA",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/220474/haji-wright",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/dj2mi11781207728.png",
+      "detailedPosition": "Centre-Forward"
     },
     {
       "number": 20,
@@ -18865,6 +19103,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Timothy Weah",
       "age": 26,
       "position": "Forward",
+      "club": "Marseille",
       "espnId": "266027",
       "fullName": "Timothy Weah",
       "dob": "2000-02-22",
@@ -18872,13 +19111,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 0\"",
       "weight": "146 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/266027/timothy-weah",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/mxdwu11766153578.png",
+      "detailedPosition": "Right Midfield"
     },
     {
       "number": 26,
       "name": "Alejandro Zendejas",
       "age": 28,
       "position": "Forward",
+      "club": "América",
       "espnId": "212824",
       "fullName": "Alejandro Zendejas",
       "dob": "1998-02-07",
@@ -18886,7 +19127,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "5' 6\"",
       "weight": "146 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/212824/alejandro-zendejas",
-      "detailedPosition": "Forward"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/okc36j1750328679.png",
+      "detailedPosition": "Right Winger"
     }
   ],
   "Uruguay": [
@@ -19330,6 +19572,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Abduvohid Nematov",
       "age": 25,
       "position": "Goalkeeper",
+      "club": "Nasaf",
       "espnId": "308612",
       "fullName": "Abduvohid Nematov",
       "dob": "2001-03-20",
@@ -19337,6 +19580,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 0\"",
       "weight": "170 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/308612/abduvohid-nematov",
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/s7adw01781037102.png",
       "detailedPosition": "Goalkeeper"
     },
     {
@@ -19392,6 +19636,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Farrukh Sayfiev",
       "age": 35,
       "position": "Defender",
+      "club": "Neftchi Fergana",
       "espnId": "211537",
       "fullName": "Farrukh Sayfiev",
       "dob": "1991-01-17",
@@ -19399,13 +19644,15 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 0\"",
       "weight": "152 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/211537/farrukh-sayfiev",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/vo03so1781037124.png",
+      "detailedPosition": "Left-Back"
     },
     {
       "number": 5,
       "name": "Rustam Ashurmatov",
       "age": 29,
       "position": "Defender",
+      "club": "Esteghlal",
       "espnId": "195282",
       "fullName": "Rustam Ashurmatov",
       "dob": "1996-07-07",
@@ -19413,7 +19660,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 1\"",
       "weight": "172 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/195282/rustam-ashurmatov",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/i5sv5j1781036776.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 13,
@@ -19436,6 +19684,7 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "name": "Umar Eshmurodov",
       "age": 33,
       "position": "Defender",
+      "club": "Nasaf",
       "espnId": "270463",
       "fullName": "Umar Eshmurodov",
       "dob": "1992-11-30",
@@ -19443,7 +19692,8 @@ export const COUNTRY_ROSTERS: Record<string, CountryPlayer[]> = {
       "height": "6' 1\"",
       "weight": "159 lbs",
       "espnUrl": "https://www.espn.com/soccer/player/_/id/270463/umar-eshmurodov",
-      "detailedPosition": "Defender"
+      "photo": "https://r2.thesportsdb.com/images/media/player/cutout/szn1ml1781036866.png",
+      "detailedPosition": "Centre-Back"
     },
     {
       "number": 24,

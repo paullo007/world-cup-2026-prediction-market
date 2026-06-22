@@ -23,11 +23,23 @@ const details: EspnDetail[] = [
   { scoringPlay: false, type: { text: "Penalty - Missed" }, penaltyKick: true, ownGoal: false, team: { id: "2" }, clock: { displayValue: "70'" }, athletesInvolved: [{ displayName: "Missed Guy" }] },
   // Yellow card — not a goal, must be excluded.
   { scoringPlay: false, type: { text: "Yellow Card" }, team: { id: "2" }, athletesInvolved: [{ displayName: "Booked Guy" }] },
+  // Mononym scorer: ESPN's fullName is "Name null" (null last name) — must be
+  // cleaned to just the name, not "Trézéguet null".
+  { scoringPlay: true, type: { text: "Goal - Header" }, penaltyKick: false, ownGoal: false, team: { id: "2" }, clock: { displayValue: "82'" }, athletesInvolved: [{ displayName: "Trézéguet", fullName: "Trézéguet null" }] },
 ];
 
 const scorers = parseEspnScorers(details, teamById);
 
-assert.equal(scorers.length, 3, `expected 3 goals (penalty + goal + own goal), got ${scorers.length}`);
+assert.equal(scorers.length, 4, `expected 4 goals (penalty + goal + own goal + mononym), got ${scorers.length}`);
+
+assert.ok(
+  scorers.some((s) => s.name === "Trézéguet"),
+  "mononym scorer must be cleaned to 'Trézéguet', not 'Trézéguet null'"
+);
+assert.ok(
+  !scorers.some((s) => /\b(null|undefined)\b/i.test(s.name)),
+  "no scorer name may contain a 'null'/'undefined' token"
+);
 
 const kane = scorers.find((s) => s.name === "Harry Kane");
 assert.ok(kane?.penalty === true, "penalty goal must be captured and flagged penalty");
@@ -40,4 +52,4 @@ assert.equal(og?.name, "Croatia Defender", "own goal keeps the own-scorer's name
 assert.ok(!scorers.some((s) => s.name === "Missed Guy"), "missed penalty must be excluded");
 assert.ok(!scorers.some((s) => s.name === "Booked Guy"), "yellow card must be excluded");
 
-console.log("✓ test-scorers: penalties kept, own goals credited to benefiting team, non-goals excluded (3/3)");
+console.log("✓ test-scorers: penalties kept, own goals credited to benefiting team, non-goals excluded, mononym names cleaned (4/4)");

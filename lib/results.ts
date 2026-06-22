@@ -122,12 +122,24 @@ interface EspnScoreboard {
  *    the own-scorer's name and flag ownGoal so every goal yields exactly one
  *    scorer and the list reconciles with the score.
  */
+/**
+ * Pick a clean player name from an ESPN athlete. ESPN builds `fullName` as
+ * "first last", so a mononym player whose last name is null comes through as
+ * e.g. "Trézéguet null". Strip any trailing/standalone "null"/"undefined" token,
+ * and fall back to `displayName` (already clean) if that leaves nothing.
+ */
+export function cleanPlayerName(ath?: { displayName?: string; fullName?: string }): string | undefined {
+  const clean = (s?: string) =>
+    s?.replace(/\b(null|undefined)\b/gi, "").replace(/\s+/g, " ").trim() || undefined;
+  return clean(ath?.fullName) ?? clean(ath?.displayName);
+}
+
 export function parseEspnScorers(details: EspnDetail[], teamById: Map<string, string>): Scorer[] {
   const scorers: Scorer[] = [];
   for (const d of details) {
     if (!d.scoringPlay) continue;
     if (!/goal|penalty/i.test(d.type?.text ?? "")) continue;
-    const player = d.athletesInvolved?.[0]?.fullName ?? d.athletesInvolved?.[0]?.displayName;
+    const player = cleanPlayerName(d.athletesInvolved?.[0]);
     const team = d.team?.id ? teamById.get(d.team.id) : undefined;
     if (!player || !team) continue;
     scorers.push({

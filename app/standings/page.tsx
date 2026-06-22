@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { flag } from "@/lib/flags";
+import { slugifyCountry } from "@/lib/countries";
 import { GROUPS } from "@/lib/groups";
 import { getPlayedMatches } from "@/lib/playedMatches";
 import { STANDINGS_SOURCES } from "@/lib/sources";
@@ -84,8 +86,14 @@ export default async function StandingsPage() {
                     >
                       <td className="flex items-center gap-1.5 py-1.5 font-semibold">
                         <span className="w-4 text-right text-xs text-slate-400">{i + 1}</span>
-                        <span>{flag(r.team)}</span>
-                        <span className="truncate">{r.team}</span>
+                        <Link
+                          href={`/countries/${slugifyCountry(r.team)}`}
+                          className="flex items-center gap-1.5 rounded transition hover:text-accent hover:underline"
+                          title={`${r.team} — squad, fixtures & history`}
+                        >
+                          <span>{flag(r.team)}</span>
+                          <span className="truncate">{r.team}</span>
+                        </Link>
                       </td>
                       <td className="px-1 text-center text-slate-300">{r.p}</td>
                       <td className="px-1 text-center text-slate-300">{r.w}</td>

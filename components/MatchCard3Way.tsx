@@ -135,6 +135,10 @@ export function MatchCard3Way({
         <GoalscorersBlock scorers={scorers} leftTeam={homeTeam} rightTeam={awayTeam} />
       )}
 
+      {!resolved && (showLive || showFtFlash) && live && (
+        <GoalscorersBlock scorers={live.scorers} leftTeam={homeTeam} rightTeam={awayTeam} />
+      )}
+
       {resolved && myResult !== undefined ? (
         <div
           className={cn(

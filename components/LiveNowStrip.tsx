@@ -2,6 +2,7 @@
 
 import { flag } from "@/lib/flags";
 import { useLiveScores } from "@/components/LiveScoreProvider";
+import { GoalscorersBlock } from "@/components/GoalscorersBlock";
 
 /**
  * "Live now" strip for the Scores tab: shows any match currently in progress
@@ -41,6 +42,9 @@ export function LiveNowStrip() {
             <p className="mt-2 text-[11px] font-bold uppercase tracking-wide text-red-600">
               {m.detail || m.clock}
             </p>
+            <div className="mt-2">
+              <GoalscorersBlock scorers={m.scorers} leftTeam={m.home} rightTeam={m.away} />
+            </div>
           </div>
         ))}
       </div>

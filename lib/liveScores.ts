@@ -1,4 +1,11 @@
-import { canonicalTeam } from "@/lib/results";
+import {
+  canonicalTeam,
+  parseEspnScorers,
+  fetchEspnAssists,
+  attachAssists,
+  type EspnDetail,
+  type Scorer,
+} from "@/lib/results";
 
 // ESPN's public scoreboard (no key). Same source as resolution, but this module
 // is DELIBERATELY separate from the payout pipeline: it keeps in-progress
@@ -18,18 +25,21 @@ export interface LiveMatch {
   state: LiveState;
   clock: string; // e.g. "70'"
   detail: string; // e.g. "70'", "HT", "FT"
+  scorers: Scorer[]; // live goalscorers (name, team, minute, penalty/OG, assists)
 }
 
 interface EspnScoreboard {
   events?: Array<{
+    id?: string;
     status?: { displayClock?: string; type?: { state?: string; shortDetail?: string } };
     competitions?: Array<{
       status?: { displayClock?: string; type?: { state?: string; shortDetail?: string } };
       competitors?: Array<{
         homeAway: "home" | "away";
         score?: string;
-        team?: { displayName?: string; name?: string };
+        team?: { id?: string; displayName?: string; name?: string };
       }>;
+      details?: EspnDetail[];
     }>;
   }>;
 }
@@ -75,6 +85,16 @@ export async function fetchLiveScores(): Promise<LiveMatch[]> {
       if (seen.has(matchKey)) continue; // a match can appear under both day queries
       seen.add(matchKey);
 
+      // Live goalscorers from the scoreboard's scoring plays (same parser as
+      // resolution), enriched with assists from the per-match summary endpoint.
+      const teamById = new Map<string, string>();
+      if (home.team.id) teamById.set(home.team.id, h);
+      if (away.team.id) teamById.set(away.team.id, a);
+      let scorers = parseEspnScorers(comp?.details ?? [], teamById);
+      if (ev.id && scorers.length) {
+        scorers = attachAssists(scorers, await fetchEspnAssists(ev.id)); // best-effort
+      }
+
       out.push({
         matchKey,
         home: h,
@@ -84,6 +104,7 @@ export async function fetchLiveScores(): Promise<LiveMatch[]> {
         state,
         clock: comp?.status?.displayClock ?? ev.status?.displayClock ?? "",
         detail: comp?.status?.type?.shortDetail ?? ev.status?.type?.shortDetail ?? "",
+        scorers,
       });
     }
   }

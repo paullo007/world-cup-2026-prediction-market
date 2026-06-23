@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Market } from "@prisma/client";
 import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import { MatchCard3Way } from "@/components/MatchCard3Way";
+import { LiveScoreProvider } from "@/components/LiveScoreProvider";
 import { useTopbarHeight } from "@/components/StickyUnderNav";
 import { cn } from "@/lib/utils";
 
@@ -115,6 +116,7 @@ export function MatchDayBoard({
   };
 
   return (
+    <LiveScoreProvider>
     <div className="space-y-5">
       {/* Sticky band: the day selector pins just under the nav; an opaque
           bg-surface wrapper covers fixtures scrolling underneath it. */}
@@ -211,5 +213,6 @@ export function MatchDayBoard({
         </div>
       )}
     </div>
+    </LiveScoreProvider>
   );
 }

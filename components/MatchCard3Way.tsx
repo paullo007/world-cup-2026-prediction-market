@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import type { Market } from "@prisma/client";
 import type { Scorer } from "@/lib/results";
@@ -7,6 +9,7 @@ import { VENUES } from "@/lib/venues";
 import { awaitingResult, cn, formatPercent, formatWCD } from "@/lib/utils";
 import { MatchStartTime } from "@/components/MatchStartTime";
 import { GoalscorersBlock } from "@/components/GoalscorersBlock";
+import { useLiveScore } from "@/components/LiveScoreProvider";
 import { Clock, MapPin } from "lucide-react";
 
 /**
@@ -37,6 +40,12 @@ export function MatchCard3Way({
   const venue = home.matchKey ? VENUES[home.matchKey] : undefined;
   const resolved = home.status === "RESOLVED";
   const awaiting = awaitingResult(home) && !resolved;
+
+  // Live (display-only) overlay from ESPN — never affects resolution/payout.
+  // "in" = playing now; "post" = final but our DB hasn't resolved it yet.
+  const live = useLiveScore(home.matchKey);
+  const showLive = !resolved && live?.state === "in";
+  const showFtFlash = !resolved && live?.state === "post";
 
   // Goalscorers (stored on the HOME market only). Shown once the match is
   // resolved; rendering/splitting/sorting handled by GoalscorersBlock.
@@ -78,6 +87,24 @@ export function MatchCard3Way({
           {winnerLabel && (
             <span className="text-xs font-semibold text-accent">{winnerLabel}</span>
           )}
+        </div>
+      ) : showLive && live ? (
+        <div className="flex flex-col items-center gap-1 rounded-lg border border-red-500/40 bg-red-500/5 px-3 py-3">
+          <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-red-600">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-red-600" /> Live
+          </span>
+          <span className="text-lg font-extrabold tabular-nums">
+            {live.homeGoals} – {live.awayGoals}
+          </span>
+          <span className="text-xs font-semibold text-slate-400">{live.detail || live.clock}</span>
+        </div>
+      ) : showFtFlash && live ? (
+        <div className="flex flex-col items-center gap-1 rounded-lg border border-surface-border bg-surface px-3 py-3">
+          <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Full time</span>
+          <span className="text-lg font-extrabold tabular-nums">
+            {live.homeGoals} – {live.awayGoals}
+          </span>
+          <span className="text-xs font-semibold text-slate-400">Settling…</span>
         </div>
       ) : awaiting ? (
         <div className="flex items-center justify-center gap-2 rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm font-semibold text-slate-400">

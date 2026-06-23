@@ -1,23 +1,42 @@
 name: Resolve match results
 
 # Backstop scheduler for settling finished World Cup matches. Vercel's own cron
-# is plan-limited and was never firing for this project, so we drive the
-# throttled, public self-heal endpoint from GitHub Actions instead. The endpoint
-# is idempotent + cooldown-throttled, so frequent hits are harmless. The in-app
-# self-heal (<AutoResolve> on page load) covers the case where someone is viewing
-# the site; this covers the case where nobody is.
+# is plan-limited and was never firing for this project, so we drive the public
+# settlement endpoints from GitHub Actions instead. Both endpoints are idempotent
+# (already-RESOLVED markets are skipped), so frequent/overlapping hits are
+# harmless. The in-app self-heal (<AutoResolve> on page load) covers viewers;
+# this covers the unattended case.
+#
+# Two schedules:
+#  - Baseline every 15m → /api/auto-resolve (cooldown-throttled self-heal).
+#  - During the daily match window, 01:00–13:00 Singapore time (UTC+8) =
+#    17:00–05:00 UTC, every 2m → /api/refresh-results (NO cooldown), so finished
+#    games pay out within ~2 minutes while matches are being played.
+# (GitHub's scheduler is best-effort; sub-5-minute crons may be delayed/coalesced
+#  under load, so 2m is a target, not a guarantee.)
 on:
   schedule:
-    - cron: "*/15 * * * *" # every 15 minutes (GitHub's minimum granularity is ~5m)
-  workflow_dispatch: {}      # allow manual runs from the Actions tab
+    - cron: "*/15 * * * *"          # baseline, every 15 minutes
+    - cron: "*/2 17-23,0-4 * * *"   # every 2 min, 01:00–12:58 SGT match window
+  workflow_dispatch: {}             # allow manual runs from the Actions tab
 
 jobs:
   resolve:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger auto-resolve
+      - name: Trigger result settlement
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
         run: |
-          curl -fsS -X POST \
-            "https://world-cup-2026-prediction-market.vercel.app/api/auto-resolve" \
+          # The 15-minute baseline uses the throttled self-heal; the 2-minute
+          # match-window schedule (and manual runs) use the no-cooldown endpoint
+          # so settlement actually happens every ~2 minutes.
+          if [ "$SCHEDULE" = "*/15 * * * *" ]; then
+            URL="https://world-cup-2026-prediction-market.vercel.app/api/auto-resolve"
+          else
+            URL="https://world-cup-2026-prediction-market.vercel.app/api/refresh-results"
+          fi
+          echo "Hitting $URL"
+          curl -fsS -X POST "$URL" \
             -H "Content-Type: application/json" \
             -w "\nHTTP %{http_code}\n"

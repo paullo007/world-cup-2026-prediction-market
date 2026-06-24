@@ -4,6 +4,7 @@ import { slugifyCountry } from "@/lib/countries";
 import { cn } from "@/lib/utils";
 import { MatchStartTime } from "@/components/MatchStartTime";
 import { GoalscorersBlock } from "@/components/GoalscorersBlock";
+import { CountryLink } from "@/components/CountryLink";
 import { SourceNote } from "@/components/SourceNote";
 import { SquadTable } from "@/components/SquadTable";
 
@@ -73,7 +74,7 @@ export function CountryDetail({
                   <div className="flex items-center gap-2 pr-20 font-semibold">
                     <span>{flag(name)}</span> {name}
                     <span className="mx-1 text-xs text-slate-400">vs</span>
-                    <span>{flag(m.opponent)}</span> {m.opponent}
+                    <span>{flag(m.opponent)}</span> <CountryLink name={m.opponent} />
                   </div>
                   {r && (
                     <div className="mt-1.5 text-sm font-bold">

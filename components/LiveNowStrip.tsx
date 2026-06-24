@@ -3,6 +3,7 @@
 import { flag } from "@/lib/flags";
 import { useLiveScores } from "@/components/LiveScoreProvider";
 import { GoalscorersBlock } from "@/components/GoalscorersBlock";
+import { CountryLink } from "@/components/CountryLink";
 
 /**
  * "Live now" strip for the Scores tab: shows any match currently in progress
@@ -27,7 +28,7 @@ export function LiveNowStrip() {
             <div className="flex items-center justify-between gap-2 font-semibold">
               <span className="flex items-center gap-1.5 truncate">
                 <span>{flag(m.home)}</span>
-                <span className="truncate">{m.home}</span>
+                <CountryLink name={m.home} className="truncate" />
               </span>
               <span className="tabular-nums">{m.homeGoals}</span>
             </div>
@@ -35,7 +36,7 @@ export function LiveNowStrip() {
             <div className="flex items-center justify-between gap-2 font-semibold">
               <span className="flex items-center gap-1.5 truncate">
                 <span>{flag(m.away)}</span>
-                <span className="truncate">{m.away}</span>
+                <CountryLink name={m.away} className="truncate" />
               </span>
               <span className="tabular-nums">{m.awayGoals}</span>
             </div>

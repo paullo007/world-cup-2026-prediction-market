@@ -5,6 +5,7 @@ import { AI_BRACKET, predWinner, eloScores, type PredMatch } from "@/lib/aiKnock
 import { BRACKET } from "@/lib/bracket";
 import type { Venue } from "@/lib/venues";
 import { flag } from "@/lib/flags";
+import { CountryLink } from "@/components/CountryLink";
 import { MatchStartTime } from "@/components/MatchStartTime";
 import { FitToWidth } from "@/components/FitToWidth";
 import { StickyUnderNav } from "@/components/StickyUnderNav";
@@ -45,7 +46,7 @@ function TeamRow({ team, score, won }: { team: string; score: number; won: boole
   return (
     <div className={cn("flex items-center gap-2", won ? "text-slate-100" : "text-slate-400")}>
       <span className="shrink-0 text-[1.5em] leading-none">{flag(team)}</span>
-      <span className={cn("flex-1 truncate", won ? "font-extrabold" : "font-semibold")}>{team}</span>
+      <CountryLink name={team} className={cn("flex-1 truncate", won ? "font-extrabold" : "font-semibold")} />
       <span className={cn("shrink-0 tabular-nums", won ? "font-extrabold text-accent" : "font-bold")}>{score}</span>
     </div>
   );

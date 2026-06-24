@@ -9,6 +9,7 @@ import { VENUES } from "@/lib/venues";
 import { awaitingResult, cn, formatPercent, formatWCD } from "@/lib/utils";
 import { MatchStartTime } from "@/components/MatchStartTime";
 import { GoalscorersBlock } from "@/components/GoalscorersBlock";
+import { CountryLink } from "@/components/CountryLink";
 import { useLiveScore } from "@/components/LiveScoreProvider";
 import { Clock, MapPin } from "lucide-react";
 
@@ -71,9 +72,9 @@ export function MatchCard3Way({
     <div className="flex flex-col gap-3 rounded-xl border border-surface-border bg-surface-raised p-4 transition hover:border-accent/50">
       <div className="font-semibold">
         {index != null && <span className="mr-1.5 font-bold text-slate-500">{index}.</span>}
-        {homeTeam} <span className="align-middle">{flag(homeTeam)}</span>
+        <CountryLink name={homeTeam} /> <span className="align-middle">{flag(homeTeam)}</span>
         <span className="mx-1.5 text-slate-400">vs</span>
-        <span className="align-middle">{flag(awayTeam)}</span> {awayTeam}
+        <span className="align-middle">{flag(awayTeam)}</span> <CountryLink name={awayTeam} />
       </div>
 
       {resolved ? (

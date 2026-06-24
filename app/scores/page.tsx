@@ -6,6 +6,7 @@ import { SCORES_SOURCES } from "@/lib/sources";
 import { SourceNote } from "@/components/SourceNote";
 import { LiveScoreProvider } from "@/components/LiveScoreProvider";
 import { LiveNowStrip } from "@/components/LiveNowStrip";
+import { CountryLink } from "@/components/CountryLink";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +16,7 @@ function TeamLine({ team, goals, won }: { team: string; goals: number; won: bool
     <div className={cn("flex items-center justify-between gap-2", won ? "font-bold" : "font-medium text-slate-300")}>
       <span className="flex items-center gap-1.5 truncate">
         <span>{flag(team)}</span>
-        <span className="truncate">{team}</span>
+        <CountryLink name={team} className="truncate" />
       </span>
       <span className="tabular-nums">{goals}</span>
     </div>

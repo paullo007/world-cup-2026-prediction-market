@@ -1,6 +1,7 @@
 "use client";
 
 import { flag } from "@/lib/flags";
+import { CountryLink } from "@/components/CountryLink";
 import { useTopbarHeight } from "@/components/StickyUnderNav";
 import { cn } from "@/lib/utils";
 
@@ -45,7 +46,7 @@ export function GoalscorersTable({ scorers, totalGoals }: { scorers: ScorerRow[]
               </td>
               <td className="px-2 py-2 text-slate-300">
                 <span className="mr-1.5">{flag(s.team)}</span>
-                {s.team}
+                <CountryLink name={s.team} />
               </td>
               <td className="px-4 py-2 text-right font-bold tabular-nums">{s.goals}</td>
             </tr>

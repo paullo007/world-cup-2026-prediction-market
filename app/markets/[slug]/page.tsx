@@ -12,6 +12,27 @@ import { CheckCircle2, Clock } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Plain-language statement of what a YES bet means, for the green prediction bar.
+ * 3-way match outcomes read "{team} Will Win" / "The Match Will Be a Draw";
+ * tournament-winner and other "Will X?" markets are reworded to a statement.
+ */
+function yesClaim(market: { matchKey: string | null; outcomeType: string | null; question: string }): string {
+  if (market.matchKey && market.outcomeType) {
+    const [home, away] = market.matchKey.split(" vs ");
+    if (market.outcomeType === "HOME") return `${home} Will Win`;
+    if (market.outcomeType === "AWAY") return `${away} Will Win`;
+    if (market.outcomeType === "DRAW") return "The Match Will Be a Draw";
+  }
+  const beat = market.question.match(/^Will\s+(.+?)\s+beat\s+/i); // legacy binary match
+  if (beat) return `${beat[1]} Will Win`;
+  const champ = market.question.match(/^Will\s+(.+?)\s+win the 2026 FIFA World Cup\??$/i);
+  if (champ) return `${champ[1]} Will Win the 2026 FIFA World Cup`;
+  // Fallback (e.g. Crazy Predictions): "Will X?" → "X"
+  const generic = market.question.replace(/^Will\s+/i, "").replace(/\?+\s*$/, "");
+  return generic.charAt(0).toUpperCase() + generic.slice(1);
+}
+
 export default async function MarketPage({ params }: { params: { slug: string } }) {
   const market = await db.market.findUnique({
     where: { slug: params.slug },
@@ -43,9 +64,22 @@ export default async function MarketPage({ params }: { params: { slug: string } 
     .reverse()
     .map((t) => ({ time: t.createdAt.getTime(), price: t.priceAfter }));
 
+  const claim = yesClaim(market);
+
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
       <div className="space-y-6">
+        {market.status !== "RESOLVED" && (
+          // Green "what YES means" bar — color-aligned with the YES/Buy buttons,
+          // styled like the Matches-tab outcome pills. Makes the bet explicit.
+          <div className="flex items-center justify-between gap-3 rounded-xl bg-yes-dim/60 px-4 py-3 text-yes">
+            <span className="flex items-center gap-2 font-bold">
+              <CheckCircle2 className="h-5 w-5 shrink-0" />
+              <span>{claim}</span>
+            </span>
+            <span className="shrink-0 text-lg font-extrabold tabular-nums">{formatPercent(p)}</span>
+          </div>
+        )}
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-amber-600">
             {market.category}

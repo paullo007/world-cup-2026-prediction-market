@@ -113,9 +113,9 @@ export function MatchCard3Way({
         </div>
       ) : (
         <div className="flex flex-col gap-1.5">
-          <Outcome label={`${homeTeam} win`} market={home} />
-          <Outcome label="Draw" market={draw} />
-          <Outcome label={`${awayTeam} win`} market={away} />
+          <Outcome label={`${homeTeam} Will Win`} market={home} />
+          <Outcome label="The Match Will Be a Draw" market={draw} />
+          <Outcome label={`${awayTeam} Will Win`} market={away} />
         </div>
       )}
 

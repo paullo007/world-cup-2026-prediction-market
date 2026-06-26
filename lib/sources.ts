@@ -21,3 +21,6 @@ export const THESPORTSDB_SOURCE: SourceLink = {
 export const SCORES_SOURCES: SourceLink[] = [ESPN_SOURCE, THESPORTSDB_SOURCE];
 export const STANDINGS_SOURCES: SourceLink[] = [ESPN_SOURCE, THESPORTSDB_SOURCE];
 export const GOALS_SOURCES: SourceLink[] = [ESPN_SOURCE];
+export const RANKINGS_SOURCES: SourceLink[] = [
+  { label: "FIFA/Coca-Cola World Ranking", url: "https://inside.fifa.com/fifa-world-ranking/men" },
+];

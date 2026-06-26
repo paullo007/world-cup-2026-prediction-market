@@ -20,11 +20,13 @@ export function RankingsTable() {
 
   return (
     <div style={{ overflowX: "clip" }}>
-      <table className="w-full text-sm">
+      {/* Content-width (not w-full) so the four short columns sit tight together
+          instead of the browser spreading them across the page. */}
+      <table className="w-auto text-sm">
         <thead>
           <tr className="text-[11px] uppercase tracking-wide text-slate-400">
             <th style={{ top }} className={cn(th, "text-left")}>#</th>
-            <th style={{ top }} className={cn(th, "text-right")}>FIFA Rank</th>
+            <th style={{ top }} className={cn(th, "text-right")}>FIFA Ranking</th>
             <th style={{ top }} className={cn(th, "text-left")}>Team</th>
             <th style={{ top }} className={cn(th, "text-right")}>Points</th>
           </tr>

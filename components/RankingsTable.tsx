@@ -26,21 +26,21 @@ export function RankingsTable() {
         <thead>
           <tr className="text-[11px] uppercase tracking-wide text-slate-400">
             <th style={{ top }} className={cn(th, "text-left")}>#</th>
-            <th style={{ top }} className={cn(th, "text-right")}>FIFA Ranking</th>
+            <th style={{ top }} className={cn(th, "text-center")}>FIFA Ranking</th>
             <th style={{ top }} className={cn(th, "text-left")}>Team</th>
-            <th style={{ top }} className={cn(th, "text-right")}>Points</th>
+            <th style={{ top }} className={cn(th, "text-left")}>Points</th>
           </tr>
         </thead>
         <tbody>
           {FIFA_RANKING.map((r, i) => (
             <tr key={r.team} className="border-t border-surface-border transition hover:bg-surface">
               <td className="px-3 py-2 text-slate-400 tabular-nums">{i + 1}</td>
-              <td className="px-3 py-2 text-right font-bold tabular-nums">{r.rank}</td>
+              <td className="px-3 py-2 text-center font-bold tabular-nums">{r.rank}</td>
               <td className="px-3 py-2 font-semibold">
                 <span className="mr-1.5">{flag(r.team)}</span>
                 <CountryLink name={r.team} />
               </td>
-              <td className="px-3 py-2 text-right tabular-nums text-slate-300">
+              <td className="px-3 py-2 text-left tabular-nums text-slate-300">
                 {r.points.toFixed(2)}
               </td>
             </tr>

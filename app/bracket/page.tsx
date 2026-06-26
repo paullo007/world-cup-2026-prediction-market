@@ -1,12 +1,19 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { BracketTree } from "@/components/BracketTree";
+import { fetchBracketTeams } from "@/lib/bracketSync";
+import { BracketLive } from "@/components/BracketLive";
 
 export const dynamic = "force-dynamic";
 
 export default async function BracketPage() {
-  const assignments = await db.bracketAssignment.findMany();
-  const teams = Object.fromEntries(assignments.map((a) => [a.slot, a.team]));
+  // Seed with ESPN-derived teams + manual overrides (admin editor wins) so the
+  // first paint already shows teams; BracketLive then polls to keep it real-time.
+  const [espn, assignments] = await Promise.all([
+    fetchBracketTeams(),
+    db.bracketAssignment.findMany(),
+  ]);
+  const teams: Record<string, string> = { ...espn };
+  for (const a of assignments) teams[a.slot] = a.team;
 
   return (
     <div className="space-y-6">
@@ -24,7 +31,7 @@ export default async function BracketPage() {
         </p>
       </div>
 
-      <BracketTree teams={teams} />
+      <BracketLive initialTeams={teams} />
     </div>
   );
 }

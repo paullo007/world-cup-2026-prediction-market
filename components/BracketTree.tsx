@@ -1,7 +1,13 @@
+"use client";
+
 import { BRACKET, THIRD_PLACE, type BracketMatch } from "@/lib/bracket";
 import { flag } from "@/lib/flags";
 import { MatchStartTime } from "@/components/MatchStartTime";
+import { StickyUnderNav } from "@/components/StickyUnderNav";
+import { FitToWidth } from "@/components/FitToWidth";
 import { cn } from "@/lib/utils";
+
+const BRACKET_W = "min-w-[1100px]"; // shared fixed width so labels align with columns
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -161,30 +167,42 @@ export function BracketTree({ teams }: { teams: Record<string, string> }) {
   const lastIndex = BRACKET.length - 1;
 
   return (
-    <div className="overflow-x-auto pb-4">
-      <div className="flex min-w-[1100px] items-stretch gap-8">
-        {BRACKET.map((round, ri) => {
-          const theme = THEMES[round.key] ?? FALLBACK;
-          const isFinal = round.key === "final";
-          return (
-            <div key={round.key} className="flex flex-1 flex-col">
-              {/* Fixed header height bottom-aligned: keeps every column's boxes
-                  (and their connectors) aligned even though the Final title is
-                  enlarged 3×. */}
-              <div className="mb-3 flex h-20 flex-col items-center justify-end text-center">
+    <div>
+      {/* Round labels pin just under the global nav while the bracket scrolls —
+          same pattern as the AI Knockouts tab (a StickyUnderNav row separate
+          from the FitToWidth-scaled body, which can't host a sticky itself). */}
+      <StickyUnderNav className="border-b border-surface-border bg-surface">
+        <div className={cn("flex items-stretch gap-8 py-2", BRACKET_W)}>
+          {BRACKET.map((round) => {
+            const theme = THEMES[round.key] ?? FALLBACK;
+            const isFinal = round.key === "final";
+            return (
+              <div key={round.key} className="flex flex-1 flex-col items-center text-center">
                 <div
                   className={cn(
                     "font-bold",
                     theme.header,
-                    isFinal ? "whitespace-nowrap text-[2.625rem] font-extrabold leading-none" : "text-sm"
+                    isFinal ? "whitespace-nowrap text-base font-extrabold leading-none" : "text-sm"
                   )}
                 >
                   {isFinal ? "🏆 " : ""}
                   {round.name}
                 </div>
-                <div className="mt-1 text-xs font-bold text-slate-400">{round.dates}</div>
+                <div className="mt-0.5 text-xs font-bold text-slate-400">{round.dates}</div>
               </div>
-              <div className="flex flex-1 flex-col">
+            );
+          })}
+        </div>
+      </StickyUnderNav>
+
+      {/* Bracket body — round headers now live in the sticky bar above. */}
+      <FitToWidth className="pb-4">
+        <div className={cn("flex items-stretch gap-8 pt-3", BRACKET_W)}>
+          {BRACKET.map((round, ri) => {
+            const theme = THEMES[round.key] ?? FALLBACK;
+            const isFinal = round.key === "final";
+            return (
+              <div key={round.key} className="flex flex-1 flex-col">
                 {round.matches.map((m) => (
                   <MatchCell
                     key={m.num}
@@ -197,10 +215,10 @@ export function BracketTree({ teams }: { teams: Record<string, string> }) {
                   />
                 ))}
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      </FitToWidth>
 
       <div className="mt-8 max-w-xs">
         <div className="mb-2 text-sm font-bold text-rose-500">🥉 Third-place play-off</div>

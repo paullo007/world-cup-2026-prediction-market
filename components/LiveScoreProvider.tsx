@@ -2,17 +2,11 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { LiveMatch } from "@/lib/liveScores";
+import { inLiveWindow } from "@/lib/liveWindow";
 
 const POLL_MS = 45_000; // refresh cadence while a game is on
 
 const LiveCtx = createContext<Record<string, LiveMatch>>({});
-
-/** True within the daily match window: 01:00–13:00 Singapore time (UTC+8, no DST).
- *  Polling only runs in this window to avoid pointless off-hours requests. */
-function inMatchWindow(now = new Date()): boolean {
-  const sgtHour = (now.getUTCHours() + 8) % 24;
-  return sgtHour >= 1 && sgtHour < 13;
-}
 
 /** Live data for one fixture by its `matchKey` ("Home vs Away"), or undefined.
  *  ESPN may designate home/away opposite to our market, so we also match the
@@ -52,7 +46,7 @@ export function LiveScoreProvider({ children }: { children: React.ReactNode }) {
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const refresh = useCallback(async () => {
-    if (!inMatchWindow() || document.visibilityState !== "visible") return;
+    if (!inLiveWindow() || document.visibilityState !== "visible") return;
     try {
       const res = await fetch("/api/live-scores", { cache: "no-store" });
       if (!res.ok) return;

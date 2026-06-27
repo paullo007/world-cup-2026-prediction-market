@@ -4,8 +4,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Market } from "@prisma/client";
 import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import { MatchCard3Way } from "@/components/MatchCard3Way";
+import { KnockoutCard } from "@/components/KnockoutCard";
 import { LiveScoreProvider } from "@/components/LiveScoreProvider";
 import { useTopbarHeight } from "@/components/StickyUnderNav";
+import type { KnockoutFixture } from "@/lib/bracket";
 import { cn } from "@/lib/utils";
 
 interface MatchEntry {
@@ -32,9 +34,13 @@ function dayKey(d: Date): string {
 export function MatchDayBoard({
   matches,
   myResultByMatch = {},
+  knockouts = [],
 }: {
   matches: MatchEntry[];
   myResultByMatch?: Record<string, number>;
+  /** Display-only knockout fixtures (R32→Final), shown on their kickoff days so
+   *  the day picker spans the whole tournament, not just the group stage. */
+  knockouts?: KnockoutFixture[];
 }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -46,16 +52,18 @@ export function MatchDayBoard({
   // early return, so the hook order stays stable across renders).
   const dateRef = useRef<HTMLInputElement>(null);
 
-  // Unique kickoff days (local), sorted ascending — the strip's tabs.
+  // Unique kickoff days (local) from BOTH group-match markets and knockout
+  // fixtures, sorted ascending — so the strip spans the whole tournament.
   const days = useMemo(() => {
     const seen = new Map<string, Date>();
-    for (const e of matches) {
-      const d = new Date(e.market.closesAt);
+    const add = (d: Date) => {
       const k = dayKey(d);
       if (!seen.has(k)) seen.set(k, new Date(d.getFullYear(), d.getMonth(), d.getDate()));
-    }
+    };
+    for (const e of matches) add(new Date(e.market.closesAt));
+    for (const k of knockouts) add(new Date(k.kickoff));
     return Array.from(seen.values()).sort((a, b) => a.getTime() - b.getTime());
-  }, [matches]);
+  }, [matches, knockouts]);
   const dayKeys = useMemo(() => days.map(dayKey), [days]);
 
   // Default selection: today if it has matches, else the next upcoming day,
@@ -89,7 +97,16 @@ export function MatchDayBoard({
     return Array.from(groups.values());
   }, [cardsForDay]);
 
-  if (!matches.length) {
+  // The selected day's knockout fixtures (display-only), earliest kickoff first.
+  const knockoutsForDay = useMemo(() => {
+    if (!days.length) return [];
+    const key = dayKeys[selectedIdx];
+    return knockouts
+      .filter((k) => dayKey(new Date(k.kickoff)) === key)
+      .sort((a, b) => (a.kickoff < b.kickoff ? -1 : 1));
+  }, [knockouts, days, dayKeys, selectedIdx]);
+
+  if (!matches.length && !knockouts.length) {
     return <p className="py-12 text-center text-slate-400">No matches in this category yet.</p>;
   }
 
@@ -222,7 +239,7 @@ export function MatchDayBoard({
         </div>
       </div>
 
-      {fixturesForDay.length === 0 ? (
+      {fixturesForDay.length === 0 && knockoutsForDay.length === 0 ? (
         <p className="py-12 text-center text-slate-400">No matches on this day.</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -234,6 +251,9 @@ export function MatchDayBoard({
               index={i + 1}
               myResult={g.markets[0].matchKey ? myResultByMatch[g.markets[0].matchKey] : undefined}
             />
+          ))}
+          {knockoutsForDay.map((k) => (
+            <KnockoutCard key={`ko-${k.num}`} fixture={k} />
           ))}
         </div>
       )}

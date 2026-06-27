@@ -106,3 +106,39 @@ export const THIRD_PLACE: BracketMatch = {
   a: s("Loser 101"),
   b: s("Loser 102"),
 };
+
+/** A knockout fixture flattened for the Matches-tab day picker (display-only).
+ *  Teams come from the bracket assignments / ESPN sync; `labelA`/`labelB` are the
+ *  positional placeholders shown until a team is known ("Winner 74"). */
+export interface KnockoutFixture {
+  num: number;
+  round: string; // "Round of 32", …
+  date: string; // YYYY-MM-DD
+  kickoff: string; // UTC ISO
+  venue: Venue;
+  labelA: string;
+  labelB: string;
+  teamA?: string;
+  teamB?: string;
+}
+
+/** All knockout fixtures (R32 → Final + third-place) with teams filled from the
+ *  given slot→team map (`"74a"`/`"74b"`), for showing on the Matches day picker. */
+export function knockoutFixtures(teams: Record<string, string>): KnockoutFixture[] {
+  const out: KnockoutFixture[] = [];
+  const add = (m: BracketMatch, round: string) =>
+    out.push({
+      num: m.num,
+      round,
+      date: m.date,
+      kickoff: m.kickoff,
+      venue: m.venue,
+      labelA: m.a.label,
+      labelB: m.b.label,
+      teamA: teams[`${m.num}a`] ?? m.a.team,
+      teamB: teams[`${m.num}b`] ?? m.b.team,
+    });
+  for (const r of BRACKET) for (const m of r.matches) add(m, r.name);
+  add(THIRD_PLACE, "Third-place play-off");
+  return out;
+}

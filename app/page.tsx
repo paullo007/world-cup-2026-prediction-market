@@ -8,6 +8,8 @@ import { PredictMyOwnWinner } from "@/components/PredictMyOwnWinner";
 import { auth } from "@/lib/auth";
 import { canonicalTeam } from "@/lib/flags";
 import { awaitingResult } from "@/lib/utils";
+import { fetchBracketTeams } from "@/lib/bracketSync";
+import { knockoutFixtures, type KnockoutFixture } from "@/lib/bracket";
 
 export const dynamic = "force-dynamic";
 
@@ -124,6 +126,20 @@ export default async function HomePage({
     }
   }
 
+  // Knockout fixtures (display-only) for the Matches day picker — teams from ESPN
+  // + any manual bracket overrides — so the picker spans the whole tournament,
+  // not just the group stage. These aren't tradeable (they live in the Bracket).
+  let knockouts: KnockoutFixture[] = [];
+  if (isMatches) {
+    const [espnTeams, assignments] = await Promise.all([
+      fetchBracketTeams(),
+      db.bracketAssignment.findMany(),
+    ]);
+    const teamMap: Record<string, string> = { ...espnTeams };
+    for (const a of assignments) teamMap[a.slot] = a.team;
+    knockouts = knockoutFixtures(teamMap);
+  }
+
   const volumes = await db.trade.groupBy({
     by: ["marketId"],
     _sum: { amount: true },
@@ -193,6 +209,7 @@ export default async function HomePage({
         <MatchDayBoard
           matches={markets.map((m) => ({ market: m, volume: volumeByMarket.get(m.id) ?? 0 }))}
           myResultByMatch={myResultByMatch}
+          knockouts={knockouts}
         />
       ) : isAll ? (
         allCards.length === 0 ? (

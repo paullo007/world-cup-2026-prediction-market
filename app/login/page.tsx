@@ -70,7 +70,7 @@ export default function LoginPage() {
           <p className="mt-4 text-sm text-slate-400">
             New here?{" "}
             <Link href="/register" className="font-semibold text-accent hover:underline">
-              Pick a nickname & get 1,000 WC$
+              Pick a nickname & get 2,000 WC$
             </Link>
           </p>
           <button

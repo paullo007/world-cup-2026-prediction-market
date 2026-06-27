@@ -67,7 +67,7 @@ model User {
   passwordHash     String?
   name             String
   role             Role       @default(USER)
-  balance          Float      @default(1000)
+  balance          Float      @default(2000)
   createdAt        DateTime   @default(now())
   positions        Position[]
   trades           Trade[]

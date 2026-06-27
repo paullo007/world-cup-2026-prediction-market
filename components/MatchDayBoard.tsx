@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Market } from "@prisma/client";
 import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import { MatchCard3Way } from "@/components/MatchCard3Way";
@@ -41,6 +41,10 @@ export function MatchDayBoard({
 
   // Pin the day-selector bar just under the global nav while fixtures scroll.
   const stickyTop = useTopbarHeight();
+
+  // Hidden date input for the calendar button (declared up here, before any
+  // early return, so the hook order stays stable across renders).
+  const dateRef = useRef<HTMLInputElement>(null);
 
   // Unique kickoff days (local), sorted ascending — the strip's tabs.
   const days = useMemo(() => {
@@ -115,6 +119,19 @@ export function MatchDayBoard({
     if (idx >= 0) setSelectedIdx(idx);
   };
 
+  // A sr-only date input won't reliably open the native picker on click, so we
+  // trigger it explicitly via showPicker() from the calendar button (dateRef is
+  // declared at the top of the component to keep hook order stable).
+  const openDatePicker = () => {
+    const el = dateRef.current;
+    if (!el) return;
+    try {
+      el.showPicker(); // modern browsers
+    } catch {
+      el.focus(); // fallback
+    }
+  };
+
   return (
     <LiveScoreProvider>
     <div className="space-y-5">
@@ -170,20 +187,28 @@ export function MatchDayBoard({
             <ChevronRight className="h-5 w-5" />
           </button>
 
-          <label
-            className="flex cursor-pointer items-center border-l border-surface-border px-3 text-slate-400 hover:text-accent"
-            title="Jump to a date"
-          >
-            <CalendarDays className="h-5 w-5" />
+          <div className="relative flex items-center border-l border-surface-border">
+            <button
+              type="button"
+              onClick={openDatePicker}
+              aria-label="Jump to a date"
+              title="Jump to a date"
+              className="flex items-center px-3 text-slate-400 hover:text-accent"
+            >
+              <CalendarDays className="h-5 w-5" />
+            </button>
             <input
+              ref={dateRef}
               type="date"
               className="sr-only"
               min={dayKeys[0]}
               max={dayKeys[dayKeys.length - 1]}
               value={dayKeys[selectedIdx]}
               onChange={(e) => e.target.value && jumpTo(e.target.value)}
+              tabIndex={-1}
+              aria-hidden
             />
-          </label>
+          </div>
         </div>
 
         <div className="border-t border-surface-border px-4 py-2 text-sm font-semibold">

@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { BracketTree } from "@/components/BracketTree";
 import { BracketSchedule } from "@/components/BracketSchedule";
 import { StickyUnderNav } from "@/components/StickyUnderNav";
-import { BRACKET_W, THEMES, FALLBACK } from "@/components/bracketShared";
+import { LiveScoreProvider } from "@/components/LiveScoreProvider";
+import { BRACKET_W, THEMES, FALLBACK, type ScoreMap } from "@/components/bracketShared";
 import { BRACKET } from "@/lib/bracket";
 import { inLiveWindow } from "@/lib/liveWindow";
 import { cn } from "@/lib/utils";
@@ -20,7 +21,7 @@ type View = "fifa" | "date";
  *   • "Bracket by Date"  (blue)  → flat schedule columns (BracketSchedule)
  * The toggle + round labels share one sticky bar pinned under the global nav.
  */
-export function BracketLive({ initialTeams }: { initialTeams: Record<string, string> }) {
+export function BracketLive({ initialTeams, scores }: { initialTeams: Record<string, string>; scores: ScoreMap }) {
   const [teams, setTeams] = useState(initialTeams);
   const [view, setView] = useState<View>("fifa");
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -53,6 +54,7 @@ export function BracketLive({ initialTeams }: { initialTeams: Record<string, str
   const btn = "rounded-lg border px-4 py-2 text-sm font-bold transition";
 
   return (
+    <LiveScoreProvider>
     <div>
       {/* Toggle + round labels pin together just under the global nav while the
           bracket scrolls — one StickyUnderNav (same pattern as AI Knockouts). */}
@@ -109,7 +111,8 @@ export function BracketLive({ initialTeams }: { initialTeams: Record<string, str
         </div>
       </StickyUnderNav>
 
-      {view === "fifa" ? <BracketTree teams={teams} /> : <BracketSchedule teams={teams} />}
+      {view === "fifa" ? <BracketTree teams={teams} scores={scores} /> : <BracketSchedule teams={teams} scores={scores} />}
     </div>
+    </LiveScoreProvider>
   );
 }

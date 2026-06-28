@@ -2,6 +2,26 @@
 
 import { useEffect, useState } from "react";
 import { flag } from "@/lib/flags";
+import { useLiveScore } from "@/components/LiveScoreProvider";
+import { cn } from "@/lib/utils";
+
+/** Final scores for completed knockout matches, keyed by matchKey ("A vs B"):
+ *  { a: <slot-a goals>, b: <slot-b goals> }. Server-fetched from resolved markets. */
+export type ScoreMap = Record<string, { a: number; b: number }>;
+
+/**
+ * Resolve a bracket box's score: prefer the live feed (covers an in-progress game
+ * AND a just-finished one in real time), else the stored final from `scores` (for
+ * matches that completed on an earlier day). `isLive` drives the LIVE badge.
+ */
+export function useBracketScore(a: string | undefined, b: string | undefined, scores: ScoreMap) {
+  const key = a && b ? `${a} vs ${b}` : undefined;
+  const live = useLiveScore(key);
+  const fin = key ? scores[key] : undefined;
+  const aGoals = live ? live.homeGoals : fin?.a ?? null;
+  const bGoals = live ? live.awayGoals : fin?.b ?? null;
+  return { aGoals, bGoals, isLive: live?.state === "in", hasScore: aGoals != null && bGoals != null };
+}
 
 // Shared bracket styling used by both views (BracketTree = "Bracket by FIFA",
 // BracketSchedule = "Bracket by Date") and the sticky toggle/label bar.
@@ -68,17 +88,33 @@ export function BoxDate({ date, kickoff, num }: { date: string; kickoff: string;
   );
 }
 
-export function Slot({ label, team }: { label: string; team?: string }) {
+export function Slot({
+  label,
+  team,
+  goals,
+  won,
+}: {
+  label: string;
+  team?: string;
+  /** Goals for this team when the match is live/completed; right-aligned. */
+  goals?: number | null;
+  /** Whether this team won — its line stays bold while the loser dims. */
+  won?: boolean;
+}) {
+  const hasScore = goals != null;
   return (
-    <div className="flex items-center gap-1.5 truncate">
-      {team ? (
-        <>
-          <span className="shrink-0 text-lg leading-none">{flag(team)}</span>
-          <span className="truncate font-bold">{team}</span>
-        </>
-      ) : (
-        <span className="truncate font-bold text-slate-400">{label}</span>
-      )}
+    <div className="flex items-center gap-1.5">
+      <span className="flex items-center gap-1.5 truncate">
+        {team ? (
+          <>
+            <span className="shrink-0 text-lg leading-none">{flag(team)}</span>
+            <span className={cn("truncate", hasScore && !won ? "font-medium text-slate-400" : "font-bold")}>{team}</span>
+          </>
+        ) : (
+          <span className="truncate font-bold text-slate-400">{label}</span>
+        )}
+      </span>
+      {hasScore && <span className="ml-auto shrink-0 pl-2 tabular-nums font-extrabold">{goals}</span>}
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { bracketByDate, THIRD_PLACE, type BracketMatch } from "@/lib/bracket";
 import { MatchStartTime } from "@/components/MatchStartTime";
 import { FitToWidth } from "@/components/FitToWidth";
-import { BRACKET_W, THEMES, FALLBACK, Slot, BoxDate, type Theme } from "@/components/bracketShared";
+import { BRACKET_W, THEMES, FALLBACK, Slot, BoxDate, useBracketScore, type Theme, type ScoreMap } from "@/components/bracketShared";
 import { cn } from "@/lib/utils";
 
 // "Bracket by FIFA" view: the full connected knockout tree, ordered by date so the
@@ -24,6 +24,7 @@ function MatchCell({
   isLast,
   theme,
   emphasis,
+  scores,
 }: {
   m: BracketMatch;
   teamFor: (key: string) => string | undefined;
@@ -31,9 +32,11 @@ function MatchCell({
   isLast: boolean;
   theme: Theme;
   emphasis?: boolean;
+  scores: ScoreMap;
 }) {
   const a = teamFor(`${m.num}a`) ?? m.a.team;
   const b = teamFor(`${m.num}b`) ?? m.b.team;
+  const { aGoals, bGoals, isLive, hasScore } = useBracketScore(a, b, scores);
   return (
     <div
       className={cn(
@@ -53,10 +56,15 @@ function MatchCell({
           emphasis ? "bg-gradient-to-br from-amber-50 to-white ring-1 ring-amber-300" : "bg-gradient-to-br from-surface-raised to-surface"
         )}
       >
-        <Slot label={m.a.label} team={a} />
+        <Slot label={m.a.label} team={a} goals={aGoals} won={hasScore && aGoals! > bGoals!} />
         <div className="my-1 h-px bg-slate-200" />
-        <Slot label={m.b.label} team={b} />
-        <div className="mt-1 text-[10px] font-bold text-slate-400">
+        <Slot label={m.b.label} team={b} goals={bGoals} won={hasScore && bGoals! > aGoals!} />
+        <div className="mt-1 flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
+          {isLive && (
+            <span className="flex items-center gap-1 rounded bg-red-600 px-1 py-0.5 text-[9px] font-bold uppercase leading-none text-white">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" /> Live
+            </span>
+          )}
           <BoxDate date={m.date} kickoff={m.kickoff} num={m.num} />
         </div>
 
@@ -74,10 +82,13 @@ function MatchCell({
   );
 }
 
-export function BracketTree({ teams }: { teams: Record<string, string> }) {
+export function BracketTree({ teams, scores }: { teams: Record<string, string>; scores: ScoreMap }) {
   const teamFor = (key: string) => teams[key];
   const rounds = bracketByDate();
   const lastIndex = rounds.length - 1;
+  const tpA = teamFor(`${THIRD_PLACE.num}a`) ?? THIRD_PLACE.a.team;
+  const tpB = teamFor(`${THIRD_PLACE.num}b`) ?? THIRD_PLACE.b.team;
+  const tp = useBracketScore(tpA, tpB, scores);
 
   return (
     <div>
@@ -97,6 +108,7 @@ export function BracketTree({ teams }: { teams: Record<string, string> }) {
                     isLast={ri === lastIndex}
                     theme={theme}
                     emphasis={isFinal}
+                    scores={scores}
                   />
                 ))}
               </div>
@@ -108,10 +120,15 @@ export function BracketTree({ teams }: { teams: Record<string, string> }) {
       <div className="mt-8 max-w-xs">
         <div className="mb-2 text-sm font-bold text-rose-500">🥉 Third-place play-off</div>
         <div className="group relative rounded-xl border border-rose-300 border-t-4 border-t-rose-500 bg-gradient-to-br from-surface-raised to-surface px-3 pb-2 pt-2 text-sm shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:border-rose-500">
-          <Slot label={THIRD_PLACE.a.label} team={teamFor(`${THIRD_PLACE.num}a`) ?? THIRD_PLACE.a.team} />
+          <Slot label={THIRD_PLACE.a.label} team={tpA} goals={tp.aGoals} won={tp.hasScore && tp.aGoals! > tp.bGoals!} />
           <div className="my-1 h-px bg-slate-200" />
-          <Slot label={THIRD_PLACE.b.label} team={teamFor(`${THIRD_PLACE.num}b`) ?? THIRD_PLACE.b.team} />
-          <div className="mt-1 text-[10px] font-bold text-slate-400">
+          <Slot label={THIRD_PLACE.b.label} team={tpB} goals={tp.bGoals} won={tp.hasScore && tp.bGoals! > tp.aGoals!} />
+          <div className="mt-1 flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
+            {tp.isLive && (
+              <span className="flex items-center gap-1 rounded bg-red-600 px-1 py-0.5 text-[9px] font-bold uppercase leading-none text-white">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" /> Live
+              </span>
+            )}
             <BoxDate date={THIRD_PLACE.date} kickoff={THIRD_PLACE.kickoff} num={THIRD_PLACE.num} /> · {THIRD_PLACE.venue.stadium}, {THIRD_PLACE.venue.city}
           </div>
         </div>

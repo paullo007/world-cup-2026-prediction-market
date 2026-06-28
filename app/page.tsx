@@ -4,9 +4,11 @@ import { db } from "@/lib/db";
 import { MarketCard } from "@/components/MarketCard";
 import { MatchCard3Way } from "@/components/MatchCard3Way";
 import { MatchDayBoard, type KnockoutMeta } from "@/components/MatchDayBoard";
+import { StickySectionBar } from "@/components/StickySectionBar";
 import { PredictMyOwnWinner } from "@/components/PredictMyOwnWinner";
 import { auth } from "@/lib/auth";
 import { canonicalTeam } from "@/lib/flags";
+import { yesPrice } from "@/lib/amm";
 import { awaitingResult } from "@/lib/utils";
 import { fetchBracketTeams } from "@/lib/bracketSync";
 import { knockoutFixtures, type KnockoutFixture } from "@/lib/bracket";
@@ -162,44 +164,81 @@ export default async function HomePage({
   });
   const volumeByMarket = new Map(volumes.map((v) => [v.marketId, v._sum.amount ?? 0]));
 
-  // On the All tab, fold the 3-way match outcomes back into one fixture card each
-  // (so Home/Draw/Away all show), and keep non-match markets as binary cards.
-  // Both share a sort key so they interleave by kickoff time, tradable first.
+  // On the All tab, organize markets into labeled sections, each headed by a
+  // full-width bar (same green as the "Bracket by FIFA" button):
+  //   1) "{Round} Prediction Bets" — knockout match fixtures (3-way/2-way cards),
+  //      by date; the round name is derived from the fixtures present.
+  //   2) "World Cup Final Winner Prediction Bets" — winner markets, % high→low.
+  //   3) "Crazy Prediction Bets" — the novelty markets.
   type AllCard =
-    | { kind: "single"; key: string; sort: number; market: Market; volume: number }
-    | { kind: "fixture"; key: string; sort: number; home: Market; markets: Market[]; volume: number };
+    | { kind: "single"; key: string; market: Market; volume: number }
+    | { kind: "fixture"; key: string; home: Market; markets: Market[]; volume: number };
+  type AllSection = { title: string; start: number; cards: AllCard[] };
 
-  const allCards: AllCard[] = [];
+  const sections: AllSection[] = [];
   if (isAll) {
+    // Group 3-way/2-way match outcomes back into one fixture each; everything else
+    // is a single binary card.
     const fixtures = new Map<string, Market[]>();
+    const singles: Market[] = [];
     for (const m of markets) {
       if ((m.category === "Matches" || m.category === "KnockoutMatches") && m.matchKey) {
         const g = fixtures.get(m.matchKey) ?? [];
         g.push(m);
         fixtures.set(m.matchKey, g);
       } else {
-        allCards.push({
-          kind: "single",
-          key: m.id,
-          sort: m.closesAt.getTime(),
-          market: m,
-          volume: volumeByMarket.get(m.id) ?? 0,
-        });
+        singles.push(m);
       }
     }
-    for (const gms of Array.from(fixtures.values())) {
-      const home = gms.find((x) => x.outcomeType === "HOME") ?? gms[0];
-      allCards.push({
-        kind: "fixture",
-        key: home.matchKey ?? home.id,
-        sort: home.closesAt.getTime(),
-        home,
-        markets: gms,
-        volume: gms.reduce((sum, x) => sum + (volumeByMarket.get(x.id) ?? 0), 0),
-      });
+    const single = (m: Market): AllCard => ({ kind: "single", key: m.id, market: m, volume: volumeByMarket.get(m.id) ?? 0 });
+
+    // Knockout fixtures, by kickoff date. Round name (for the section title) comes
+    // from the live bracket so it tracks the active round (R32 now → R16 later).
+    const fixtureCards = Array.from(fixtures.values())
+      .map((gms): AllCard => {
+        const home = gms.find((x) => x.outcomeType === "HOME") ?? gms[0];
+        return { kind: "fixture", key: home.matchKey ?? home.id, home, markets: gms, volume: gms.reduce((s, x) => s + (volumeByMarket.get(x.id) ?? 0), 0) };
+      })
+      .sort((a, b) => (a.kind === "fixture" && b.kind === "fixture" ? a.home.closesAt.getTime() - b.home.closesAt.getTime() : 0));
+
+    if (fixtureCards.length) {
+      const [espn, assignments] = await Promise.all([fetchBracketTeams(), db.bracketAssignment.findMany()]);
+      const teamMap: Record<string, string> = { ...espn };
+      for (const a of assignments) teamMap[a.slot] = a.team;
+      const roundByKey: Record<string, string> = {};
+      for (const f of knockoutFixtures(teamMap)) if (f.teamA && f.teamB) roundByKey[`${f.teamA} vs ${f.teamB}`] = f.round;
+      const rounds = Array.from(
+        new Set(fixtureCards.map((c) => (c.kind === "fixture" ? roundByKey[c.home.matchKey ?? ""] : undefined)).filter(Boolean))
+      );
+      const title = rounds.length === 1 ? `${rounds[0]} Prediction Bets` : "Knockout Prediction Bets";
+      sections.push({ title, start: 0, cards: fixtureCards });
     }
-    const awaitingOf = (c: AllCard) => awaitingResult(c.kind === "single" ? c.market : c.home);
-    allCards.sort((a, b) => Number(awaitingOf(a)) - Number(awaitingOf(b)) || a.sort - b.sort);
+
+    // Winner markets, highest implied % first (Brazil/favourites → Canada longshot).
+    const winnerCards = singles
+      .filter((m) => m.category === "Tournament Winner")
+      .sort((a, b) => yesPrice(b) - yesPrice(a))
+      .map(single);
+    if (winnerCards.length) sections.push({ title: "World Cup Final Winner Prediction Bets", start: 0, cards: winnerCards });
+
+    // Crazy / novelty markets.
+    const crazyCards = singles
+      .filter((m) => m.category === "Crazy Predictions")
+      .sort((a, b) => a.closesAt.getTime() - b.closesAt.getTime())
+      .map(single);
+    if (crazyCards.length) sections.push({ title: "Crazy Prediction Bets", start: 0, cards: crazyCards });
+
+    // Anything else (unexpected categories) goes last so nothing silently vanishes.
+    const known = new Set(["Tournament Winner", "Crazy Predictions"]);
+    const otherCards = singles.filter((m) => !known.has(m.category)).map(single);
+    if (otherCards.length) sections.push({ title: "Other Prediction Bets", start: 0, cards: otherCards });
+
+    // Continuous card numbering across the sections (1,2,3…).
+    let running = 0;
+    for (const sec of sections) {
+      sec.start = running;
+      running += sec.cards.length;
+    }
   }
 
   return (
@@ -229,17 +268,24 @@ export default async function HomePage({
           koMeta={koMeta}
         />
       ) : isAll ? (
-        allCards.length === 0 ? (
+        sections.length === 0 ? (
           <p className="py-12 text-center text-slate-400">No markets in this category yet.</p>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {allCards.map((c, i) =>
-              c.kind === "single" ? (
-                <MarketCard key={c.key} market={c.market} volume={c.volume} index={i + 1} />
-              ) : (
-                <MatchCard3Way key={c.key} markets={c.markets} volume={c.volume} index={i + 1} />
-              )
-            )}
+          <div className="space-y-8">
+            {sections.map((sec) => (
+              <div key={sec.title} className="space-y-4">
+                <StickySectionBar title={sec.title} />
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {sec.cards.map((c, i) =>
+                    c.kind === "single" ? (
+                      <MarketCard key={c.key} market={c.market} volume={c.volume} index={sec.start + i + 1} />
+                    ) : (
+                      <MatchCard3Way key={c.key} markets={c.markets} volume={c.volume} index={sec.start + i + 1} />
+                    )
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         )
       ) : markets.length === 0 ? (

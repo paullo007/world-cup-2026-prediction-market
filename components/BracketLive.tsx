@@ -58,7 +58,7 @@ export function BracketLive({ initialTeams }: { initialTeams: Record<string, str
           bracket scrolls — one StickyUnderNav (same pattern as AI Knockouts). */}
       <StickyUnderNav className="border-b border-surface-border bg-surface">
         <div className={BRACKET_W}>
-          <div className="flex justify-center gap-2 py-2">
+          <div className="flex justify-start gap-2 py-2">
             <button
               type="button"
               onClick={() => setView("fifa")}

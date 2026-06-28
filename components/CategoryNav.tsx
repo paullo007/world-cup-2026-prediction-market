@@ -41,6 +41,7 @@ const ROUTE_TO_TAB: Record<string, string> = Object.fromEntries(
 // Display overrides: pill text differs from the underlying category value/key
 // (which must stay in sync with the market `category` stored in the DB).
 const LABELS: Record<string, string> = {
+  All: "All Predictions Available",
   "Tournament Winner": "Predict World Cup Winner",
 };
 

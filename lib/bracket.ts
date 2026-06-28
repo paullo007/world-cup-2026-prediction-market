@@ -122,6 +122,71 @@ export interface KnockoutFixture {
   teamB?: string;
 }
 
+/**
+ * The bracket reordered so each branch is sorted by its earliest contained match
+ * — i.e. the first-played match (Match 73) rises to the very top, and the whole
+ * tree reads as chronologically as a connected bracket allows. Crucially this is
+ * still a VALID tree ordering (each Round-of-N+1 match stays positioned directly
+ * across from its two feeders), so the CSS connector elbows still line up. Used
+ * by the "Bracket Tree" (date-ordered) view.
+ */
+export function bracketByDate(): BracketRound[] {
+  const byNum = new Map<number, BracketMatch>();
+  for (const r of BRACKET) for (const m of r.matches) byNum.set(m.num, m);
+
+  const winner = (label: string): number | null => {
+    const m = label.match(/^Winner (\d+)$/);
+    return m ? Number(m[1]) : null;
+  };
+  const children = (num: number): [number, number] | null => {
+    const m = byNum.get(num);
+    if (!m) return null;
+    const a = winner(m.a.label);
+    const b = winner(m.b.label);
+    return a != null && b != null ? [a, b] : null;
+  };
+  const minKick = (num: number): number => {
+    const ch = children(num);
+    if (!ch) return new Date(byNum.get(num)!.kickoff).getTime();
+    return Math.min(minKick(ch[0]), minKick(ch[1]));
+  };
+  const ordered = (num: number): [number, number] | null => {
+    const ch = children(num);
+    if (!ch) return null;
+    return minKick(ch[0]) <= minKick(ch[1]) ? ch : [ch[1], ch[0]];
+  };
+
+  // Left-to-right DFS from the Final collects each depth's matches in tree order;
+  // depth 0 = Final … deepest = Round of 32. A perfect binary tree, so a parent at
+  // position j sits exactly above its feeders at 2j / 2j+1 in the next round.
+  const root = BRACKET[BRACKET.length - 1].matches[0].num;
+  const perDepth: number[][] = [];
+  const visit = (num: number, depth: number) => {
+    (perDepth[depth] ??= []).push(num);
+    const ch = ordered(num);
+    if (ch) {
+      visit(ch[0], depth + 1);
+      visit(ch[1], depth + 1);
+    }
+  };
+  visit(root, 0);
+
+  return BRACKET.map((round, ri) => {
+    const depth = BRACKET.length - 1 - ri; // r32 (ri 0) is the deepest
+    const order = perDepth[depth] ?? round.matches.map((m) => m.num);
+    return { ...round, matches: order.map((n) => byNum.get(n)!).filter(Boolean) };
+  });
+}
+
+/** Each round's matches sorted purely by kickoff (earliest first) — for the flat
+ *  "By Date" schedule view (no tree connectors). */
+export function bracketRoundsByDate(): BracketRound[] {
+  return BRACKET.map((round) => ({
+    ...round,
+    matches: [...round.matches].sort((a, b) => (a.kickoff < b.kickoff ? -1 : 1)),
+  }));
+}
+
 /** All knockout fixtures (R32 → Final + third-place) with teams filled from the
  *  given slot→team map (`"74a"`/`"74b"`), for showing on the Matches day picker. */
 export function knockoutFixtures(teams: Record<string, string>): KnockoutFixture[] {

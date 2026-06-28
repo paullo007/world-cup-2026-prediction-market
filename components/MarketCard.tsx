@@ -34,7 +34,9 @@ export function MarketCard({
       {resolved && (
         <span className="absolute right-3 top-3 z-10 text-[11px] font-bold text-red-600">COMPLETED</span>
       )}
-      <div>
+      {/* When resolved, push the (centered, possibly 2-line) title down so the
+          top-right COMPLETED badge gets its own row and never overlaps a team name. */}
+      <div className={resolved ? "pt-5" : undefined}>
         {teams ? (
           <FitText
             className="font-semibold group-hover:text-accent"

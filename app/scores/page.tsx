@@ -1,27 +1,12 @@
 import Link from "next/link";
-import { flag } from "@/lib/flags";
 import { getPlayedMatches } from "@/lib/playedMatches";
-import { MatchStartTime } from "@/components/MatchStartTime";
 import { SCORES_SOURCES } from "@/lib/sources";
 import { SourceNote } from "@/components/SourceNote";
 import { LiveScoreProvider } from "@/components/LiveScoreProvider";
 import { LiveNowStrip } from "@/components/LiveNowStrip";
-import { CountryLink } from "@/components/CountryLink";
-import { cn } from "@/lib/utils";
+import { ScoresByDay } from "@/components/ScoresByDay";
 
 export const dynamic = "force-dynamic";
-
-function TeamLine({ team, goals, won }: { team: string; goals: number; won: boolean }) {
-  return (
-    <div className={cn("flex items-center justify-between gap-2", won ? "font-bold" : "font-medium text-slate-300")}>
-      <span className="flex items-center gap-1.5 truncate">
-        <span>{flag(team)}</span>
-        <CountryLink name={team} className="truncate" />
-      </span>
-      <span className="tabular-nums">{goals}</span>
-    </div>
-  );
-}
 
 export default async function ScoresPage() {
   // Most-recent results first.
@@ -49,28 +34,17 @@ export default async function ScoresPage() {
           No results yet — approved match scores will show up here.
         </p>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
-          {played.map((m) => {
-            const homeWon = m.homeGoals > m.awayGoals;
-            const awayWon = m.awayGoals > m.homeGoals;
-            return (
-              <div key={m.slug} className="rounded-2xl border border-surface-border bg-surface-raised p-4">
-                <div className="space-y-1.5">
-                  <TeamLine team={m.home} goals={m.homeGoals} won={homeWon} />
-                  <div className="h-px bg-surface-border" />
-                  <TeamLine team={m.away} goals={m.awayGoals} won={awayWon} />
-                </div>
-                {!homeWon && !awayWon && (
-                  <p className="mt-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400">Draw</p>
-                )}
-                <div className="mt-2 space-y-0.5 text-[11px] leading-tight text-slate-400">
-                  <div><MatchStartTime iso={m.kickoffIso} /></div>
-                  {m.venue && <div>{m.venue.stadium}, {m.venue.city}</div>}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <ScoresByDay
+          matches={played.map((m) => ({
+            slug: m.slug,
+            home: m.home,
+            away: m.away,
+            homeGoals: m.homeGoals,
+            awayGoals: m.awayGoals,
+            kickoffIso: m.kickoffIso,
+            venue: m.venue,
+          }))}
+        />
       )}
 
       <SourceNote sources={SCORES_SOURCES} />

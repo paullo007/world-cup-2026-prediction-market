@@ -29,8 +29,11 @@ export function MarketCard({
   return (
     <Link
       href={`/markets/${market.slug}`}
-      className="group flex flex-col gap-3 rounded-xl border border-surface-border bg-surface-raised p-4 transition hover:border-accent/50 hover:bg-surface-hover"
+      className="group relative flex flex-col gap-3 rounded-xl border border-surface-border bg-surface-raised p-4 transition hover:border-accent/50 hover:bg-surface-hover"
     >
+      {resolved && (
+        <span className="absolute right-3 top-3 z-10 text-[11px] font-bold text-red-600">COMPLETED</span>
+      )}
       <div>
         {teams ? (
           <FitText

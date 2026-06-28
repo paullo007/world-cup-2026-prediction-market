@@ -76,8 +76,10 @@ export default async function HomePage({
           { category: { in: ["Matches", "KnockoutMatches"] } }
         : isAll
           ? // Include every outcome so match fixtures can render as 3-way cards
-            // (Home/Draw/Away) here too; they're grouped by matchKey below.
-            { status: { not: "RESOLVED" }, ...hideKnockouts }
+            // (Home/Draw/Away) here too; they're grouped by matchKey below. Keep
+            // COMPLETED knockout/winner/crazy markets visible (badged) instead of
+            // vanishing — but exclude the finished group stage so it doesn't flood.
+            { ...hideKnockouts, NOT: { category: "Matches", status: "RESOLVED" } }
           : { category, status: { not: "RESOLVED" }, ...hideSecondary },
     orderBy: isResults ? [{ resolvedAt: "desc" }] : [{ closesAt: "asc" }],
   });

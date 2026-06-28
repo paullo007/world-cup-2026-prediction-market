@@ -93,13 +93,16 @@ export function MatchCard3Way({
     ) : null;
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-surface-border bg-surface-raised p-4 transition hover:border-accent/50">
+    <div className="relative flex flex-col gap-3 rounded-xl border border-surface-border bg-surface-raised p-4 transition hover:border-accent/50">
+      {resolved && (
+        <span className="absolute right-3 top-3 z-10 text-[11px] font-bold text-red-600">COMPLETED</span>
+      )}
       {roundLabel && (
         <span className="text-[11px] font-bold uppercase tracking-wide text-violet-600">
           {roundLabel}
         </span>
       )}
-      <div className="font-semibold">
+      <div className={cn("font-semibold", resolved && "pr-20")}>
         {index != null && <span className="mr-1.5 font-bold text-slate-500">{index}.</span>}
         <CountryLink name={homeTeam} /> <span className="align-middle">{flag(homeTeam)}</span>
         <span className="mx-1.5 text-slate-400">vs</span>

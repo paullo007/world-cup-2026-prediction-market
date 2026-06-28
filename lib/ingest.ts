@@ -43,7 +43,7 @@ export async function ingestAndPublish(): Promise<IngestSummary> {
   // the HOME market's group settles its Draw/Away siblings atomically.
   const markets = await db.market.findMany({
     where: {
-      category: "Matches",
+      category: { in: ["Matches", "KnockoutMatches"] },
       status: { not: "RESOLVED" },
       OR: [{ outcomeType: "HOME" }, { outcomeType: null }],
     },
@@ -75,11 +75,19 @@ export async function ingestAndPublish(): Promise<IngestSummary> {
     // abort the whole batch (it would strand the cooldown lock and leave every
     // later finished match unresolved — the CQ-01 failure mode). Record it and
     // move on; the next run retries it (resolution is idempotent).
+    // Knockout matches can't end in a draw — they're 2-way (Home/Away) and resolve
+    // by who ADVANCES (penalties included), so use the advancement winner, not the
+    // score-based one. If the feed hasn't decided a winner yet (reads as DRAW, e.g.
+    // a shootout ESPN hasn't flagged), leave it unresolved and retry next run.
+    const isKnockout = m.category === "KnockoutMatches";
+    const groupWinner = isKnockout ? merged.advanceWinner : merged.winner;
+    if (isKnockout && groupWinner === "DRAW") continue;
+
     try {
       if (m.matchKey) {
-        // Resolve all three outcomes atomically, then commit the structured score
+        // Resolve all outcomes atomically, then commit the structured score
         // + scorers to the HOME market so Scores/Standings/Goals pick them up.
-        await resolveMatchGroup(m.matchKey, merged.winner);
+        await resolveMatchGroup(m.matchKey, groupWinner);
         // Enrich scorers with assists from ESPN's summary endpoint (best-effort).
         let scorers = merged.scorers;
         if (merged.espnEventId && scorers.length) {
@@ -146,7 +154,7 @@ export async function ingestIfDue(cooldownMs = 3 * 60 * 1000): Promise<IngestSum
 
   const stale = await db.market.count({
     where: {
-      category: "Matches",
+      category: { in: ["Matches", "KnockoutMatches"] },
       status: { not: "RESOLVED" },
       closesAt: { lt: new Date() },
       OR: [{ outcomeType: "HOME" }, { outcomeType: null }],

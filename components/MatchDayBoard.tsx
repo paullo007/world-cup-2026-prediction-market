@@ -8,12 +8,16 @@ import { KnockoutCard } from "@/components/KnockoutCard";
 import { LiveScoreProvider } from "@/components/LiveScoreProvider";
 import { useTopbarHeight } from "@/components/StickyUnderNav";
 import type { KnockoutFixture } from "@/lib/bracket";
+import type { Venue } from "@/lib/venues";
 import { cn } from "@/lib/utils";
 
 interface MatchEntry {
   market: Market;
   volume: number;
 }
+
+/** Round name + venue for a tradeable knockout fixture, keyed by matchKey. */
+export type KnockoutMeta = Record<string, { round: string; venue: Venue }>;
 
 const WINDOW = 7; // days visible in the strip at once, like ESPN
 
@@ -35,12 +39,16 @@ export function MatchDayBoard({
   matches,
   myResultByMatch = {},
   knockouts = [],
+  koMeta = {},
 }: {
   matches: MatchEntry[];
   myResultByMatch?: Record<string, number>;
-  /** Display-only knockout fixtures (R32→Final), shown on their kickoff days so
-   *  the day picker spans the whole tournament, not just the group stage. */
+  /** Display-only knockout fixtures (R32→Final) whose markets DON'T exist yet,
+   *  shown as placeholder cards so the day picker spans the whole tournament. */
   knockouts?: KnockoutFixture[];
+  /** Round/venue for tradeable knockout fixtures (keyed by matchKey) so their
+   *  cards show the round label + venue like the placeholder ones did. */
+  koMeta?: KnockoutMeta;
 }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -243,15 +251,21 @@ export function MatchDayBoard({
         <p className="py-12 text-center text-slate-400">No matches on this day.</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {fixturesForDay.map((g, i) => (
-            <MatchCard3Way
-              key={g.markets[0].matchKey ?? g.markets[0].id}
-              markets={g.markets}
-              volume={g.volume}
-              index={i + 1}
-              myResult={g.markets[0].matchKey ? myResultByMatch[g.markets[0].matchKey] : undefined}
-            />
-          ))}
+          {fixturesForDay.map((g, i) => {
+            const mk = g.markets[0].matchKey;
+            const meta = mk ? koMeta[mk] : undefined;
+            return (
+              <MatchCard3Way
+                key={mk ?? g.markets[0].id}
+                markets={g.markets}
+                volume={g.volume}
+                index={i + 1}
+                myResult={mk ? myResultByMatch[mk] : undefined}
+                roundLabel={meta?.round}
+                venue={meta?.venue}
+              />
+            );
+          })}
           {knockoutsForDay.map((k) => (
             <KnockoutCard key={`ko-${k.num}`} fixture={k} />
           ))}

@@ -410,7 +410,8 @@ export function outcomeForMarket(
 
 export interface MergedResult {
   outcome: "YES" | "NO"; // best consensus outcome (YES iff the market's home won)
-  winner: "HOME" | "AWAY" | "DRAW"; // result oriented to the market's home/away
+  winner: "HOME" | "AWAY" | "DRAW"; // SCORE-based result, market-oriented (group stage)
+  advanceWinner: "HOME" | "AWAY" | "DRAW"; // who ADVANCES (incl. penalties); for knockouts
   agree: boolean; // all sources that had a result agreed
   sources: Source[]; // sources that reported this match
   detail: string; // human-readable, for resultDetail / admin display
@@ -468,9 +469,25 @@ export function mergeForMarket(
           ? "HOME"
           : "AWAY";
 
+  // Advancement winner (who progresses) for KNOCKOUT markets. A knockout can't
+  // truly end in a draw — extra time + penalties decide it — and ESPN flags the
+  // advancing team (`competitor.winner`), which fetchEspn carries on `m.winner`.
+  // The score-based `winner` above would read a 1–1 shootout as DRAW (correct for
+  // a group game, wrong for a knockout), so knockout resolution uses THIS instead.
+  // Prefer the ESPN hit's verdict (it has the flag); fall back to the primary.
+  const advanceSrc = hits.find((h) => h.m.source === "ESPN")?.m ?? primary;
+  const advanceHomeIsMarketHome = normalize(advanceSrc.home) === normalize(marketHome);
+  const advanceWinner: "HOME" | "AWAY" | "DRAW" =
+    advanceSrc.winner === "DRAW"
+      ? "DRAW"
+      : (advanceSrc.winner === "HOME") === advanceHomeIsMarketHome
+        ? "HOME"
+        : "AWAY";
+
   return {
     outcome: hits[0].outcome,
     winner,
+    advanceWinner,
     agree,
     sources: hits.map((h) => h.source),
     detail: agree ? `${detail} ✓ agree` : `⚠ disagree — ${detail}`,

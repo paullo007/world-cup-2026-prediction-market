@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { MarketCard } from "@/components/MarketCard";
 import { MatchCard3Way } from "@/components/MatchCard3Way";
-import { MatchDayBoard } from "@/components/MatchDayBoard";
+import { MatchDayBoard, type KnockoutMeta } from "@/components/MatchDayBoard";
 import { PredictMyOwnWinner } from "@/components/PredictMyOwnWinner";
 import { auth } from "@/lib/auth";
 import { canonicalTeam } from "@/lib/flags";
@@ -70,7 +70,8 @@ export default async function HomePage({
       : isMatches
         ? // Include resolved fixtures so the day picker spans every match-day and
           // past (played) days show their final results, not just upcoming games.
-          { category: "Matches" }
+          // KnockoutMatches = the tradeable R32→Final 2-way markets.
+          { category: { in: ["Matches", "KnockoutMatches"] } }
         : isAll
           ? // Include every outcome so match fixtures can render as 3-way cards
             // (Home/Draw/Away) here too; they're grouped by matchKey below.
@@ -112,7 +113,7 @@ export default async function HomePage({
       const myPos = await db.position.findMany({
         where: {
           userId: session.user.id,
-          market: { category: "Matches", status: "RESOLVED" },
+          market: { category: { in: ["Matches", "KnockoutMatches"] }, status: "RESOLVED" },
           OR: [{ yesShares: { gt: 0.001 } }, { noShares: { gt: 0.001 } }],
         },
         include: { market: { select: { matchKey: true, resolvedOutcome: true } } },
@@ -130,6 +131,7 @@ export default async function HomePage({
   // + any manual bracket overrides — so the picker spans the whole tournament,
   // not just the group stage. These aren't tradeable (they live in the Bracket).
   let knockouts: KnockoutFixture[] = [];
+  let koMeta: KnockoutMeta = {};
   if (isMatches) {
     const [espnTeams, assignments] = await Promise.all([
       fetchBracketTeams(),
@@ -137,7 +139,21 @@ export default async function HomePage({
     ]);
     const teamMap: Record<string, string> = { ...espnTeams };
     for (const a of assignments) teamMap[a.slot] = a.team;
-    knockouts = knockoutFixtures(teamMap);
+    const allKo = knockoutFixtures(teamMap);
+
+    // matchKeys that already have real (tradeable) knockout markets — those render
+    // as MatchCard3Way; their display-only placeholder card is dropped to avoid a
+    // duplicate. Round/venue for the tradeable ones flow through koMeta.
+    const koMarketKeys = new Set(
+      markets.filter((m) => m.category === "KnockoutMatches" && m.matchKey).map((m) => m.matchKey!)
+    );
+    for (const f of allKo) {
+      if (f.teamA && f.teamB) koMeta[`${f.teamA} vs ${f.teamB}`] = { round: f.round, venue: f.venue };
+    }
+    knockouts = allKo.filter((f) => {
+      const mk = f.teamA && f.teamB ? `${f.teamA} vs ${f.teamB}` : null;
+      return !(mk && koMarketKeys.has(mk));
+    });
   }
 
   const volumes = await db.trade.groupBy({
@@ -157,7 +173,7 @@ export default async function HomePage({
   if (isAll) {
     const fixtures = new Map<string, Market[]>();
     for (const m of markets) {
-      if (m.category === "Matches" && m.matchKey) {
+      if ((m.category === "Matches" || m.category === "KnockoutMatches") && m.matchKey) {
         const g = fixtures.get(m.matchKey) ?? [];
         g.push(m);
         fixtures.set(m.matchKey, g);
@@ -210,6 +226,7 @@ export default async function HomePage({
           matches={markets.map((m) => ({ market: m, volume: volumeByMarket.get(m.id) ?? 0 }))}
           myResultByMatch={myResultByMatch}
           knockouts={knockouts}
+          koMeta={koMeta}
         />
       ) : isAll ? (
         allCards.length === 0 ? (

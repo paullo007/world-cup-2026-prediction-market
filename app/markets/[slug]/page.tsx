@@ -54,7 +54,10 @@ export default async function MarketPage({ params }: { params: { slug: string } 
     : null;
 
   const p = yesPrice(market);
-  const teams = market.category === "Matches" ? matchTeams(market.question) : null;
+  const teams =
+    market.category === "Matches" || market.category === "KnockoutMatches"
+      ? matchTeams(market.question)
+      : null;
   const venue = teams ? VENUES[`${teams[0]} vs ${teams[1]}`] : null;
   const open = market.status === "OPEN" && market.closesAt > new Date();
   const awaiting = awaitingResult(market);
@@ -82,7 +85,7 @@ export default async function MarketPage({ params }: { params: { slug: string } 
         )}
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-amber-600">
-            {market.category}
+            {market.category === "KnockoutMatches" ? "Knockout Match" : market.category}
           </p>
           <h1 className="mt-1 text-2xl font-extrabold sm:text-3xl">
             {teams

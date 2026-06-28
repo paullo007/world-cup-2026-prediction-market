@@ -83,6 +83,20 @@ export function matchProbabilities(home: string, away: string): MatchProbs {
   return { HOME: rest * we, DRAW: draw, AWAY: rest * (1 - we) };
 }
 
+/**
+ * Two-way knockout odds (Team A advances / Team B advances). A knockout tie can't
+ * end in a draw — extra time + penalties always produce a winner — so this is the
+ * Elo win expectation with NO draw mass and NO host bonus (knockouts are at neutral
+ * venues). The two sides sum to 1; each opens its own binary market at that price.
+ */
+export function knockoutProbabilities(home: string, away: string): { HOME: number; AWAY: number } {
+  const rh = TEAM_ELO[home] ?? DEFAULT_ELO;
+  const ra = TEAM_ELO[away] ?? DEFAULT_ELO;
+  const pHome = 1 / (1 + Math.pow(10, -(rh - ra) / 400)); // P(home advances), neutral venue
+  const clamped = Math.min(0.95, Math.max(0.05, pHome));
+  return { HOME: clamped, AWAY: 1 - clamped };
+}
+
 // Elo -> linear strength on the standard scale (a 400-point gap = 10x stronger).
 const strength = (elo: number) => Math.pow(10, elo / 400);
 

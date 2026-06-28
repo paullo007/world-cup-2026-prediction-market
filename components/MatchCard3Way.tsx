@@ -5,7 +5,7 @@ import type { Market } from "@prisma/client";
 import type { Scorer } from "@/lib/results";
 import { yesPrice } from "@/lib/amm";
 import { flag, matchTeams } from "@/lib/flags";
-import { VENUES } from "@/lib/venues";
+import { VENUES, type Venue } from "@/lib/venues";
 import { awaitingResult, cn, formatPercent, formatWCD } from "@/lib/utils";
 import { MatchStartTime } from "@/components/MatchStartTime";
 import { GoalscorersBlock } from "@/components/GoalscorersBlock";
@@ -23,12 +23,18 @@ export function MatchCard3Way({
   volume = 0,
   index,
   myResult,
+  roundLabel,
+  venue: venueOverride,
 }: {
-  markets: Market[]; // the 1–3 outcome markets of one fixture
+  markets: Market[]; // the 1–3 outcome markets of one fixture (knockouts are 2-way)
   volume?: number;
   index?: number;
   /** Signed-in user's net P&L on this resolved fixture (undefined = no position). */
   myResult?: number;
+  /** Knockout fixtures: round name ("Round of 32") shown above the matchup. */
+  roundLabel?: string;
+  /** Venue override (knockouts aren't in the group VENUES map). */
+  venue?: Venue;
 }) {
   const byType = (t: string) => markets.find((m) => m.outcomeType === t);
   const home = byType("HOME") ?? markets[0];
@@ -38,7 +44,7 @@ export function MatchCard3Way({
   const [homeTeam, awayTeam] = home.matchKey
     ? home.matchKey.split(" vs ")
     : matchTeams(home.question) ?? ["", ""];
-  const venue = home.matchKey ? VENUES[home.matchKey] : undefined;
+  const venue = venueOverride ?? (home.matchKey ? VENUES[home.matchKey] : undefined);
   const resolved = home.status === "RESOLVED";
   const awaiting = awaitingResult(home) && !resolved;
 
@@ -70,6 +76,11 @@ export function MatchCard3Way({
 
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-surface-border bg-surface-raised p-4 transition hover:border-accent/50">
+      {roundLabel && (
+        <span className="text-[11px] font-bold uppercase tracking-wide text-violet-600">
+          {roundLabel}
+        </span>
+      )}
       <div className="font-semibold">
         {index != null && <span className="mr-1.5 font-bold text-slate-500">{index}.</span>}
         <CountryLink name={homeTeam} /> <span className="align-middle">{flag(homeTeam)}</span>

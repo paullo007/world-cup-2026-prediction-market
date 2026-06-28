@@ -60,8 +60,26 @@ export function MatchCard3Way({
 
   // For a played fixture, the winning outcome is the one that resolved YES.
   const winner = markets.find((m) => m.resolvedOutcome === "YES")?.outcomeType;
+  // A knockout that resolved with a LEVEL score but still has a winner can only
+  // have been decided by a shootout — so tag it "(pens)" (the free feeds don't
+  // give us the shootout numbers, but the level-score + winner is unambiguous).
+  const isKnockout = home.category === "KnockoutMatches";
+  const wentToPens =
+    isKnockout &&
+    resolved &&
+    home.homeGoals != null &&
+    home.awayGoals != null &&
+    home.homeGoals === home.awayGoals &&
+    (winner === "HOME" || winner === "AWAY");
+  const pens = wentToPens ? " (pens)" : "";
   const winnerLabel =
-    winner === "HOME" ? `${homeTeam} won` : winner === "AWAY" ? `${awayTeam} won` : winner === "DRAW" ? "Draw" : null;
+    winner === "HOME"
+      ? `${homeTeam} won${pens}`
+      : winner === "AWAY"
+        ? `${awayTeam} won${pens}`
+        : winner === "DRAW"
+          ? "Draw"
+          : null;
 
   const Outcome = ({ label, market }: { label: string; market?: Market }) =>
     market ? (
@@ -95,6 +113,7 @@ export function MatchCard3Way({
           </span>
           <span className="text-lg font-extrabold tabular-nums">
             {home.homeGoals ?? "?"} – {home.awayGoals ?? "?"}
+            {wentToPens && <span className="ml-1 text-xs font-semibold text-slate-400">(pens)</span>}
           </span>
           {winnerLabel && (
             <span className="text-xs font-semibold text-accent">{winnerLabel}</span>

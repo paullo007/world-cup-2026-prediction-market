@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { matchTeams } from "@/lib/flags";
 import { fetchAllSources, mergeForMarket, fetchEspnAssists, attachAssists } from "@/lib/results";
 import { resolveMarket, resolveMatchGroup } from "@/lib/trade";
+import { ensureKnockoutMarkets } from "@/lib/knockoutMarkets";
 
 export interface IngestSummary {
   ok: boolean;
@@ -130,6 +131,19 @@ export async function ingestAndPublish(): Promise<IngestSummary> {
       const label = m.matchKey ?? m.question;
       errors.push(`${label}: ${err instanceof Error ? err.message : "resolve failed"}`);
     }
+  }
+
+  // Auto-open the next round's knockout markets as soon as their teams are known.
+  // Best-effort + idempotent: it must never block or fail settlement, so any error
+  // is swallowed (the next cycle retries). This is what removes the per-round
+  // manual market-creation step entirely.
+  try {
+    const ko = await ensureKnockoutMarkets();
+    if (ko.created.length) {
+      console.log(`[ingest] auto-created knockout markets for ${ko.created.length} fixture(s): ${ko.created.map((c) => c.matchKey).join(", ")}`);
+    }
+  } catch (err) {
+    console.warn(`[ingest] ensureKnockoutMarkets failed (will retry next cycle): ${err instanceof Error ? err.message : err}`);
   }
 
   return { ok: true, sources: sourceSummary, sourceErrors, published, conflicts, unmatched, failed, errors };

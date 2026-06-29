@@ -77,6 +77,7 @@ export async function knockoutsForCountry(country: string): Promise<KnockoutMatc
     return { title: ROUND_TITLE[f.round] ?? f.round.toUpperCase(), round: f.round, opponent, kickoffIso: f.kickoff, venue: f.venue, result };
   });
 
-  views.sort((a, b) => ROUND_ORDER.indexOf(a.round) - ROUND_ORDER.indexOf(b.round));
+  // Most-recent round first (Final → R32), so the latest match sits on top.
+  views.sort((a, b) => ROUND_ORDER.indexOf(b.round) - ROUND_ORDER.indexOf(a.round));
   return views;
 }

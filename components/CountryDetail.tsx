@@ -112,7 +112,23 @@ export function CountryDetail({
         </div>
       </div>
 
-      {/* 1) Group-stage matches */}
+      {/* 1) Knockout rounds reached — most recent round first (Final → R32), shown
+          ABOVE the group stage since those matches are the latest. */}
+      {knockouts.map((k) => (
+        <Box key={k.round} title={k.title}>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <FixtureCard
+              country={name}
+              opponent={k.opponent}
+              kickoffIso={k.kickoffIso}
+              venue={k.venue}
+              result={k.result}
+            />
+          </div>
+        </Box>
+      ))}
+
+      {/* 2) Group-stage matches — at the bottom (oldest / completed) */}
       <Box title="Group Stage Matches">
         {matches.length === 0 ? (
           <p className="text-sm text-slate-400">No group-stage fixtures found.</p>
@@ -131,21 +147,6 @@ export function CountryDetail({
           </div>
         )}
       </Box>
-
-      {/* 1b) Knockout rounds reached (R32 → Final + 3rd place), one section each */}
-      {knockouts.map((k) => (
-        <Box key={k.round} title={k.title}>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <FixtureCard
-              country={name}
-              opponent={k.opponent}
-              kickoffIso={k.kickoffIso}
-              venue={k.venue}
-              result={k.result}
-            />
-          </div>
-        </Box>
-      ))}
 
       {/* 2) Squad table */}
       <Box title="Squad — 2026 World Cup">

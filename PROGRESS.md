@@ -2,11 +2,11 @@
 
 _You-are-here for a cheap resume. Durable map: `CLAUDE.md`. Deep archive: `../SESSION MD CODE HISTORY/SESSION_LOG.md`._
 
-**Last updated:** 2026-06-30 (end of Session 17 — **Bracket polish + pioneer nickname login**: every country name in the Bracket tab is now clickable to its country page (incl. advancing teams); the 3 original email/password users (Paul, dzuizz, Ainun) can now log in by nickname; NEW **"Bracket by Circle"** radial view (3rd purple toggle) — the viral circular-bracket design with flags/clickable names/live+final scores/trophy-at-center. Shipped `main` HEAD = `88d422e`.)
-_Prior: Session 16 — knockouts went tradeable (2-way, auto-created per round); Bracket FIFA/Date toggle + per-box scores+LIVE; All/Scores sticky section bars; COMPLETED badge; tab renames. (`61657fa`)_
+**Last updated:** 2026-06-30 (end of Session 18 — **Bracket pinned-bar reclaims tab space + country-page knockout sections**: the bracket toggle bar now pins under the black logo and COVERS the category tabs on scroll; country pages now show each knockout round the team reached as its own amber section ("ROUND OF 32 MATCHES" … "FINAL" + 3rd place), ordered most-recent-first ABOVE the group stage. Shipped `main` HEAD = `34ba268`. **PROGRESS.md/CLAUDE.md are now committed to git** (no longer local-only).)
+_Prior: Session 17 — bracket country names clickable; pioneer nickname login (Paul/dzuizz/Ainun); NEW "Bracket by Circle" radial view (3rd toggle). (`88d422e`)_
 
 ## Current phase
-Session 17 **shipped and live**. Nothing half-done in code. (Tournament is in the **Round of 32** — knockout markets tradeable + auto-opening per round; bracket has 3 views.)
+Session 18 **shipped and live**. Nothing half-done in code. (Tournament is in the **Round of 32** — knockout markets tradeable + auto-opening; bracket has 3 views; country pages show knockout rounds.)
 
 ## START HERE (next action)
 Nothing is in-flight. Pick whichever is most relevant:
@@ -19,6 +19,10 @@ Nothing is in-flight. Pick whichever is most relevant:
 7. **Player/squad data freshness** — re-run `npx tsx scripts/gen-countries.ts` (fast; `.sdb-cache.json` committed) to refresh bio/club/photo as squads change.
 
 ## Done (high level)
+- **Session 18 (Jun30.26) — pinned-bar reclaims tab space + country knockout sections:**
+  - **Bracket toggle bar covers the tabs on scroll:** new `useHeaderHeight()` (measures `#wc-header`, the black logo only — id added in `Navbar`); the bracket bar (now a plain `FitToWidth` sticky, `top=headerHeight`, `z-[45]` > nav z-40, opaque bg) rises over the category tab bar when scrolling, reclaiming that vertical space. (Was `StickyUnderNav` pinned below the full nav.)
+  - **Country pages show knockout rounds:** NEW `lib/countryKnockouts.ts` `knockoutsForCountry(name)` — teams from the live bracket (`knockoutFixtures` + assignments, `canonicalTeam` match), results from resolved `KnockoutMatches` HOME markets (winner = which side resolved YES; level score ⇒ `pens`). `CountryDetail` extracts a shared **`FixtureCard`** (used by group + knockout) and renders one amber-titled `Box` per round the team reached ("ROUND OF 32 MATCHES" … "FINAL"/"THIRD-PLACE PLAY-OFF"); a round shows only once its opponent is known. Wired into `app/brazil` + `app/countries/[slug]`.
+  - **Order = most recent first:** knockout sections render **above** Group Stage (which is over), and knockout rounds are sorted **Final → R32** (newest on top).
 - **Session 17 (Jun28–30.26) — Bracket polish + pioneer nickname login:**
   - **All bracket country names clickable:** wrapped the shared bracket `Slot` team name in `CountryLink` (`components/bracketShared.tsx`) → every printed country, every box/round, both tree + date views + 3rd-place, AND teams that advance into later boxes, link to `/countries/<slug>`. Placeholders ("Winner 75") stay plain.
   - **Pioneer nickname login (live DB):** the 3 original email/password users now have a nickname so they can log in by typing it (keeping email+password as backup): `paul.lo@me.com`→**Paul**, `ahmad.dzuizz.annajib@gmail.com`→**Dzuizz**, `ainunnajib@gmail.com`→**Ainun** (all `nicknameLower` were free). Done via `scripts/enable-pioneer-nicknames.ts` (idempotent, by email, collision-checked). ⚠️ Left the SEPARATE `ainunnajib` nickname account (0 cash / ~2,378 in positions) untouched — Ainun now has two reachable accounts ("Ainun" = his email one, row 6; "ainunnajib" = the workaround).
@@ -97,7 +101,7 @@ Nothing is in-flight. Pick whichever is most relevant:
 - **Sessions 1–6 (Jun11–13):** launch/deploy, 72 matches→3-way (216 markets), 48-team bracket, FIFA groups/times/venues, data tabs (Standings/Scores/Goals/Brazil), live resolutions. (Detail in `SESSION_LOG.md`.)
 
 ## In-flight
-- None — everything committed, merged to `main`, pushed, deployed (Session 17 through `88d422e`).
+- None — everything committed, merged to `main`, pushed, deployed (Session 18 through `34ba268`).
 
 ## Known issues / gotchas (see CLAUDE.md for full rules)
 - 🟢 **Knockout markets = 2-way (no Draw), resolve by ADVANCEMENT** (Session 16). `KnockoutMatches` category; resolution uses `merged.advanceWinner` (ESPN flag) not the score-based `winner`; a penalty shootout pays the advancing team and shows "(pens)". Auto-created per round by `ensureKnockoutMarkets()` inside `ingestAndPublish` — so a wrong `EVENT_TO_MATCH` id for a later round would auto-create a MIS-PAIRED market; verify the id-map before each round (see START HERE #1).
@@ -115,7 +119,7 @@ Nothing is in-flight. Pick whichever is most relevant:
 - 🟡 Nickname-only login has NO account security; auto-publish has no human gate (both accepted for play money).
 - 🟢 144 legacy "Knockouts" markets hidden, not deleted. Elo reprice only touches OPEN untraded match markets.
 - 🟢 NULL-outcome Prisma filter trap still applies (`app/page.tsx` `hideSecondary` uses `OR [HOME, null]`).
-- 📝 `PROGRESS.md` + `CLAUDE.md` are currently **uncommitted** in the working tree (doc handoff, intentionally not pushed). `.DS_Store` + `design-backups/` are untracked, ignore.
+- 📝 `PROGRESS.md` + `CLAUDE.md` are now **committed to git** (changed Session 17; Paul OK'd it). Commit them with each save-phase. `.DS_Store` + `design-backups/` are untracked, ignore.
 
 ## How to run / verify
 - `npm run dev` → :3000 · `npx tsc --noEmit` · `npm run build` · `npm run db:push` · `npm run db:seed`.

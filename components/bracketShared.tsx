@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { flag } from "@/lib/flags";
 import { useLiveScore } from "@/components/LiveScoreProvider";
+import { CountryLink } from "@/components/CountryLink";
 import { cn } from "@/lib/utils";
 
 /** Final scores for completed knockout matches, keyed by matchKey ("A vs B"):
@@ -108,7 +109,7 @@ export function Slot({
         {team ? (
           <>
             <span className="shrink-0 text-lg leading-none">{flag(team)}</span>
-            <span className={cn("truncate", hasScore && !won ? "font-medium text-slate-400" : "font-bold")}>{team}</span>
+            <CountryLink name={team} className={cn("truncate", hasScore && !won ? "font-medium text-slate-400" : "font-bold")} />
           </>
         ) : (
           <span className="truncate font-bold text-slate-400">{label}</span>

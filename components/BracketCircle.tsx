@@ -79,9 +79,14 @@ function TeamNode({ slot, team, goals, won, live }: { slot: string; team?: strin
   const a = ANG[slot];
   const p = posOf(slot);
   const hasScore = goals != null;
-  const upright = a > 90 && a < 270 ? a + 180 : a;
   const sp = { x: CX + (LEAF_R - 22) * Math.cos(toRad(a)), y: CY + (LEAF_R - 22) * Math.sin(toRad(a)) };
-  const lp = { x: CX + (LEAF_R + 30) * Math.cos(toRad(a)), y: CY + (LEAF_R + 30) * Math.sin(toRad(a)) };
+  // Anchor the name by its INNER edge just outside the flag so it grows strictly
+  // outward (never into the badge). Left-half labels flip 180° to stay upright.
+  const lp = { x: CX + (LEAF_R + 22) * Math.cos(toRad(a)), y: CY + (LEAF_R + 22) * Math.sin(toRad(a)) };
+  const rightSide = Math.cos(toRad(a)) >= 0;
+  const nameTransform = rightSide
+    ? `translateY(-50%) rotate(${a}deg)`
+    : `translate(-100%, -50%) rotate(${a + 180}deg)`;
   return (
     <>
       <div
@@ -103,8 +108,8 @@ function TeamNode({ slot, team, goals, won, live }: { slot: string; team?: strin
       )}
       {team && (
         <div
-          className={cn("absolute -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-[11px]", hasScore && !won ? "font-medium text-slate-400" : "font-bold text-slate-900")}
-          style={{ left: lp.x, top: lp.y, transform: `translate(-50%,-50%) rotate(${upright}deg)` }}
+          className={cn("absolute whitespace-nowrap text-[11px]", hasScore && !won ? "font-medium text-slate-400" : "font-bold text-slate-900")}
+          style={{ left: lp.x, top: lp.y, transform: nameTransform, transformOrigin: rightSide ? "left center" : "right center" }}
         >
           <CountryLink name={team} />
         </div>

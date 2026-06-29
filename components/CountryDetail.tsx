@@ -1,6 +1,9 @@
 import { flag } from "@/lib/flags";
 import type { CountryData, MatchResult } from "@/lib/countries";
 import { slugifyCountry } from "@/lib/countries";
+import type { KnockoutMatchView } from "@/lib/countryKnockouts";
+import type { Scorer } from "@/lib/results";
+import type { Venue } from "@/lib/venues";
 import { cn } from "@/lib/utils";
 import { MatchStartTime } from "@/components/MatchStartTime";
 import { GoalscorersBlock } from "@/components/GoalscorersBlock";
@@ -17,21 +20,82 @@ function Box({ title, children }: { title: string; children: React.ReactNode }) 
   );
 }
 
+interface CardResult {
+  countryGoals: number;
+  oppGoals: number;
+  outcome: "W" | "L" | "D";
+  pens?: boolean;
+  scorers: Scorer[];
+}
+
+/** One fixture card — shared by the group-stage and knockout-round sections. */
+function FixtureCard({
+  country,
+  opponent,
+  kickoffIso,
+  venue,
+  result,
+}: {
+  country: string;
+  opponent: string;
+  kickoffIso: string;
+  venue?: Venue;
+  result?: CardResult;
+}) {
+  const done = Boolean(result);
+  return (
+    <div className={cn("relative rounded-xl bg-surface p-3", done ? "border border-surface-border" : "border-2 border-yes")}>
+      {done && <span className="absolute right-3 top-3 text-[11px] font-bold text-red-600">COMPLETED</span>}
+      <div className="flex items-center gap-2 pr-20 font-semibold">
+        <span>{flag(country)}</span> {country}
+        <span className="mx-1 text-xs text-slate-400">vs</span>
+        <span>{flag(opponent)}</span> <CountryLink name={opponent} />
+      </div>
+      {result && (
+        <div className="mt-1.5 text-sm font-bold">
+          FT {result.countryGoals} – {result.oppGoals}
+          {result.pens ? " (pens)" : ""}{" "}
+          <span
+            className={cn(
+              "text-xs font-semibold",
+              result.outcome === "W" ? "text-emerald-600" : result.outcome === "L" ? "text-red-600" : "text-slate-400"
+            )}
+          >
+            · {result.outcome === "W" ? "Won" : result.outcome === "L" ? "Lost" : "Draw"}
+          </span>
+        </div>
+      )}
+      <div className="mt-2 space-y-0.5 text-[11px] leading-tight text-slate-400">
+        <div><MatchStartTime iso={kickoffIso} /></div>
+        {venue && <div>{venue.stadium}, {venue.city}, {venue.country}</div>}
+      </div>
+      {result && (
+        <div className="mt-2">
+          <GoalscorersBlock scorers={result.scorers} leftTeam={country} rightTeam={opponent} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 /**
  * Shared country detail layout — used by both the dedicated Brazil tab and every
  * /countries/[slug] page, so all 48 teams render identically. Goals are computed
- * server-side and passed in keyed by player name.
+ * server-side and passed in keyed by player name. Knockout rounds the team has
+ * reached are shown as their own sections after the group stage.
  */
 export function CountryDetail({
   data,
   goals,
   assists = {},
   results = {},
+  knockouts = [],
 }: {
   data: CountryData;
   goals: Record<string, number>;
   assists?: Record<string, number>;
   results?: Record<string, MatchResult>;
+  knockouts?: KnockoutMatchView[];
 }) {
   const { name, group, roster, coach, titles, matches, sources } = data;
   const countrySlug = slugifyCountry(name);
@@ -54,64 +118,34 @@ export function CountryDetail({
           <p className="text-sm text-slate-400">No group-stage fixtures found.</p>
         ) : (
           <div className="grid gap-3 sm:grid-cols-3">
-            {matches.map((m) => {
-              const r = results[m.opponent];
-              const done = Boolean(r);
-              return (
-                <div
-                  key={m.opponent}
-                  className={cn(
-                    "relative rounded-xl bg-surface p-3",
-                    // Upcoming (not yet played): bold green edge. Completed: normal border.
-                    done ? "border border-surface-border" : "border-2 border-yes"
-                  )}
-                >
-                  {done && (
-                    <span className="absolute right-3 top-3 text-[11px] font-bold text-red-600">
-                      COMPLETED
-                    </span>
-                  )}
-                  <div className="flex items-center gap-2 pr-20 font-semibold">
-                    <span>{flag(name)}</span> {name}
-                    <span className="mx-1 text-xs text-slate-400">vs</span>
-                    <span>{flag(m.opponent)}</span> <CountryLink name={m.opponent} />
-                  </div>
-                  {r && (
-                    <div className="mt-1.5 text-sm font-bold">
-                      FT {r.countryGoals} – {r.oppGoals}{" "}
-                      <span
-                        className={cn(
-                          "text-xs font-semibold",
-                          r.outcome === "W"
-                            ? "text-emerald-600"
-                            : r.outcome === "L"
-                              ? "text-red-600"
-                              : "text-slate-400"
-                        )}
-                      >
-                        · {r.outcome === "W" ? "Won" : r.outcome === "L" ? "Lost" : "Draw"}
-                      </span>
-                    </div>
-                  )}
-                  <div className="mt-2 space-y-0.5 text-[11px] leading-tight text-slate-400">
-                    <div><MatchStartTime iso={m.kickoffIso} /></div>
-                    {m.venue && <div>{m.venue.stadium}, {m.venue.city}, {m.venue.country}</div>}
-                  </div>
-                  {r && (
-                    <div className="mt-2">
-                      <GoalscorersBlock
-                        scorers={r.scorers}
-                        leftTeam={name}
-                        rightTeam={m.opponent}
-                      />
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+            {matches.map((m) => (
+              <FixtureCard
+                key={m.opponent}
+                country={name}
+                opponent={m.opponent}
+                kickoffIso={m.kickoffIso}
+                venue={m.venue}
+                result={results[m.opponent]}
+              />
+            ))}
           </div>
         )}
       </Box>
+
+      {/* 1b) Knockout rounds reached (R32 → Final + 3rd place), one section each */}
+      {knockouts.map((k) => (
+        <Box key={k.round} title={k.title}>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <FixtureCard
+              country={name}
+              opponent={k.opponent}
+              kickoffIso={k.kickoffIso}
+              venue={k.venue}
+              result={k.result}
+            />
+          </div>
+        </Box>
+      ))}
 
       {/* 2) Squad table */}
       <Box title="Squad — 2026 World Cup">

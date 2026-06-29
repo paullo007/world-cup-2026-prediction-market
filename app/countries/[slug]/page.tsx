@@ -7,6 +7,7 @@ import {
   resultsForCountry,
   countryFromSlug,
 } from "@/lib/countries";
+import { knockoutsForCountry } from "@/lib/countryKnockouts";
 import { CountryDetail } from "@/components/CountryDetail";
 
 export const dynamic = "force-dynamic";
@@ -19,5 +20,6 @@ export default async function CountryPage({ params }: { params: { slug: string }
   const goals = goalsForRoster(data.roster, played, name);
   const assists = assistsForRoster(data.roster, played, name);
   const results = resultsForCountry(data.matches, played, name);
-  return <CountryDetail data={data} goals={goals} assists={assists} results={results} />;
+  const knockouts = await knockoutsForCountry(name);
+  return <CountryDetail data={data} goals={goals} assists={assists} results={results} knockouts={knockouts} />;
 }

@@ -32,7 +32,7 @@ export function Navbar() {
   // line up with the rest of the page. Stickiness is owned by the wrapper in
   // app/layout.tsx, which pins the header + tab bar together.
   return (
-    <header className="bg-surface">
+    <header id="wc-header" className="bg-surface">
       <div className="mx-auto max-w-6xl px-4">
         <div className="relative flex items-center gap-4 border-b-2 border-amber-500/50 bg-gradient-to-r from-black via-zinc-900 to-black px-6 py-3">
         <Suspense fallback={null}>

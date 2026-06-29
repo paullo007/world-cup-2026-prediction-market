@@ -26,6 +26,28 @@ export function useTopbarHeight(): number {
 }
 
 /**
+ * Live height of JUST the black logo header (`#wc-header`), excluding the category
+ * tab bar. Use as the `top` for a bar that should pin under the logo and cover the
+ * tabs (higher z-index needed). Same re-measure behaviour as `useTopbarHeight`.
+ */
+export function useHeaderHeight(): number {
+  const [top, setTop] = useState(0);
+  useEffect(() => {
+    const el = document.getElementById("wc-header");
+    const measure = () => setTop(el ? el.getBoundingClientRect().height : 0);
+    measure();
+    const ro = el ? new ResizeObserver(measure) : null;
+    if (el && ro) ro.observe(el);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+  return top;
+}
+
+/**
  * Pins its children just below the global sticky header+nav while the page
  * scrolls, wrapping them in FitToWidth so a scaled bracket row stays aligned
  * with the body below it. z-30 keeps it under the nav (z-40) so it tucks neatly

@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { BracketTree } from "@/components/BracketTree";
 import { BracketSchedule } from "@/components/BracketSchedule";
 import { BracketCircle } from "@/components/BracketCircle";
-import { StickyUnderNav } from "@/components/StickyUnderNav";
+import { useHeaderHeight } from "@/components/StickyUnderNav";
+import { FitToWidth } from "@/components/FitToWidth";
 import { LiveScoreProvider } from "@/components/LiveScoreProvider";
 import { BRACKET_W, THEMES, FALLBACK, type ScoreMap } from "@/components/bracketShared";
 import { BRACKET } from "@/lib/bracket";
@@ -25,6 +26,7 @@ type View = "fifa" | "date" | "circle";
 export function BracketLive({ initialTeams, scores }: { initialTeams: Record<string, string>; scores: ScoreMap }) {
   const [teams, setTeams] = useState(initialTeams);
   const [view, setView] = useState<View>("fifa");
+  const headerTop = useHeaderHeight();
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const refresh = useCallback(async () => {
@@ -57,9 +59,10 @@ export function BracketLive({ initialTeams, scores }: { initialTeams: Record<str
   return (
     <LiveScoreProvider>
     <div>
-      {/* Toggle + round labels pin together just under the global nav while the
-          bracket scrolls — one StickyUnderNav (same pattern as AI Knockouts). */}
-      <StickyUnderNav className="border-b border-surface-border bg-surface">
+      {/* Toggle + round labels pin under the BLACK LOGO HEADER (not the full nav)
+          with a higher z-index + opaque bg, so on scroll they rise up and COVER
+          the category tab bar — reclaiming that vertical space for the bracket. */}
+      <FitToWidth className="sticky z-[45] border-b border-surface-border bg-surface" style={{ top: headerTop }}>
         <div className={BRACKET_W}>
           <div className="flex justify-start gap-2 py-2">
             <button
@@ -124,7 +127,7 @@ export function BracketLive({ initialTeams, scores }: { initialTeams: Record<str
           </div>
           )}
         </div>
-      </StickyUnderNav>
+      </FitToWidth>
 
       {view === "fifa" ? (
         <BracketTree teams={teams} scores={scores} />

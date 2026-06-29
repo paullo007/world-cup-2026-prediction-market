@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BracketTree } from "@/components/BracketTree";
 import { BracketSchedule } from "@/components/BracketSchedule";
+import { BracketCircle } from "@/components/BracketCircle";
 import { StickyUnderNav } from "@/components/StickyUnderNav";
 import { LiveScoreProvider } from "@/components/LiveScoreProvider";
 import { BRACKET_W, THEMES, FALLBACK, type ScoreMap } from "@/components/bracketShared";
@@ -12,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 const POLL_MS = 45_000; // same cadence as the Matches-tab live scores
 
-type View = "fifa" | "date";
+type View = "fifa" | "date" | "circle";
 
 /**
  * Client wrapper for the Bracket tab. Keeps the teams fresh in real-time by
@@ -85,8 +86,21 @@ export function BracketLive({ initialTeams, scores }: { initialTeams: Record<str
             >
               Bracket by Date
             </button>
+            <button
+              type="button"
+              onClick={() => setView("circle")}
+              className={cn(
+                btn,
+                view === "circle"
+                  ? "border-violet-500 bg-violet-500 text-white"
+                  : "border-violet-300 text-violet-600 hover:bg-violet-50"
+              )}
+            >
+              Bracket by Circle
+            </button>
           </div>
 
+          {view !== "circle" && (
           <div className="flex items-stretch gap-8 pb-2">
             {BRACKET.map((round) => {
               const theme = THEMES[round.key] ?? FALLBACK;
@@ -108,10 +122,17 @@ export function BracketLive({ initialTeams, scores }: { initialTeams: Record<str
               );
             })}
           </div>
+          )}
         </div>
       </StickyUnderNav>
 
-      {view === "fifa" ? <BracketTree teams={teams} scores={scores} /> : <BracketSchedule teams={teams} scores={scores} />}
+      {view === "fifa" ? (
+        <BracketTree teams={teams} scores={scores} />
+      ) : view === "date" ? (
+        <BracketSchedule teams={teams} scores={scores} />
+      ) : (
+        <BracketCircle teams={teams} scores={scores} />
+      )}
     </div>
     </LiveScoreProvider>
   );

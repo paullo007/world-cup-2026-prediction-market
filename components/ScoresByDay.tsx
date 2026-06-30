@@ -5,6 +5,7 @@ import { flag } from "@/lib/flags";
 import { MatchStartTime } from "@/components/MatchStartTime";
 import { CountryLink } from "@/components/CountryLink";
 import { StickySectionBar } from "@/components/StickySectionBar";
+import { knockoutRoundTitle } from "@/lib/bracket";
 import { cn } from "@/lib/utils";
 import type { Venue } from "@/lib/venues";
 
@@ -16,6 +17,11 @@ export interface ScoreMatch {
   awayGoals: number;
   kickoffIso: string;
   venue?: Venue;
+  // Knockout matches carry their round (→ a "ROUND OF 32 MATCHES" section header)
+  // and which side ADVANCED, so a level score decided on penalties still shows a
+  // winner instead of a "Draw". Absent on group-stage games (grouped by day).
+  round?: string;
+  homeWon?: boolean;
 }
 
 function TeamLine({ team, goals, won }: { team: string; goals: number; won: boolean }) {
@@ -54,14 +60,17 @@ export function ScoresByDay({ matches }: { matches: ScoreMatch[] }) {
     return <p className="py-12 text-center text-slate-400">Loading scores…</p>;
   }
 
-  // Group preserving the incoming order (newest match first → newest day first).
+  // Group preserving the incoming order. Knockout games (which carry a `round`)
+  // group under one "ROUND OF 32 MATCHES"-style bar per round; group-stage games
+  // group by the viewer's local day. The page sends knockouts first (newest round
+  // on top) then group days, so the section order falls out of first-appearance.
   const groups: { key: string; label: string; items: ScoreMatch[] }[] = [];
   const byKey = new Map<string, { key: string; label: string; items: ScoreMatch[] }>();
   for (const m of matches) {
-    const k = dayKey(m.kickoffIso);
+    const k = m.round ? `ko:${m.round}` : dayKey(m.kickoffIso);
     let g = byKey.get(k);
     if (!g) {
-      g = { key: k, label: dayLabel(m.kickoffIso), items: [] };
+      g = { key: k, label: m.round ? knockoutRoundTitle(m.round) : dayLabel(m.kickoffIso), items: [] };
       byKey.set(k, g);
       groups.push(g);
     }
@@ -75,8 +84,12 @@ export function ScoresByDay({ matches }: { matches: ScoreMatch[] }) {
           <StickySectionBar title={g.label} />
           <div className="grid gap-3 sm:grid-cols-2">
             {g.items.map((m) => {
-              const homeWon = m.homeGoals > m.awayGoals;
-              const awayWon = m.awayGoals > m.homeGoals;
+              // Knockouts can't end level: a tied score went to penalties, and the
+              // winner is the side that advanced (`homeWon`). Group games tied = a Draw.
+              const level = m.homeGoals === m.awayGoals;
+              const pens = !!m.round && level;
+              const homeWon = pens ? m.homeWon === true : m.homeGoals > m.awayGoals;
+              const awayWon = pens ? m.homeWon === false : m.awayGoals > m.homeGoals;
               return (
                 <div key={m.slug} className="rounded-2xl border border-surface-border bg-surface-raised p-4">
                   <div className="space-y-1.5">
@@ -84,7 +97,12 @@ export function ScoresByDay({ matches }: { matches: ScoreMatch[] }) {
                     <div className="h-px bg-surface-border" />
                     <TeamLine team={m.away} goals={m.awayGoals} won={awayWon} />
                   </div>
-                  {!homeWon && !awayWon && (
+                  {pens && (
+                    <p className="mt-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                      {(homeWon ? m.home : m.away)} won (pens)
+                    </p>
+                  )}
+                  {!m.round && level && (
                     <p className="mt-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400">Draw</p>
                   )}
                   <div className="mt-2 space-y-0.5 text-[11px] leading-tight text-slate-400">

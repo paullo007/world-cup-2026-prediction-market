@@ -2,6 +2,9 @@ import { db } from "@/lib/db";
 import { matchTeams } from "@/lib/flags";
 import { KICKOFFS } from "@/lib/kickoffs";
 import { VENUES, type Venue } from "@/lib/venues";
+import { knockoutFixtures, type KnockoutFixture } from "@/lib/bracket";
+import { getBracketTeams } from "@/lib/bracketSync";
+import { KNOCKOUT_CATEGORY } from "@/lib/knockoutMarkets";
 import type { Scorer } from "@/lib/results";
 
 export interface PlayedMatch {
@@ -13,6 +16,12 @@ export interface PlayedMatch {
   kickoffIso: string; // UTC ISO, for MatchStartTime
   venue?: Venue;
   scorers: Scorer[];
+}
+
+export interface PlayedKnockoutMatch extends PlayedMatch {
+  round: string; // "Round of 32", … — for the round section header
+  homeWon: boolean; // who ADVANCED (settles by advancement) — needed to show the
+  // winner on a level score that went to penalties
 }
 
 /**
@@ -50,5 +59,56 @@ export async function getPlayedMatches(): Promise<PlayedMatch[]> {
       scorers: Array.isArray(m.scorers) ? (m.scorers as unknown as Scorer[]) : [],
     });
   }
+  return out;
+}
+
+/**
+ * All RESOLVED knockout matches (R32 → Final + 3rd place) with a stored score —
+ * the knockout-stage counterpart to getPlayedMatches(), so the Scores tab keeps
+ * listing games once the group stage is over. The score + scorers live on the
+ * HOME market only (one row per tie). Round / kickoff / venue come from the live
+ * bracket; `homeWon` (= which side ADVANCED, the market that resolved YES) lets
+ * the UI show the winner on a level score decided by penalties. Newest first.
+ */
+export async function getPlayedKnockoutMatches(): Promise<PlayedKnockoutMatch[]> {
+  const markets = await db.market.findMany({
+    where: {
+      category: KNOCKOUT_CATEGORY,
+      outcomeType: "HOME",
+      status: "RESOLVED",
+      homeGoals: { not: null },
+      awayGoals: { not: null },
+    },
+  });
+  if (markets.length === 0) return [];
+
+  // Bracket fixtures keyed by "TeamA vs TeamB" (matches the market's matchKey),
+  // for round / kickoff / venue.
+  const teamMap = await getBracketTeams();
+  const fxByKey = new Map<string, KnockoutFixture>();
+  for (const f of knockoutFixtures(teamMap)) {
+    if (f.teamA && f.teamB) fxByKey.set(`${f.teamA} vs ${f.teamB}`, f);
+  }
+
+  const out: PlayedKnockoutMatch[] = [];
+  for (const m of markets) {
+    if (!m.matchKey || m.homeGoals == null || m.awayGoals == null) continue;
+    const [home, away] = m.matchKey.split(" vs ");
+    if (!home || !away) continue;
+    const f = fxByKey.get(m.matchKey);
+    out.push({
+      slug: m.slug,
+      home,
+      away,
+      homeGoals: m.homeGoals,
+      awayGoals: m.awayGoals,
+      kickoffIso: f ? f.kickoff : m.closesAt.toISOString(),
+      venue: f?.venue,
+      scorers: Array.isArray(m.scorers) ? (m.scorers as unknown as Scorer[]) : [],
+      round: f?.round ?? "Knockout",
+      homeWon: m.resolvedOutcome === "YES",
+    });
+  }
+  out.sort((a, b) => (a.kickoffIso < b.kickoffIso ? 1 : -1)); // newest kickoff first
   return out;
 }

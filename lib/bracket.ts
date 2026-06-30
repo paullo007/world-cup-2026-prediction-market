@@ -107,6 +107,29 @@ export const THIRD_PLACE: BracketMatch = {
   b: s("Loser 102"),
 };
 
+// Section header per knockout round (uppercase, styled like "GROUP STAGE
+// MATCHES") + the chronological round order — shared by the country page and the
+// Scores tab so the labels can't drift.
+const KNOCKOUT_ROUND_TITLE: Record<string, string> = {
+  "Round of 32": "ROUND OF 32 MATCHES",
+  "Round of 16": "ROUND OF 16 MATCHES",
+  "Quarter-finals": "QUARTER-FINAL",
+  "Semi-finals": "SEMI-FINAL",
+  "Third-place play-off": "THIRD-PLACE PLAY-OFF",
+  Final: "FINAL",
+};
+export const KNOCKOUT_ROUND_ORDER = [
+  "Round of 32",
+  "Round of 16",
+  "Quarter-finals",
+  "Semi-finals",
+  "Third-place play-off",
+  "Final",
+];
+export function knockoutRoundTitle(round: string): string {
+  return KNOCKOUT_ROUND_TITLE[round] ?? round.toUpperCase();
+}
+
 /** A knockout fixture flattened for the Matches-tab day picker (display-only).
  *  Teams come from the bracket assignments / ESPN sync; `labelA`/`labelB` are the
  *  positional placeholders shown until a team is known ("Winner 74"). */

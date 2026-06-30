@@ -1,20 +1,9 @@
 import { db } from "@/lib/db";
-import { knockoutFixtures } from "@/lib/bracket";
+import { knockoutFixtures, knockoutRoundTitle, KNOCKOUT_ROUND_ORDER } from "@/lib/bracket";
 import { getBracketTeams } from "@/lib/bracketSync";
 import { canonicalTeam } from "@/lib/flags";
 import type { Scorer } from "@/lib/results";
 import type { Venue } from "@/lib/venues";
-
-// Section title per round, styled like the "GROUP STAGE MATCHES" header.
-const ROUND_TITLE: Record<string, string> = {
-  "Round of 32": "ROUND OF 32 MATCHES",
-  "Round of 16": "ROUND OF 16 MATCHES",
-  "Quarter-finals": "QUARTER-FINAL",
-  "Semi-finals": "SEMI-FINAL",
-  "Third-place play-off": "THIRD-PLACE PLAY-OFF",
-  Final: "FINAL",
-};
-const ROUND_ORDER = ["Round of 32", "Round of 16", "Quarter-finals", "Semi-finals", "Third-place play-off", "Final"];
 
 export interface KnockoutMatchView {
   title: string;
@@ -72,10 +61,10 @@ export async function knockoutsForCountry(country: string): Promise<KnockoutMatc
         scorers: r.scorers,
       };
     }
-    return { title: ROUND_TITLE[f.round] ?? f.round.toUpperCase(), round: f.round, opponent, kickoffIso: f.kickoff, venue: f.venue, result };
+    return { title: knockoutRoundTitle(f.round), round: f.round, opponent, kickoffIso: f.kickoff, venue: f.venue, result };
   });
 
   // Most-recent round first (Final → R32), so the latest match sits on top.
-  views.sort((a, b) => ROUND_ORDER.indexOf(b.round) - ROUND_ORDER.indexOf(a.round));
+  views.sort((a, b) => KNOCKOUT_ROUND_ORDER.indexOf(b.round) - KNOCKOUT_ROUND_ORDER.indexOf(a.round));
   return views;
 }

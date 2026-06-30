@@ -1,16 +1,43 @@
 import Link from "next/link";
-import { getPlayedMatches } from "@/lib/playedMatches";
+import { getPlayedMatches, getPlayedKnockoutMatches } from "@/lib/playedMatches";
 import { SCORES_SOURCES } from "@/lib/sources";
 import { SourceNote } from "@/components/SourceNote";
 import { LiveScoreProvider } from "@/components/LiveScoreProvider";
 import { LiveNowStrip } from "@/components/LiveNowStrip";
-import { ScoresByDay } from "@/components/ScoresByDay";
+import { ScoresByDay, type ScoreMatch } from "@/components/ScoresByDay";
 
 export const dynamic = "force-dynamic";
 
 export default async function ScoresPage() {
-  // Most-recent results first.
-  const played = (await getPlayedMatches()).reverse();
+  // Knockout results first (newest round on top), then group-stage games
+  // most-recent day first — so the Scores tab spans the whole tournament.
+  const [knockout, group] = await Promise.all([
+    getPlayedKnockoutMatches(),
+    getPlayedMatches(),
+  ]);
+
+  const matches: ScoreMatch[] = [
+    ...knockout.map((m) => ({
+      slug: m.slug,
+      home: m.home,
+      away: m.away,
+      homeGoals: m.homeGoals,
+      awayGoals: m.awayGoals,
+      kickoffIso: m.kickoffIso,
+      venue: m.venue,
+      round: m.round,
+      homeWon: m.homeWon,
+    })),
+    ...[...group].reverse().map((m) => ({
+      slug: m.slug,
+      home: m.home,
+      away: m.away,
+      homeGoals: m.homeGoals,
+      awayGoals: m.awayGoals,
+      kickoffIso: m.kickoffIso,
+      venue: m.venue,
+    })),
+  ];
 
   return (
     <LiveScoreProvider>
@@ -29,22 +56,12 @@ export default async function ScoresPage() {
         </p>
       </div>
 
-      {played.length === 0 ? (
+      {matches.length === 0 ? (
         <p className="py-12 text-center text-slate-400">
           No results yet — approved match scores will show up here.
         </p>
       ) : (
-        <ScoresByDay
-          matches={played.map((m) => ({
-            slug: m.slug,
-            home: m.home,
-            away: m.away,
-            homeGoals: m.homeGoals,
-            awayGoals: m.awayGoals,
-            kickoffIso: m.kickoffIso,
-            venue: m.venue,
-          }))}
-        />
+        <ScoresByDay matches={matches} />
       )}
 
       <SourceNote sources={SCORES_SOURCES} />

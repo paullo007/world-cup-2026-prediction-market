@@ -9,7 +9,7 @@ import { db } from "@/lib/db";
 import { seedStateForProbability } from "@/lib/amm";
 import { knockoutProbabilities } from "@/lib/elo";
 import { knockoutFixtures } from "@/lib/bracket";
-import { fetchBracketTeams } from "@/lib/bracketSync";
+import { getBracketTeams } from "@/lib/bracketSync";
 import { ALL_TEAMS } from "@/lib/flags";
 
 export const KNOCKOUT_CATEGORY = "KnockoutMatches";
@@ -55,11 +55,10 @@ export async function ensureKnockoutMarkets(opts: { dryRun?: boolean } = {}): Pr
   const { dryRun = false } = opts;
   const isReal = new Set(ALL_TEAMS);
 
-  // Bracket teams: ESPN auto-fill merged with manual admin overrides (admin wins).
-  const espnTeams = await fetchBracketTeams();
-  const assignments = await db.bracketAssignment.findMany();
-  const teamMap: Record<string, string> = { ...espnTeams };
-  for (const a of assignments) teamMap[a.slot] = a.team;
+  // Bracket teams: ESPN R32 draw + manual overrides + OUR resolved results
+  // auto-advancing winners forward — so R16+ markets auto-create from our own
+  // advancement (no dependency on ESPN's later-round feed / EVENT_TO_MATCH).
+  const teamMap = await getBracketTeams();
 
   const fixtures = knockoutFixtures(teamMap);
 

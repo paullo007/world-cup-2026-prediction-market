@@ -2,15 +2,15 @@
 
 _You-are-here for a cheap resume. Durable map: `CLAUDE.md`. Deep archive: `../SESSION MD CODE HISTORY/SESSION_LOG.md`._
 
-**Last updated:** 2026-06-30 (end of Session 18 — **Bracket pinned-bar reclaims tab space + country-page knockout sections**: the bracket toggle bar now pins under the black logo and COVERS the category tabs on scroll; country pages now show each knockout round the team reached as its own amber section ("ROUND OF 32 MATCHES" … "FINAL" + 3rd place), ordered most-recent-first ABOVE the group stage. Shipped `main` HEAD = `34ba268`. **PROGRESS.md/CLAUDE.md are now committed to git** (no longer local-only).)
-_Prior: Session 17 — bracket country names clickable; pioneer nickname login (Paul/dzuizz/Ainun); NEW "Bracket by Circle" radial view (3rd toggle). (`88d422e`)_
+**Last updated:** 2026-06-30 (end of Session 19 — **AUTOMATIC bracket advancement** + label renames: winners now auto-advance to the next slot derived from OUR resolved results (no ESPN later-round feed / id-map needed), shown across all 3 bracket views (Circle draws the advancing flag on the branch) + country pages, within a fetch of each completed match. Renamed bracket toggles → **FIFA/Date/Circle Bracket**, nav tab → **Brackets**. Shipped `main` HEAD = `92b6d25`.)
+_Prior: Session 18 — bracket pinned-bar covers tabs on scroll; country-page knockout sections (most-recent-first). (`34ba268`)_
 
 ## Current phase
-Session 18 **shipped and live**. Nothing half-done in code. (Tournament is in the **Round of 32** — knockout markets tradeable + auto-opening; bracket has 3 views; country pages show knockout rounds.)
+Session 19 **shipped and live**. Nothing half-done in code. (Tournament is in the **Round of 32** — knockout markets tradeable + auto-opening; winners auto-advance the bracket; 3 bracket views; country pages show knockout rounds.)
 
 ## START HERE (next action)
 Nothing is in-flight. Pick whichever is most relevant:
-1. ⏰ **Verify the Bracket R16+ id-map before each knockout round** — R32 in `lib/bracketSync.ts` `EVENT_TO_MATCH` is VERIFIED; R16 (~Jul 4), QF (~Jul 9), SF/3rd/Final mappings are best-effort placeholders (teams TBD now). Re-check each event-id→match-num before its teams populate (code comment flags it). **Knockout 2-way markets auto-create from this map** (`ensureKnockoutMarkets` in ingest) — a wrong later-round id would create a mis-paired market, so this verification matters more now.
+1. 🔭 **Switch market auto-creation to derived advancement (recommended, Session 19 follow-up):** the BRACKET DISPLAY now advances winners from our own results (`getBracketTeams`), so it no longer needs ESPN's R16+ feed/`EVENT_TO_MATCH`. BUT `lib/knockoutMarkets.ensureKnockoutMarkets()` still reads teams via `fetchBracketTeams()` (ESPN) — so the tradeable R16+ MARKETS still wait on ESPN's (unverified) later-round ids. Change it to use `getBracketTeams()` so R16 markets auto-create from our derived advancement too (close the loop, no ESPN dependency). Until then: still re-verify the R16/QF/SF/Final `EVENT_TO_MATCH` ids before each round, OR make this switch.
 2. **Pin-feature sweep** — Paul wants sticky/pinned headers "wherever there's a row of columns of data." Done on most (squad tables, Goals, Countries history, Rankings). Remaining candidate: **Portfolio** tables. (Standings = tiny 4-row per-group cards, pinning N/A.)
 3. **Round-two country links** — extend `CountryLink` to the nested-anchor spots skipped in round one: market cards, the tradeable Bracket boxes, market question text, Portfolio. (Need no-nested-`<a>` handling.)
 4. **SEC-01** — login rate-limit/lockout, still open (needs Upstash).
@@ -19,6 +19,10 @@ Nothing is in-flight. Pick whichever is most relevant:
 7. **Player/squad data freshness** — re-run `npx tsx scripts/gen-countries.ts` (fast; `.sdb-cache.json` committed) to refresh bio/club/photo as squads change.
 
 ## Done (high level)
+- **Session 19 (Jun30.26) — automatic bracket advancement + renames:**
+  - **Winners auto-advance from OUR results (NEW):** `lib/bracketSync.ts` `deriveBracketAdvancement(teams, winners)` — each later slot is labelled "Winner N"/"Loser N", so once match N resolves we fill the next slot ourselves (fixpoint loop → cascades R32→R16→QF…). `getBracketTeams()` = ESPN R32 draw + manual overrides + derived winners (**precedence: admin > derived > ESPN**). **No longer depends on ESPN's later-round feed or the unverified `EVENT_TO_MATCH` R16+ ids** to advance. Centralised: `/api/bracket-teams`, `app/bracket`, Matches day picker + All round labels (`app/page.tsx`), and country pages (`lib/countryKnockouts`) all call `getBracketTeams()`, so advancement shows everywhere within one fetch (~45s poll / 2-min settle) of full-time — zero manual steps.
+  - **Circle view shows the move:** `BracketCircle` now draws the advancing flag on the branch it moves into (midpoint between the round node and its feeder), so a win visibly travels inward toward the trophy (inner rounds were dots-only before). Verified live: 90a=Canada, 91a=Brazil, 89a=Paraguay.
+  - **Renames:** bracket toggles "Bracket by FIFA/Date/Circle" → **"FIFA Bracket" / "Date Bracket" / "Circle Bracket"**; nav tab "Bracket" → **"Brackets"** (display-only label in `CategoryNav`, route unchanged).
 - **Session 18 (Jun30.26) — pinned-bar reclaims tab space + country knockout sections:**
   - **Bracket toggle bar covers the tabs on scroll:** new `useHeaderHeight()` (measures `#wc-header`, the black logo only — id added in `Navbar`); the bracket bar (now a plain `FitToWidth` sticky, `top=headerHeight`, `z-[45]` > nav z-40, opaque bg) rises over the category tab bar when scrolling, reclaiming that vertical space. (Was `StickyUnderNav` pinned below the full nav.)
   - **Country pages show knockout rounds:** NEW `lib/countryKnockouts.ts` `knockoutsForCountry(name)` — teams from the live bracket (`knockoutFixtures` + assignments, `canonicalTeam` match), results from resolved `KnockoutMatches` HOME markets (winner = which side resolved YES; level score ⇒ `pens`). `CountryDetail` extracts a shared **`FixtureCard`** (used by group + knockout) and renders one amber-titled `Box` per round the team reached ("ROUND OF 32 MATCHES" … "FINAL"/"THIRD-PLACE PLAY-OFF"); a round shows only once its opponent is known. Wired into `app/brazil` + `app/countries/[slug]`.
@@ -101,7 +105,7 @@ Nothing is in-flight. Pick whichever is most relevant:
 - **Sessions 1–6 (Jun11–13):** launch/deploy, 72 matches→3-way (216 markets), 48-team bracket, FIFA groups/times/venues, data tabs (Standings/Scores/Goals/Brazil), live resolutions. (Detail in `SESSION_LOG.md`.)
 
 ## In-flight
-- None — everything committed, merged to `main`, pushed, deployed (Session 18 through `34ba268`).
+- None — everything committed, merged to `main`, pushed, deployed (Session 19 through `92b6d25`).
 
 ## Known issues / gotchas (see CLAUDE.md for full rules)
 - 🟢 **Knockout markets = 2-way (no Draw), resolve by ADVANCEMENT** (Session 16). `KnockoutMatches` category; resolution uses `merged.advanceWinner` (ESPN flag) not the score-based `winner`; a penalty shootout pays the advancing team and shows "(pens)". Auto-created per round by `ensureKnockoutMarkets()` inside `ingestAndPublish` — so a wrong `EVENT_TO_MATCH` id for a later round would auto-create a MIS-PAIRED market; verify the id-map before each round (see START HERE #1).

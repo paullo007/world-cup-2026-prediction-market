@@ -24,7 +24,8 @@ export default async function StandingsPage() {
             All 12 groups and their points (3 for a win, 1 for a draw). Tables update in real time:
             approved results plus <span className="font-semibold text-red-600">provisional</span>{" "}
             points from matches in progress (refreshed every 45s during play, marked{" "}
-            <span className="font-semibold text-red-600">Live</span>). Top two of each group advance.
+            <span className="font-semibold text-red-600">Live</span>). The top two of each group,
+            plus the eight best third-placed teams, advance to the Round of 32.
             Ordered by points, then goal difference, then goals for.
           </p>
         </div>

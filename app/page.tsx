@@ -1,4 +1,5 @@
 import type { Market } from "@prisma/client";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { MarketCard } from "@/components/MarketCard";
@@ -253,6 +254,15 @@ export default async function HomePage({
         </p>
       </section>
 
+      {isWinner && (
+        <p className="-mt-2 max-w-3xl text-xs italic text-slate-400">
+          These are <span className="font-semibold">crowd-set prices</span> — each team&apos;s % is just
+          the live market price for its YES shares, moved by traders. They reflect where the crowd is
+          betting, not a team-strength model, so they won&apos;t line up with the{" "}
+          <Link href="/rankings" className="text-accent hover:underline">FIFA Rankings</Link> tab.
+        </p>
+      )}
+
       {isWinner && <PredictMyOwnWinner existingTeams={existingWinnerTeams} />}
 
       {isMatches ? (
@@ -270,7 +280,7 @@ export default async function HomePage({
             {sections.map((sec) => (
               <div key={sec.title} className="space-y-4">
                 <StickySectionBar title={sec.title} />
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {sec.cards.map((c, i) =>
                     c.kind === "single" ? (
                       <MarketCard key={c.key} market={c.market} volume={c.volume} index={sec.start + i + 1} />
@@ -288,7 +298,7 @@ export default async function HomePage({
           No markets in this category yet.
         </p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {markets.map((m, i) => (
             <MarketCard
               key={m.id}

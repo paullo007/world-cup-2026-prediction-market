@@ -26,11 +26,22 @@ const details: EspnDetail[] = [
   // Mononym scorer: ESPN's fullName is "Name null" (null last name) — must be
   // cleaned to just the name, not "Trézéguet null".
   { scoringPlay: true, type: { text: "Goal - Header" }, penaltyKick: false, ownGoal: false, team: { id: "2" }, clock: { displayValue: "82'" }, athletesInvolved: [{ displayName: "Trézéguet", fullName: "Trézéguet null" }] },
+  // Penalty SHOOTOUT kicks — scoring plays typed "Penalty" but NOT goals (the
+  // tie was level). ESPN logs them in period 5. All must be EXCLUDED, by any of
+  // the three signals (period >= 5, a "shootout" type, or an explicit flag).
+  { scoringPlay: true, type: { text: "Penalty - Scored" }, penaltyKick: true, period: { number: 5 }, team: { id: "1" }, clock: { displayValue: "120'" }, athletesInvolved: [{ displayName: "Shootout Taker A" }] },
+  { scoringPlay: true, type: { text: "Penalty - Shootout" }, penaltyKick: true, team: { id: "2" }, clock: { displayValue: "120'" }, athletesInvolved: [{ displayName: "Shootout Taker B" }] },
+  { scoringPlay: true, type: { text: "Penalty - Scored" }, penaltyKick: true, shootout: true, team: { id: "2" }, clock: { displayValue: "120'" }, athletesInvolved: [{ displayName: "Shootout Taker C" }] },
 ];
 
 const scorers = parseEspnScorers(details, teamById);
 
-assert.equal(scorers.length, 4, `expected 4 goals (penalty + goal + own goal + mononym), got ${scorers.length}`);
+assert.equal(scorers.length, 4, `expected 4 goals (penalty + goal + own goal + mononym; shootout kicks excluded), got ${scorers.length}`);
+
+assert.ok(
+  !scorers.some((s) => /Shootout Taker/.test(s.name)),
+  "penalty shootout kicks must be excluded (not counted as goals)"
+);
 
 assert.ok(
   scorers.some((s) => s.name === "Trézéguet"),

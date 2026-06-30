@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AI_BRACKET, predWinner, eloScores, type PredMatch } from "@/lib/aiKnockouts";
+import { predWinner, eloScores, type PredMatch, type PredRound } from "@/lib/aiKnockouts";
 import { BRACKET } from "@/lib/bracket";
 import type { Venue } from "@/lib/venues";
 import { flag } from "@/lib/flags";
@@ -117,14 +117,16 @@ function RoundLabel({ name, className }: { name: string; className: string }) {
 }
 
 export function AiKnockoutBracket({
-  brazil,
+  bracket,
+  ai,
   dynamic,
 }: {
-  brazil: ChampionPick;
+  bracket: PredRound[];
+  ai: ChampionPick;
   dynamic: ChampionPick;
 }) {
-  const [mode, setMode] = useState<"brazil" | "dynamic">("brazil");
-  const sel = mode === "brazil" ? brazil : dynamic;
+  const [mode, setMode] = useState<"ai" | "dynamic">("ai");
+  const sel = mode === "ai" ? ai : dynamic;
   const btn = (active: boolean) =>
     cn(
       "rounded-full px-4 py-1.5 text-sm font-semibold transition",
@@ -142,15 +144,15 @@ export function AiKnockoutBracket({
             <span className="mr-1 text-[0.9375rem] font-bold uppercase tracking-wide text-accent">
               Predicted champion:
             </span>
-            <button type="button" onClick={() => setMode("brazil")} className={btn(mode === "brazil")}>
-              Brazil Prediction
+            <button type="button" onClick={() => setMode("ai")} className={btn(mode === "ai")}>
+              AI Prediction
             </button>
             <button type="button" onClick={() => setMode("dynamic")} className={btn(mode === "dynamic")}>
               Performance-adjusted Prediction
             </button>
           </div>
           <div className="flex items-stretch gap-8">
-            {AI_BRACKET.map((round) => (
+            {bracket.map((round) => (
               <RoundLabel key={round.key} name={round.name} className={THEMES[round.key].header} />
             ))}
             <RoundLabel name="🏆 Champion" className="text-amber-500" />
@@ -163,7 +165,7 @@ export function AiKnockoutBracket({
         {/* Fixed design width; FitToWidth scales the whole tree (Champion included)
             down to fit any screen, falling back to scroll only on very small ones. */}
         <div className="flex w-[1180px] items-stretch gap-8 pr-2 pt-3">
-          {AI_BRACKET.map((round) => (
+          {bracket.map((round) => (
             <div key={round.key} className="flex flex-1 flex-col">
               {round.matches.map((m, i) => (
                 <MatchCell
@@ -186,7 +188,7 @@ export function AiKnockoutBracket({
                 <div className="mt-1 text-[11px] font-bold uppercase tracking-wide text-amber-600">
                   Predicted Champion
                 </div>
-                {mode === "brazil" ? (
+                {mode === "ai" ? (
                   sel.pct != null && (
                     <>
                       <div className="mt-1.5 text-lg font-extrabold text-accent">

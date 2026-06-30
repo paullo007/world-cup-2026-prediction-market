@@ -154,13 +154,14 @@ export function CountryDetail({
         <p className="mt-3 text-xs italic text-slate-400">
           Click any player for their full profile. Name, age, number and position from ESPN; club
           from TheSportsDB where available. Goals and assists update live from approved 2026 match
-          results; caps aren&apos;t tracked by our data feed (shown as —).
+          results.
         </p>
       </Box>
 
-      {/* 3) Coach (only where we have a confirmed name) */}
-      {coach && (
-        <Box title="Head Coach">
+      {/* 3) Coach — always shown for layout consistency; a graceful placeholder
+          where our data feed doesn't carry a confirmed name (most non-Brazil teams). */}
+      <Box title="Head Coach">
+        {coach ? (
           <div className="flex items-center gap-3">
             <span className="text-2xl">{flag(coach.country)}</span>
             <div>
@@ -168,8 +169,10 @@ export function CountryDetail({
               <p className="text-sm text-slate-400">From {coach.country}</p>
             </div>
           </div>
-        </Box>
-      )}
+        ) : (
+          <p className="text-sm italic text-slate-400">Not in our data feed.</p>
+        )}
+      </Box>
 
       {/* 4) World Cup titles */}
       <Box title={`World Cup Titles — ${titles.length}${name === "Brazil" ? " (most of any nation)" : ""}`}>

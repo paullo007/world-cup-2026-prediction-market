@@ -4,15 +4,21 @@ import { canonicalTeam, flag } from "@/lib/flags";
 import { getPlayedMatches } from "@/lib/playedMatches";
 import { computeDynamic, type WinnerChance } from "@/lib/dynamicPrediction";
 import { AiKnockoutBracket } from "@/components/AiKnockoutBracket";
-import { AI_CHAMPION } from "@/lib/aiKnockouts";
+import { buildAiBracket } from "@/lib/aiKnockouts";
+import { getBracketTeams } from "@/lib/bracketSync";
 
 export const dynamic = "force-dynamic";
 
 export default async function AiKnockoutsPage() {
-  const [played, winnerMarkets] = await Promise.all([
+  const [played, winnerMarkets, teamMap] = await Promise.all([
     getPlayedMatches(),
     db.market.findMany({ where: { category: "Tournament Winner" } }),
+    getBracketTeams(),
   ]);
+
+  // Predicted bracket built on the REAL Round-of-32 draw (Elo-favourite advances),
+  // so the pairings always match the live tournament.
+  const { rounds: aiRounds, champion: aiChampion } = buildAiBracket(teamMap);
 
   // Each team's live "win the WC" chance (YES price), team canonicalized to
   // match results/flags (e.g. USA → United States).
@@ -23,9 +29,9 @@ export default async function AiKnockoutsPage() {
     })
     .filter((c): c is WinnerChance => c !== null);
 
-  // Brazil Prediction = Brazil's live market chance. Dynamic = highest
-  // form-adjusted market chance (same scale, so 38% correctly beats 16%).
-  const brazilPick = { team: "Brazil", pct: chances.find((c) => c.team === "Brazil")?.pct ?? null };
+  // AI Prediction = the bracket's predicted champion + its live market chance.
+  // Dynamic = highest form-adjusted market chance (same scale, so 38% beats 16%).
+  const aiPick = { team: aiChampion, pct: chances.find((c) => c.team === canonicalTeam(aiChampion))?.pct ?? null };
   const dyn = computeDynamic(chances, played);
   const dynamicPick = { team: dyn.champion, pct: dyn.pct, marketPct: dyn.marketPct };
 
@@ -50,9 +56,9 @@ export default async function AiKnockoutsPage() {
         <h1 className="text-2xl font-extrabold">AI Knockouts — Claude&apos;s Predicted Bracket 🏆</h1>
         <p className="mt-1 max-w-3xl text-sm text-slate-400">
           Just for fun: Claude&apos;s own prediction of how the 2026 knockout stage could play out —
-          from the Round of 32 to the Final, with predicted scorelines. Winners advance across each
-          round to a predicted champion:{" "}
-          <span className="font-bold text-amber-600">{AI_CHAMPION}</span>. Toggle the champion to a{" "}
+          built on the <span className="font-semibold">real Round-of-32 draw</span>, with the favourite
+          advancing each round and predicted scorelines, to a predicted champion:{" "}
+          <span className="font-bold text-amber-600">{flag(aiChampion)} {aiChampion}</span>. Toggle to a{" "}
           <span className="font-semibold">Performance-adjusted Prediction</span> — the market favorite
           re-weighted by live form. It&apos;s an AI guess — not official, and not tradeable.
         </p>
@@ -66,7 +72,7 @@ export default async function AiKnockoutsPage() {
         </div>
       )}
 
-      <AiKnockoutBracket brazil={brazilPick} dynamic={dynamicPick} />
+      <AiKnockoutBracket bracket={aiRounds} ai={aiPick} dynamic={dynamicPick} />
     </div>
   );
 }

@@ -30,7 +30,7 @@ export default async function BracketPage() {
       <div>
         <h1 className="text-2xl font-extrabold">Tournament Bracket</h1>
         <p className="mt-1 max-w-3xl text-sm text-slate-400">
-          The full knockout path to the final at MetLife Stadium. Matchups fill in with
+          The full knockout path to the final at New York/New Jersey Stadium. Matchups fill in with
           teams as the group stage finishes (Jun 27) and each round is decided — the
           structure, dates and slots below are final. See Claude&apos;s predicted run to the
           trophy in the{" "}

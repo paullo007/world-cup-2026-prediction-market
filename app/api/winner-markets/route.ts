@@ -86,7 +86,7 @@ export async function POST(req: Request) {
       data: {
         slug,
         question: `Will ${team} win the 2026 FIFA World Cup?`,
-        description: `Resolves YES if ${team} lifts the trophy at the final on July 19, 2026 (MetLife Stadium, New Jersey).`,
+        description: `Resolves YES if ${team} lifts the trophy at the final on July 19, 2026 (New York/New Jersey Stadium, New Jersey).`,
         category: "Tournament Winner",
         closesAt,
         liquidity,

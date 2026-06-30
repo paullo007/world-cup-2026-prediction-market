@@ -65,66 +65,65 @@ export function eloScores(m: PredMatch): { a: number; b: number } {
   return aWins ? { a: w, b: l } : { a: l, b: w };
 }
 
-export const AI_BRACKET: PredRound[] = [
-  {
-    key: "r32",
-    name: "Round of 32",
-    matches: [
-      { a: { team: "Brazil", score: 3 }, b: { team: "Australia", score: 0 } },
-      { a: { team: "Croatia", score: 2 }, b: { team: "Mexico", score: 1 } },
-      { a: { team: "England", score: 2 }, b: { team: "Ghana", score: 0 } },
-      { a: { team: "Colombia", score: 1 }, b: { team: "Egypt", score: 0 } },
-      { a: { team: "France", score: 2 }, b: { team: "Senegal", score: 1 } },
-      { a: { team: "Switzerland", score: 1 }, b: { team: "Iran", score: 0 } },
-      { a: { team: "Portugal", score: 3 }, b: { team: "Norway", score: 1 } },
-      { a: { team: "Uruguay", score: 2 }, b: { team: "South Korea", score: 0 } },
-      { a: { team: "Spain", score: 3 }, b: { team: "Ivory Coast", score: 0 } },
-      { a: { team: "Morocco", score: 2 }, b: { team: "Sweden", score: 1 } },
-      { a: { team: "Germany", score: 2 }, b: { team: "Ecuador", score: 1 } },
-      { a: { team: "Japan", score: 1 }, b: { team: "Austria", score: 0 } },
-      { a: { team: "Argentina", score: 3 }, b: { team: "Canada", score: 1 } },
-      { a: { team: "Netherlands", score: 2 }, b: { team: "Qatar", score: 0 } },
-      { a: { team: "Belgium", score: 2 }, b: { team: "United States", score: 1 } },
-      { a: { team: "Türkiye", score: 1 }, b: { team: "Scotland", score: 0 } },
-    ],
-  },
-  {
-    key: "r16",
-    name: "Round of 16",
-    matches: [
-      { a: { team: "Brazil", score: 2 }, b: { team: "Croatia", score: 1 } },
-      { a: { team: "England", score: 2 }, b: { team: "Colombia", score: 0 } },
-      { a: { team: "France", score: 2 }, b: { team: "Switzerland", score: 0 } },
-      { a: { team: "Portugal", score: 1 }, b: { team: "Uruguay", score: 0 } },
-      { a: { team: "Spain", score: 2 }, b: { team: "Morocco", score: 1 } },
-      { a: { team: "Germany", score: 2 }, b: { team: "Japan", score: 1 } },
-      { a: { team: "Argentina", score: 2 }, b: { team: "Netherlands", score: 1 } },
-      { a: { team: "Belgium", score: 3 }, b: { team: "Türkiye", score: 1 } },
-    ],
-  },
-  {
-    key: "qf",
-    name: "Quarter-finals",
-    matches: [
-      { a: { team: "Brazil", score: 2 }, b: { team: "England", score: 1 } },
-      { a: { team: "France", score: 1 }, b: { team: "Portugal", score: 0 } },
-      { a: { team: "Spain", score: 2 }, b: { team: "Germany", score: 1 } },
-      { a: { team: "Argentina", score: 2 }, b: { team: "Belgium", score: 0 } },
-    ],
-  },
-  {
-    key: "sf",
-    name: "Semi-finals",
-    matches: [
-      { a: { team: "Brazil", score: 2 }, b: { team: "France", score: 1 } },
-      { a: { team: "Argentina", score: 1 }, b: { team: "Spain", score: 0 } },
-    ],
-  },
-  {
-    key: "final",
-    name: "Final",
-    matches: [{ a: { team: "Brazil", score: 2 }, b: { team: "Argentina", score: 1 } }],
-  },
-];
+import { BRACKET, type BracketMatch } from "@/lib/bracket";
+import { ALL_TEAMS } from "@/lib/flags";
 
-export const AI_CHAMPION = "Brazil";
+const REAL = new Set<string>(ALL_TEAMS);
+
+/**
+ * Build the predicted bracket from the REAL Round-of-32 draw (so the pairings
+ * always match the live tournament), then advance the Elo-favourite of each tie
+ * up the real bracket tree to a predicted champion. `teamMap` is the slot→team
+ * map from `getBracketTeams()` (keys `"74a"`/`"74b"`). Deterministic (Elo is
+ * static) → the bracket is stable between renders. Scores here are just winner/
+ * loser markers (1/0); `eloScores()` turns them into a plausible scoreline at
+ * render time. Where a slot is still TBD, the positional label is shown and that
+ * branch simply doesn't advance yet.
+ *
+ * `BRACKET` is stored in tree order (each round's matches pair up to feed the
+ * next), so iterating it in order both resolves feeders before they're needed
+ * and yields the correct top-to-bottom display order for the connectors.
+ */
+export function buildAiBracket(teamMap: Record<string, string>): { rounds: PredRound[]; champion: string } {
+  const byNum = new Map<number, BracketMatch>();
+  for (const r of BRACKET) for (const m of r.matches) byNum.set(m.num, m);
+
+  const winnerByNum = new Map<number, string>();
+
+  const teamFor = (num: number, side: "a" | "b"): string => {
+    const m = byNum.get(num)!;
+    const slot = side === "a" ? m.a : m.b;
+    const feeder = slot.label.match(/Winner (\d+)/); // later rounds feed from "Winner N"
+    if (feeder) return winnerByNum.get(parseInt(feeder[1], 10)) ?? slot.label;
+    return teamMap[`${num}${side}`] ?? slot.team ?? slot.label; // R32: real drawn team
+  };
+
+  const rounds: PredRound[] = BRACKET.map((r) => ({
+    key: r.key,
+    name: r.name,
+    matches: r.matches.map((m) => {
+      const ta = teamFor(m.num, "a");
+      const tb = teamFor(m.num, "b");
+      const realA = REAL.has(ta);
+      const realB = REAL.has(tb);
+
+      // Predicted winner: the higher-Elo side when both teams are known; if only
+      // one side is known yet, it carries through.
+      let winner: string | null = null;
+      if (realA && realB) winner = (TEAM_ELO[ta] ?? DEFAULT_ELO) >= (TEAM_ELO[tb] ?? DEFAULT_ELO) ? ta : tb;
+      else if (realA) winner = ta;
+      else if (realB) winner = tb;
+      if (winner) winnerByNum.set(m.num, winner);
+
+      // 1/0 markers so predWinner()/eloScores() pick the right side; the real
+      // scoreline is derived from the Elo gap at render time.
+      return {
+        a: { team: ta, score: winner === ta ? 1 : 0 },
+        b: { team: tb, score: winner === tb ? 1 : 0 },
+      };
+    }),
+  }));
+
+  const champion = winnerByNum.get(104) ?? ""; // match 104 = the Final
+  return { rounds, champion };
+}

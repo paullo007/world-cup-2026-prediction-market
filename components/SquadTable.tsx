@@ -40,7 +40,6 @@ export function SquadTable({
             <th style={{ top }} className={cn(th, "text-right")}>Age</th>
             <th style={{ top }} className={cn(th, "text-left")}>Position</th>
             <th style={{ top }} className={cn(th, "text-left")}>Club</th>
-            <th style={{ top }} className={cn(th, "text-right")}>Caps</th>
             <th style={{ top }} className={cn(th, "text-right")}>Goals</th>
             <th style={{ top }} className={cn(th, "text-right")}>Assists</th>
           </tr>
@@ -63,7 +62,6 @@ export function SquadTable({
               <td className="px-2 py-2 text-right text-slate-300">{p.age ?? "—"}</td>
               <td className="px-2 py-2 text-slate-300">{p.position}</td>
               <td className="px-2 py-2 text-slate-300">{p.club ?? "—"}</td>
-              <td className="px-2 py-2 text-right text-slate-300">—</td>
               <td className="px-2 py-2 text-right font-bold tabular-nums">{goals[p.name] ?? 0}</td>
               <td className="px-2 py-2 text-right tabular-nums text-slate-300">{assists[p.name] ?? 0}</td>
             </tr>

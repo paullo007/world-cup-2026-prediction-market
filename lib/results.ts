@@ -86,11 +86,28 @@ const yyyymmdd = (d: Date) => d.toISOString().slice(0, 10).replace(/-/g, "");
 export interface EspnDetail {
   type?: { text?: string };
   clock?: { displayValue?: string };
+  period?: { number?: number };
   team?: { id?: string };
   scoringPlay?: boolean;
   ownGoal?: boolean;
   penaltyKick?: boolean;
+  shootout?: boolean;
   athletesInvolved?: Array<{ displayName?: string; fullName?: string }>;
+}
+
+/**
+ * A scoring play that belongs to the penalty SHOOTOUT, not the match. ESPN logs
+ * shootout kicks as scoring plays typed "Penalty" (so they'd pass the goal
+ * filter), but they are NOT goals — the tie is level on the pitch. They live in
+ * period 5 (1=1st half … 4=ET2, 5=shootout) and/or carry a "shootout" type/flag.
+ * Counting them inflates every goalscorer list and the site-wide goals totals.
+ */
+export function isShootoutPlay(d: EspnDetail): boolean {
+  return (
+    d.shootout === true ||
+    (d.period?.number != null && d.period.number >= 5) ||
+    /shoot.?out|penalties/i.test(d.type?.text ?? "")
+  );
 }
 
 interface EspnScoreboard {
@@ -138,6 +155,7 @@ export function parseEspnScorers(details: EspnDetail[], teamById: Map<string, st
   const scorers: Scorer[] = [];
   for (const d of details) {
     if (!d.scoringPlay) continue;
+    if (isShootoutPlay(d)) continue; // shootout kicks aren't goals — see isShootoutPlay
     if (!/goal|penalty/i.test(d.type?.text ?? "")) continue;
     const player = cleanPlayerName(d.athletesInvolved?.[0]);
     const team = d.team?.id ? teamById.get(d.team.id) : undefined;

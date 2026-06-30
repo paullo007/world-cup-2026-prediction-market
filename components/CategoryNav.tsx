@@ -43,6 +43,7 @@ const ROUTE_TO_TAB: Record<string, string> = Object.fromEntries(
 const LABELS: Record<string, string> = {
   All: "All Predictions Available",
   "Tournament Winner": "Predict World Cup Winner",
+  Bracket: "Brackets",
   Results: "Prediction Results",
 };
 

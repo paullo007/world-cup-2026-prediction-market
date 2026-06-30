@@ -18,10 +18,10 @@ export interface WinnerChance {
  * Brazil at 38% beats Argentina at 16% unless Argentina's form is dramatically
  * better — it can still flip to another team if one clearly outperforms.
  */
-export function computeDynamic(
-  winnerMarkets: WinnerChance[],
-  played: Played[]
-): { champion: string; pct: number; marketPct: number } {
+// Build the per-team form factor (a ±50% multiplier vs the field-average form)
+// from the played matches — shared by the whole-field pick and the single-team
+// lookup so they can't drift.
+function buildFormFactor(played: Played[]): (team: string) => number {
   const form = new Map<string, { g: number; w: number; d: number; l: number; gf: number; ga: number }>();
   const get = (t: string) => {
     let r = form.get(t);
@@ -45,7 +45,6 @@ export function computeDynamic(
     return (3 * r.w + r.d) / r.g + 0.3 * (r.gf - r.ga) / r.g + 0.05 * (r.gf / r.g);
   };
 
-  // Field-average form (teams that have played) → the baseline a team is judged against.
   const scores: number[] = [];
   for (const t of Array.from(form.keys())) {
     const s = formScore(t);
@@ -53,11 +52,36 @@ export function computeDynamic(
   }
   const avg = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
 
+  return (team: string) => {
+    const s = formScore(team);
+    return s == null ? 1 : Math.min(1.5, Math.max(0.5, 1 + 0.25 * (s - avg)));
+  };
+}
+
+/**
+ * The form-adjusted title chance for ONE team — its live market % re-weighted by
+ * current form, on the same 0–1 scale. Used so the AI-Knockouts champion box can
+ * show the BRACKET champion's form-adjusted odds (rather than a different team),
+ * keeping the box consistent with the bracket it sits beside.
+ */
+export function formAdjustedFor(
+  team: string,
+  winnerMarkets: WinnerChance[],
+  played: Played[]
+): { marketPct: number; pct: number } {
+  const factor = buildFormFactor(played);
+  const marketPct = winnerMarkets.find((m) => m.team === team)?.pct ?? 0;
+  return { marketPct, pct: Math.min(0.99, Math.max(0, marketPct * factor(team))) };
+}
+
+export function computeDynamic(
+  winnerMarkets: WinnerChance[],
+  played: Played[]
+): { champion: string; pct: number; marketPct: number } {
+  const factor = buildFormFactor(played);
   let best: { team: string; pct: number; marketPct: number } | null = null;
   for (const m of winnerMarkets) {
-    const s = formScore(m.team);
-    const factor = s == null ? 1 : Math.min(1.5, Math.max(0.5, 1 + 0.25 * (s - avg)));
-    const chance = Math.min(0.99, Math.max(0, m.pct * factor));
+    const chance = Math.min(0.99, Math.max(0, m.pct * factor(m.team)));
     if (!best || chance > best.pct) best = { team: m.team, pct: chance, marketPct: m.pct };
   }
   const fallback = winnerMarkets[0];

@@ -75,7 +75,7 @@ export function BracketLive({ initialTeams, scores }: { initialTeams: Record<str
                   : "border-emerald-300 text-emerald-600 hover:bg-emerald-50"
               )}
             >
-              Bracket by FIFA
+              FIFA Bracket
             </button>
             <button
               type="button"
@@ -87,7 +87,7 @@ export function BracketLive({ initialTeams, scores }: { initialTeams: Record<str
                   : "border-sky-300 text-sky-600 hover:bg-sky-50"
               )}
             >
-              Bracket by Date
+              Date Bracket
             </button>
             <button
               type="button"
@@ -99,7 +99,7 @@ export function BracketLive({ initialTeams, scores }: { initialTeams: Record<str
                   : "border-violet-300 text-violet-600 hover:bg-violet-50"
               )}
             >
-              Bracket by Circle
+              Circle Bracket
             </button>
           </div>
 

@@ -2,11 +2,12 @@ import { flag } from "@/lib/flags";
 import type { CountryData, MatchResult } from "@/lib/countries";
 import { slugifyCountry } from "@/lib/countries";
 import type { KnockoutMatchView } from "@/lib/countryKnockouts";
-import type { Scorer } from "@/lib/results";
+import type { Scorer, ShootoutKick } from "@/lib/results";
 import type { Venue } from "@/lib/venues";
 import { cn } from "@/lib/utils";
 import { MatchStartTime } from "@/components/MatchStartTime";
 import { GoalscorersBlock } from "@/components/GoalscorersBlock";
+import { ShootoutBox } from "@/components/ShootoutBox";
 import { CountryLink } from "@/components/CountryLink";
 import { SourceNote } from "@/components/SourceNote";
 import { SquadTable } from "@/components/SquadTable";
@@ -26,6 +27,7 @@ interface CardResult {
   outcome: "W" | "L" | "D";
   pens?: boolean;
   scorers: Scorer[];
+  shootout?: ShootoutKick[];
 }
 
 /** One fixture card — shared by the group-stage and knockout-round sections. */
@@ -54,7 +56,7 @@ function FixtureCard({
       {result && (
         <div className="mt-1.5 text-sm font-bold">
           FT {result.countryGoals} – {result.oppGoals}
-          {result.pens ? " (pens)" : ""}{" "}
+          {result.pens ? " (penalties)" : ""}{" "}
           <span
             className={cn(
               "text-xs font-semibold",
@@ -72,6 +74,11 @@ function FixtureCard({
       {result && (
         <div className="mt-2">
           <GoalscorersBlock scorers={result.scorers} leftTeam={country} rightTeam={opponent} />
+        </div>
+      )}
+      {result?.shootout && result.shootout.length > 0 && (
+        <div className="mt-2">
+          <ShootoutBox kicks={result.shootout} leftTeam={country} rightTeam={opponent} />
         </div>
       )}
     </div>

@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { knockoutFixtures, knockoutRoundTitle, KNOCKOUT_ROUND_ORDER } from "@/lib/bracket";
 import { getBracketTeams } from "@/lib/bracketSync";
 import { canonicalTeam } from "@/lib/flags";
-import type { Scorer } from "@/lib/results";
+import type { Scorer, ShootoutKick } from "@/lib/results";
 import type { Venue } from "@/lib/venues";
 
 export interface KnockoutMatchView {
@@ -11,7 +11,7 @@ export interface KnockoutMatchView {
   opponent: string;
   kickoffIso: string;
   venue?: Venue;
-  result?: { countryGoals: number; oppGoals: number; outcome: "W" | "L"; pens: boolean; scorers: Scorer[] };
+  result?: { countryGoals: number; oppGoals: number; outcome: "W" | "L"; pens: boolean; scorers: Scorer[]; shootout: ShootoutKick[] };
 }
 
 /**
@@ -32,15 +32,16 @@ export async function knockoutsForCountry(country: string): Promise<KnockoutMatc
 
   const homeMarkets = await db.market.findMany({
     where: { category: "KnockoutMatches", outcomeType: "HOME", status: "RESOLVED", homeGoals: { not: null }, awayGoals: { not: null } },
-    select: { matchKey: true, homeGoals: true, awayGoals: true, scorers: true, resolvedOutcome: true },
+    select: { matchKey: true, homeGoals: true, awayGoals: true, scorers: true, shootout: true, resolvedOutcome: true },
   });
-  const resMap = new Map<string, { homeGoals: number; awayGoals: number; scorers: Scorer[]; homeWon: boolean }>();
+  const resMap = new Map<string, { homeGoals: number; awayGoals: number; scorers: Scorer[]; shootout: ShootoutKick[]; homeWon: boolean }>();
   for (const m of homeMarkets) {
     if (m.matchKey && m.homeGoals != null && m.awayGoals != null) {
       resMap.set(m.matchKey, {
         homeGoals: m.homeGoals,
         awayGoals: m.awayGoals,
         scorers: Array.isArray(m.scorers) ? (m.scorers as unknown as Scorer[]) : [],
+        shootout: Array.isArray(m.shootout) ? (m.shootout as unknown as ShootoutKick[]) : [],
         homeWon: m.resolvedOutcome === "YES",
       });
     }
@@ -59,6 +60,7 @@ export async function knockoutsForCountry(country: string): Promise<KnockoutMatc
         outcome: countryWon ? "W" : "L",
         pens: r.homeGoals === r.awayGoals,
         scorers: r.scorers,
+        shootout: r.shootout,
       };
     }
     return { title: knockoutRoundTitle(f.round), round: f.round, opponent, kickoffIso: f.kickoff, venue: f.venue, result };

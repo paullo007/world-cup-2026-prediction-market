@@ -99,7 +99,7 @@ export function ScoresByDay({ matches }: { matches: ScoreMatch[] }) {
                   </div>
                   {pens && (
                     <p className="mt-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                      {(homeWon ? m.home : m.away)} won (pens)
+                      {(homeWon ? m.home : m.away)} won (penalties)
                     </p>
                   )}
                   {!m.round && level && (

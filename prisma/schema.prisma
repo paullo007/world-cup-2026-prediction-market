@@ -109,6 +109,9 @@ model Market {
   homeGoals        Int?
   awayGoals        Int?
   scorers          Json?
+  // Penalty-shootout kicks for a knockout tie decided on penalties (HOME market
+  // only). [{ team, player, scored, order }] — see lib/results.ShootoutKick.
+  shootout         Json?
 
   // LMSR automated market maker state
   liquidity Float @default(1000) // LMSR "b" parameter

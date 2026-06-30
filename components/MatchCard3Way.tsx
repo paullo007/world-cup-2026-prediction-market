@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import type { Market } from "@prisma/client";
-import type { Scorer } from "@/lib/results";
+import type { Scorer, ShootoutKick } from "@/lib/results";
 import { yesPrice } from "@/lib/amm";
 import { flag, matchTeams } from "@/lib/flags";
 import { VENUES, type Venue } from "@/lib/venues";
 import { awaitingResult, cn, formatPercent, formatWCD } from "@/lib/utils";
 import { MatchStartTime } from "@/components/MatchStartTime";
 import { GoalscorersBlock } from "@/components/GoalscorersBlock";
+import { ShootoutBox } from "@/components/ShootoutBox";
 import { CountryLink } from "@/components/CountryLink";
 import { useLiveScore } from "@/components/LiveScoreProvider";
 import { Clock, MapPin } from "lucide-react";
@@ -57,12 +58,13 @@ export function MatchCard3Way({
   // Goalscorers (stored on the HOME market only). Shown once the match is
   // resolved; rendering/splitting/sorting handled by GoalscorersBlock.
   const scorers = Array.isArray(home.scorers) ? (home.scorers as unknown as Scorer[]) : [];
+  const shootout = Array.isArray(home.shootout) ? (home.shootout as unknown as ShootoutKick[]) : [];
 
   // For a played fixture, the winning outcome is the one that resolved YES.
   const winner = markets.find((m) => m.resolvedOutcome === "YES")?.outcomeType;
   // A knockout that resolved with a LEVEL score but still has a winner can only
-  // have been decided by a shootout — so tag it "(pens)" (the free feeds don't
-  // give us the shootout numbers, but the level-score + winner is unambiguous).
+  // have been decided by a shootout — so tag it "(penalties)"; the taker-by-taker
+  // breakdown is shown in the ShootoutBox below (from home.shootout).
   const isKnockout = home.category === "KnockoutMatches";
   const wentToPens =
     isKnockout &&
@@ -71,7 +73,7 @@ export function MatchCard3Way({
     home.awayGoals != null &&
     home.homeGoals === home.awayGoals &&
     (winner === "HOME" || winner === "AWAY");
-  const pens = wentToPens ? " (pens)" : "";
+  const pens = wentToPens ? " (penalties)" : "";
   const winnerLabel =
     winner === "HOME"
       ? `${homeTeam} won${pens}`
@@ -116,7 +118,7 @@ export function MatchCard3Way({
           </span>
           <span className="text-lg font-extrabold tabular-nums">
             {home.homeGoals ?? "?"} – {home.awayGoals ?? "?"}
-            {wentToPens && <span className="ml-1 text-xs font-semibold text-slate-400">(pens)</span>}
+            {wentToPens && <span className="ml-1 text-xs font-semibold text-slate-400">(penalties)</span>}
           </span>
           {winnerLabel && (
             <span className="text-xs font-semibold text-accent">{winnerLabel}</span>
@@ -167,6 +169,10 @@ export function MatchCard3Way({
 
       {resolved && (
         <GoalscorersBlock scorers={scorers} leftTeam={homeTeam} rightTeam={awayTeam} />
+      )}
+
+      {resolved && shootout.length > 0 && (
+        <ShootoutBox kicks={shootout} leftTeam={homeTeam} rightTeam={awayTeam} />
       )}
 
       {!resolved && (showLive || showFtFlash) && live && (

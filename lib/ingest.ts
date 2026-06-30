@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { matchTeams } from "@/lib/flags";
-import { fetchAllSources, mergeForMarket, fetchEspnAssists, attachAssists } from "@/lib/results";
+import { fetchAllSources, mergeForMarket, fetchEspnAssists, attachAssists, fetchEspnShootout } from "@/lib/results";
 import { resolveMarket, resolveMatchGroup } from "@/lib/trade";
 import { ensureKnockoutMarkets } from "@/lib/knockoutMarkets";
 
@@ -94,6 +94,10 @@ export async function ingestAndPublish(): Promise<IngestSummary> {
         if (merged.espnEventId && scorers.length) {
           scorers = attachAssists(scorers, await fetchEspnAssists(merged.espnEventId));
         }
+        // A knockout decided on penalties (level score, but a side advances) →
+        // capture the shootout kicks (scored + missed) for the match card.
+        const wentToPens = isKnockout && merged.homeGoals != null && merged.homeGoals === merged.awayGoals;
+        const shootout = wentToPens && merged.espnEventId ? await fetchEspnShootout(merged.espnEventId) : [];
         // Self-check (CQ): every goal — regular, penalty, OR own goal — should
         // produce exactly one scorer. If we HAVE scorer data but it doesn't sum
         // to the final score, a parse gap is dropping goals; surface it LOUDLY
@@ -112,6 +116,7 @@ export async function ingestAndPublish(): Promise<IngestSummary> {
             homeGoals: merged.homeGoals,
             awayGoals: merged.awayGoals,
             scorers: scorers.length ? (scorers as unknown as Prisma.InputJsonValue) : undefined,
+            shootout: shootout.length ? (shootout as unknown as Prisma.InputJsonValue) : undefined,
             resultSource: merged.sources.join("+"),
             resultDetail,
             fetchedAt: new Date(),

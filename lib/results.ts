@@ -66,6 +66,14 @@ export interface Scorer {
   assists?: string[]; // assisting player name(s), from ESPN's summary endpoint
 }
 
+/** One penalty-shootout kick (in taking order), scored or missed. */
+export interface ShootoutKick {
+  team: string; // canonical team name
+  player: string;
+  scored: boolean;
+  order: number; // shotNumber (1-based), so the UI can show kicks in sequence
+}
+
 export interface FinishedMatch {
   source: Source;
   home: string; // canonical name where recognised
@@ -279,6 +287,35 @@ export async function fetchEspnAssists(eventId: string): Promise<Map<string, str
   } catch {
     // ignore — assists are optional enrichment
   }
+  return out;
+}
+
+/**
+ * Fetch the penalty-shootout kicks for one match from ESPN's SUMMARY endpoint,
+ * which carries a dedicated `shootout` block (the scoreboard feed mislabels the
+ * kicks as 120' "Penalty - Scored" goals). Returns every kick — scored AND missed
+ * — in taking order, team names canonicalised. Best-effort: any error or a match
+ * that didn't go to penalties yields an empty array.
+ */
+export async function fetchEspnShootout(eventId: string): Promise<ShootoutKick[]> {
+  const out: ShootoutKick[] = [];
+  try {
+    const res = await fetch(`${ESPN_SUMMARY_URL}?event=${eventId}`, { cache: "no-store" });
+    if (!res.ok) return out;
+    const data = (await res.json()) as {
+      shootout?: Array<{ team?: string; shots?: Array<{ player?: string; shotNumber?: number; didScore?: boolean }> }>;
+    };
+    for (const t of data.shootout ?? []) {
+      const team = canonicalTeam(t.team ?? "");
+      for (const s of t.shots ?? []) {
+        if (!s.player) continue;
+        out.push({ team, player: s.player, scored: s.didScore === true, order: s.shotNumber ?? out.length + 1 });
+      }
+    }
+  } catch {
+    // ignore — shootout detail is optional enrichment
+  }
+  out.sort((a, b) => a.order - b.order);
   return out;
 }
 

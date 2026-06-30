@@ -10,7 +10,7 @@ import { auth } from "@/lib/auth";
 import { canonicalTeam } from "@/lib/flags";
 import { yesPrice } from "@/lib/amm";
 import { awaitingResult } from "@/lib/utils";
-import { fetchBracketTeams } from "@/lib/bracketSync";
+import { getBracketTeams } from "@/lib/bracketSync";
 import { knockoutFixtures, type KnockoutFixture } from "@/lib/bracket";
 
 export const dynamic = "force-dynamic";
@@ -137,12 +137,7 @@ export default async function HomePage({
   let knockouts: KnockoutFixture[] = [];
   let koMeta: KnockoutMeta = {};
   if (isMatches) {
-    const [espnTeams, assignments] = await Promise.all([
-      fetchBracketTeams(),
-      db.bracketAssignment.findMany(),
-    ]);
-    const teamMap: Record<string, string> = { ...espnTeams };
-    for (const a of assignments) teamMap[a.slot] = a.team;
+    const teamMap = await getBracketTeams();
     const allKo = knockoutFixtures(teamMap);
 
     // matchKeys that already have real (tradeable) knockout markets — those render
@@ -204,9 +199,7 @@ export default async function HomePage({
       .sort((a, b) => (a.kind === "fixture" && b.kind === "fixture" ? a.home.closesAt.getTime() - b.home.closesAt.getTime() : 0));
 
     if (fixtureCards.length) {
-      const [espn, assignments] = await Promise.all([fetchBracketTeams(), db.bracketAssignment.findMany()]);
-      const teamMap: Record<string, string> = { ...espn };
-      for (const a of assignments) teamMap[a.slot] = a.team;
+      const teamMap = await getBracketTeams();
       const roundByKey: Record<string, string> = {};
       for (const f of knockoutFixtures(teamMap)) if (f.teamA && f.teamB) roundByKey[`${f.teamA} vs ${f.teamB}`] = f.round;
       const rounds = Array.from(

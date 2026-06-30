@@ -148,6 +148,32 @@ export function BracketCircle({ teams, scores }: { teams: Record<string, string>
         {Array.from({ length: 16 }, (_, i) => 73 + i).map((num) => (
           <CircleMatch key={num} num={num} teams={teams} scores={scores} />
         ))}
+        {/* Advancement flags: when a team reaches a later round, show its flag on
+            the branch (midway between the round node and the feeder it came from),
+            so wins visibly move one branch inward toward the trophy. */}
+        {([104, 101, 102, 97, 98, 99, 100, 89, 90, 91, 92, 93, 94, 95, 96] as const).flatMap((M) => {
+          const ch = CHILDREN[M];
+          if (!ch) return [];
+          const pp = posOf(M);
+          return ([0, 1] as const).map((i) => {
+            const slot = `${M}${i === 0 ? "a" : "b"}`;
+            const team = teams[slot];
+            if (!team) return null;
+            const cp = posOf(ch[i]);
+            const x = pp.x + (cp.x - pp.x) * 0.5;
+            const y = pp.y + (cp.y - pp.y) * 0.5;
+            return (
+              <div
+                key={slot}
+                className="absolute flex h-[26px] w-[26px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-sky-400 bg-white text-[13px] shadow"
+                style={{ left: x, top: y }}
+                title={team}
+              >
+                {flag(team)}
+              </div>
+            );
+          });
+        })}
       </div>
     </FitToWidth>
   );

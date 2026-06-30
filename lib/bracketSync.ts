@@ -1,5 +1,7 @@
 import { canonicalTeam } from "@/lib/results";
 import { ALL_TEAMS } from "@/lib/flags";
+import { db } from "@/lib/db";
+import { BRACKET, THIRD_PLACE, knockoutFixtures } from "@/lib/bracket";
 
 // Auto-populate the knockout bracket from ESPN, in real-time. DISPLAY-ONLY —
 // this never resolves a market or pays out; it only fills team names into the
@@ -70,4 +72,79 @@ export async function fetchBracketTeams(): Promise<BracketTeams> {
     if (isRealTeam(away)) out[`${num}b`] = canonicalTeam(away!);
   }
   return out;
+}
+
+// --- Automatic advancement, derived from OUR OWN resolved knockout results ---
+// Each later-round slot is labelled "Winner N" / "Loser N" (N = a match number),
+// so once we know who advanced from match N (from its resolved market) we can
+// fill that slot ourselves — no reliance on ESPN's later-round feed or the
+// unverified R16+ id map. Built once from the static bracket structure.
+const WINNER_SLOT: Record<number, string> = {};
+const LOSER_SLOT: Record<number, string> = {};
+for (const m of [...BRACKET.flatMap((r) => r.matches), THIRD_PLACE]) {
+  for (const side of ["a", "b"] as const) {
+    const w = m[side].label.match(/^Winner (\d+)$/);
+    if (w) WINNER_SLOT[Number(w[1])] = `${m.num}${side}`;
+    const l = m[side].label.match(/^Loser (\d+)$/);
+    if (l) LOSER_SLOT[Number(l[1])] = `${m.num}${side}`;
+  }
+}
+
+/**
+ * Fill later-round slots from our resolved results. Fixpoint loop so a win
+ * cascades forward (R32 winner → R16 slot → once that plays, its winner → QF …).
+ * Pure: `winners` is keyed by matchKey ("Home vs Away"). Only fills empty slots,
+ * so any ESPN/manual value already present is left untouched.
+ */
+export function deriveBracketAdvancement(
+  base: BracketTeams,
+  winners: Record<string, { winner: string; loser: string }>
+): BracketTeams {
+  const teams: BracketTeams = { ...base };
+  for (let guard = 0; guard < 8; guard++) {
+    let changed = false;
+    for (const f of knockoutFixtures(teams)) {
+      if (!f.teamA || !f.teamB) continue;
+      const w = winners[`${f.teamA} vs ${f.teamB}`];
+      if (!w) continue;
+      const ws = WINNER_SLOT[f.num];
+      if (ws && !teams[ws]) { teams[ws] = w.winner; changed = true; }
+      const ls = LOSER_SLOT[f.num];
+      if (ls && !teams[ls]) { teams[ls] = w.loser; changed = true; }
+    }
+    if (!changed) break;
+  }
+  return teams;
+}
+
+/**
+ * The canonical bracket slot→team map used everywhere (Bracket views, Matches
+ * day picker, country pages): ESPN R32 draw + manual BracketAssignment overrides,
+ * then OUR resolved results auto-advance the winners forward. Precedence: admin
+ * manual override > our derived result > ESPN feed. Automatic — reflects each
+ * completed knockout match on the next fetch.
+ */
+export async function getBracketTeams(): Promise<BracketTeams> {
+  const [espn, assignments, homeMarkets] = await Promise.all([
+    fetchBracketTeams(),
+    db.bracketAssignment.findMany(),
+    db.market.findMany({
+      where: { category: "KnockoutMatches", outcomeType: "HOME", status: "RESOLVED", resolvedOutcome: { not: null }, matchKey: { not: null } },
+      select: { matchKey: true, resolvedOutcome: true },
+    }),
+  ]);
+  const assignMap: BracketTeams = {};
+  for (const a of assignments) assignMap[a.slot] = a.team;
+
+  const winners: Record<string, { winner: string; loser: string }> = {};
+  for (const m of homeMarkets) {
+    if (!m.matchKey) continue;
+    const [home, away] = m.matchKey.split(" vs ");
+    if (!home || !away) continue;
+    const homeWon = m.resolvedOutcome === "YES";
+    winners[m.matchKey] = { winner: homeWon ? home : away, loser: homeWon ? away : home };
+  }
+
+  const derived = deriveBracketAdvancement({ ...espn, ...assignMap }, winners);
+  return { ...derived, ...assignMap }; // admin override wins even over a derived slot
 }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { fetchBracketTeams } from "@/lib/bracketSync";
+import { getBracketTeams } from "@/lib/bracketSync";
 import { BracketLive } from "@/components/BracketLive";
 
 export const dynamic = "force-dynamic";
@@ -8,9 +8,9 @@ export const dynamic = "force-dynamic";
 export default async function BracketPage() {
   // Seed with ESPN-derived teams + manual overrides (admin editor wins) so the
   // first paint already shows teams; BracketLive then polls to keep it real-time.
-  const [espn, assignments, scored] = await Promise.all([
-    fetchBracketTeams(),
-    db.bracketAssignment.findMany(),
+  const [teams, scored] = await Promise.all([
+    // ESPN R32 draw + manual overrides + OUR resolved results auto-advancing winners.
+    getBracketTeams(),
     // Final scores of completed matches → shown next to each team in the bracket
     // box. The one-row-per-match HOME (or legacy binary) market carries the score.
     db.market.findMany({
@@ -18,8 +18,6 @@ export default async function BracketPage() {
       select: { matchKey: true, homeGoals: true, awayGoals: true },
     }),
   ]);
-  const teams: Record<string, string> = { ...espn };
-  for (const a of assignments) teams[a.slot] = a.team;
   const scores: Record<string, { a: number; b: number }> = {};
   for (const m of scored) {
     if (m.matchKey && m.homeGoals != null && m.awayGoals != null) {

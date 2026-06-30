@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { knockoutFixtures } from "@/lib/bracket";
-import { fetchBracketTeams } from "@/lib/bracketSync";
+import { getBracketTeams } from "@/lib/bracketSync";
 import { canonicalTeam } from "@/lib/flags";
 import type { Scorer } from "@/lib/results";
 import type { Venue } from "@/lib/venues";
@@ -34,9 +34,7 @@ export interface KnockoutMatchView {
  */
 export async function knockoutsForCountry(country: string): Promise<KnockoutMatchView[]> {
   const canon = canonicalTeam(country);
-  const espn = await fetchBracketTeams();
-  const teamMap: Record<string, string> = { ...espn };
-  for (const a of await db.bracketAssignment.findMany()) teamMap[a.slot] = a.team;
+  const teamMap = await getBracketTeams();
 
   const fixtures = knockoutFixtures(teamMap).filter(
     (f) => f.teamA && f.teamB && (canonicalTeam(f.teamA) === canon || canonicalTeam(f.teamB) === canon)

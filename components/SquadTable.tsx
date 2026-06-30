@@ -29,6 +29,8 @@ export function SquadTable({
   const top = useTopbarHeight();
   const th = "sticky z-20 border-b border-surface-border bg-surface-raised px-2 py-2 font-semibold";
   const slugged = withPlayerSlugs(roster);
+  const totalGoals = slugged.reduce((s, p) => s + (goals[p.name] ?? 0), 0);
+  const totalAssists = slugged.reduce((s, p) => s + (assists[p.name] ?? 0), 0);
 
   return (
     <div style={{ overflowX: "clip" }}>
@@ -67,6 +69,15 @@ export function SquadTable({
             </tr>
           ))}
         </tbody>
+        <tfoot>
+          <tr className="border-t-2 border-surface-border bg-surface font-bold">
+            <td colSpan={5} className="px-2 py-2.5 text-right text-[11px] uppercase tracking-wide text-slate-400">
+              Squad Total
+            </td>
+            <td className="px-2 py-2.5 text-right tabular-nums">{totalGoals}</td>
+            <td className="px-2 py-2.5 text-right tabular-nums">{totalAssists}</td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   );

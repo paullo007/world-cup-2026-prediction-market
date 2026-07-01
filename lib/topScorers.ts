@@ -24,4 +24,5 @@ export const TOP_SCORERS: TopScorer[] = [
   { rank: 8, name: "Jürgen Klinsmann", country: "Germany", goals: 11, years: "1990–1998" },
   { rank: 9, name: "Sándor Kocsis", country: "Hungary", goals: 11, years: "1954" },
   { rank: 10, name: "Gabriel Batistuta", country: "Argentina", goals: 11, years: "1994–2002" },
+  { rank: 11, name: "Harry Kane", country: "England", goals: 8, years: "2018–2022" },
 ];

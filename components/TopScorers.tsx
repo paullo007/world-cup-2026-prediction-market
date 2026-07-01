@@ -32,7 +32,7 @@ export function TopScorers({ wc2026 = {} }: { wc2026?: Record<string, number> })
       // Extend the span end-year to 2026 for 2026 scorers (e.g. 2006–2022 → 2006–2026).
       yearsDisplay: extra > 0 ? s.years.replace(/\d{4}$/, "2026") : s.years,
     };
-  }).sort((a, b) => b.total - a.total || b.goals - a.goals || a.name.localeCompare(b.name));
+  }).sort((a, b) => b.total - a.total || b.goals - a.goals || a.name.localeCompare(b.name)).slice(0, 10);
 
   return (
     <section className="rounded-2xl border border-surface-border bg-surface-raised">

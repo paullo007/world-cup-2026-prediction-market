@@ -4,7 +4,7 @@
  * (BracketLive). Centralised here so they can never drift apart.
  *
  * Polling runs only when BOTH (evaluated in Singapore time, UTC+8, no DST):
- *  - the Singapore wall-clock hour is within 01:00–13:00 — the daily match
+ *  - the Singapore wall-clock hour is within 00:00–13:00 — the daily match
  *    window, and
  *  - the Singapore date is on or before July 20, 2026 — the last game (the
  *    July 19 final) falls on July 20 SGT, so everything hard-stops after it.
@@ -21,5 +21,5 @@ export function inLiveWindow(now: Date = new Date()): boolean {
   if (afterTournament) return false;
 
   const sgtHour = sgt.getUTCHours();
-  return sgtHour >= 1 && sgtHour < 13;
+  return sgtHour >= 0 && sgtHour < 13;
 }

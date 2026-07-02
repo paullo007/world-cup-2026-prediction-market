@@ -26,6 +26,7 @@ export default async function GoalsPage() {
   const byPlayer = new Map<string, Tally>();
   for (const m of played) {
     for (const s of m.scorers) {
+      if (s.ownGoal) continue; // own goals are not credited to the scorer (Goals tab rule)
       const key = `${s.name}|${s.team}`;
       const t = byPlayer.get(key) ?? { name: s.name, team: s.team, goals: 0, penalties: 0 };
       t.goals++;

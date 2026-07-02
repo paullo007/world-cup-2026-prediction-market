@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getPlayedMatches, getPlayedKnockoutMatches } from "@/lib/playedMatches";
+import { getPlayedGroupMatches, getPlayedKnockoutMatches } from "@/lib/playedMatches";
 import { SCORES_SOURCES } from "@/lib/sources";
 import { SourceNote } from "@/components/SourceNote";
 import { LiveScoreProvider } from "@/components/LiveScoreProvider";
@@ -13,7 +13,7 @@ export default async function ScoresPage() {
   // most-recent day first — so the Scores tab spans the whole tournament.
   const [knockout, group] = await Promise.all([
     getPlayedKnockoutMatches(),
-    getPlayedMatches(),
+    getPlayedGroupMatches(),
   ]);
 
   const matches: ScoreMatch[] = [

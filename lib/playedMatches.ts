@@ -29,7 +29,7 @@ export interface PlayedKnockoutMatch extends PlayedMatch {
  * Single source of truth for Standings, Scores and Goals — none of them show a
  * game until its result has passed the admin-approval gate. Ordered by kickoff.
  */
-export async function getPlayedMatches(): Promise<PlayedMatch[]> {
+export async function getPlayedGroupMatches(): Promise<PlayedMatch[]> {
   const markets = await db.market.findMany({
     where: {
       category: "Matches",
@@ -64,7 +64,7 @@ export async function getPlayedMatches(): Promise<PlayedMatch[]> {
 
 /**
  * All RESOLVED knockout matches (R32 → Final + 3rd place) with a stored score —
- * the knockout-stage counterpart to getPlayedMatches(), so the Scores tab keeps
+ * the knockout-stage counterpart to getPlayedGroupMatches(), so the Scores tab keeps
  * listing games once the group stage is over. The score + scorers live on the
  * HOME market only (one row per tie). Round / kickoff / venue come from the live
  * bracket; `homeWon` (= which side ADVANCED, the market that resolved YES) lets
@@ -111,4 +111,20 @@ export async function getPlayedKnockoutMatches(): Promise<PlayedKnockoutMatch[]>
   }
   out.sort((a, b) => (a.kickoffIso < b.kickoffIso ? 1 : -1)); // newest kickoff first
   return out;
+}
+
+/**
+ * EVERY played match across the WHOLE tournament — group stage + knockouts — as
+ * one flat list. This is the correct source for tournament-wide tallies (Goals
+ * tab, per-player goals/assists, form). Knockout entries are PlayedKnockoutMatch
+ * (a superset of PlayedMatch), so callers reading only the shared fields can
+ * treat the array uniformly. Prefer this over getPlayedGroupMatches() unless you
+ * specifically want group-stage-only data (e.g. Standings tables).
+ */
+export async function getAllPlayedMatches(): Promise<PlayedMatch[]> {
+  const [group, knockout] = await Promise.all([
+    getPlayedGroupMatches(),
+    getPlayedKnockoutMatches(),
+  ]);
+  return [...group, ...knockout];
 }

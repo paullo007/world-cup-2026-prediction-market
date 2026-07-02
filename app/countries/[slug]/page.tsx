@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getPlayedMatches } from "@/lib/playedMatches";
+import { getPlayedGroupMatches, getPlayedKnockoutMatches } from "@/lib/playedMatches";
 import {
   getCountry,
   goalsForRoster,
@@ -16,10 +16,11 @@ export default async function CountryPage({ params }: { params: { slug: string }
   const name = countryFromSlug(params.slug);
   if (!name) notFound();
   const data = getCountry(name)!;
-  const played = await getPlayedMatches();
+  const [groupPlayed, knockoutPlayed] = await Promise.all([getPlayedGroupMatches(), getPlayedKnockoutMatches()]);
+  const played = [...groupPlayed, ...knockoutPlayed];
   const goals = goalsForRoster(data.roster, played, name);
   const assists = assistsForRoster(data.roster, played, name);
-  const results = resultsForCountry(data.matches, played, name);
+  const results = resultsForCountry(data.matches, groupPlayed, name);
   const knockouts = await knockoutsForCountry(name);
   return <CountryDetail data={data} goals={goals} assists={assists} results={results} knockouts={knockouts} />;
 }

@@ -1,4 +1,4 @@
-import { getPlayedMatches } from "@/lib/playedMatches";
+import { getPlayedGroupMatches } from "@/lib/playedMatches";
 import { STANDINGS_SOURCES } from "@/lib/sources";
 import { SourceNote } from "@/components/SourceNote";
 import { LiveScoreProvider } from "@/components/LiveScoreProvider";
@@ -7,7 +7,7 @@ import { StandingsLive } from "@/components/StandingsLive";
 export const dynamic = "force-dynamic";
 
 export default async function StandingsPage() {
-  const played = await getPlayedMatches();
+  const played = await getPlayedGroupMatches();
   const playedLite = played.map((m) => ({
     home: m.home,
     away: m.away,

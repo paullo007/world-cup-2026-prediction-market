@@ -9,7 +9,8 @@
     "lint": "next lint",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
-    "test:scorers": "tsx scripts/test-scorers.ts"
+    "test:scorers": "tsx scripts/test-scorers.ts",
+    "test:played-matches": "tsx scripts/check-played-matches.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.18.0",

@@ -1,4 +1,4 @@
-import { getPlayedMatches } from "@/lib/playedMatches";
+import { getAllPlayedMatches } from "@/lib/playedMatches";
 import { GOALS_SOURCES } from "@/lib/sources";
 import { SourceNote } from "@/components/SourceNote";
 import { GoalscorersTable } from "@/components/GoalscorersTable";
@@ -19,7 +19,7 @@ interface Tally {
 }
 
 export default async function GoalsPage() {
-  const played = await getPlayedMatches();
+  const played = await getAllPlayedMatches();
 
   // One row per player who has scored at least once; players who haven't scored
   // never enter the map, so they're absent by construction.

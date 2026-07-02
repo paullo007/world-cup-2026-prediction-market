@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { yesPrice } from "@/lib/amm";
 import { canonicalTeam, flag } from "@/lib/flags";
-import { getPlayedMatches } from "@/lib/playedMatches";
+import { getAllPlayedMatches } from "@/lib/playedMatches";
 import { formAdjustedFor, type WinnerChance } from "@/lib/dynamicPrediction";
 import { AiKnockoutBracket } from "@/components/AiKnockoutBracket";
 import { buildAiBracket } from "@/lib/aiKnockouts";
@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AiKnockoutsPage() {
   const [played, winnerMarkets, teamMap] = await Promise.all([
-    getPlayedMatches(),
+    getAllPlayedMatches(),
     db.market.findMany({ where: { category: "Tournament Winner" } }),
     getBracketTeams(),
   ]);

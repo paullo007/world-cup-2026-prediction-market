@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getPlayedMatches } from "@/lib/playedMatches";
+import { getAllPlayedMatches } from "@/lib/playedMatches";
 import {
   getCountry,
   countryFromSlug,
@@ -22,7 +22,7 @@ export default async function PlayerPage({
   const player = findPlayerBySlug(data.roster, params.player);
   if (!player) notFound();
 
-  const played = await getPlayedMatches();
+  const played = await getAllPlayedMatches();
   const goals = goalsForRoster(data.roster, played, name)[player.name] ?? 0;
   const assists = assistsForRoster(data.roster, played, name)[player.name] ?? 0;
 

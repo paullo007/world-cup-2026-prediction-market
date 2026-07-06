@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import type { LiveMatch } from "@/lib/liveScores";
 import { inLiveWindow } from "@/lib/liveWindow";
 
-const POLL_MS = 45_000; // refresh cadence while a game is on
+const POLL_MS = 12_000; // refresh cadence while a game is on (near ESPN's own ~20-30s feed-latency floor; was 45s)
 
 const LiveCtx = createContext<Record<string, LiveMatch>>({});
 
@@ -36,7 +36,7 @@ export function useLiveScores(): LiveMatch[] {
 }
 
 /**
- * Polls /api/live-scores every 45s and exposes the result via context. Polling
+ * Polls /api/live-scores every 12s and exposes the result via context. Polling
  * is gated on (a) being inside the SGT match window and (b) the tab being
  * visible — it pauses on hidden tabs and refetches immediately on refocus.
  * Mount it around any subtree that renders match cards (Matches/Scores tabs).

@@ -1,10 +1,10 @@
 import { getAllPlayedMatches } from "@/lib/playedMatches";
 import { GOALS_SOURCES } from "@/lib/sources";
 import { SourceNote } from "@/components/SourceNote";
-import { GoalscorersTable, type ScorerRow, type GoalEvent } from "@/components/GoalscorersTable";
+import { GoalscorersTable } from "@/components/GoalscorersTable";
 import { TopScorers } from "@/components/TopScorers";
 import { TOP_SCORERS } from "@/lib/topScorers";
-import { priorWorldCupGoals } from "@/lib/historicalWCGoals";
+import { buildScorerRows } from "@/lib/scorerRows";
 
 // Tolerant name match (strip accents/case/punct) for crediting WC2026 goals.
 const normName = (s: string) =>
@@ -12,41 +12,13 @@ const normName = (s: string) =>
 
 export const dynamic = "force-dynamic";
 
-interface Tally {
-  name: string;
-  team: string;
-  goals: number;
-  penalties: number;
-  events: GoalEvent[];
-}
-
 export default async function GoalsPage() {
   const played = await getAllPlayedMatches();
 
-  // One row per player who has scored at least once; players who haven't scored
-  // never enter the map, so they're absent by construction. Each goal also
-  // records the match it was scored in (opponent + date) for the drill-down.
-  const byPlayer = new Map<string, Tally>();
-  for (const m of played) {
-    for (const s of m.scorers) {
-      if (s.ownGoal) continue; // own goals are not credited to the scorer (Goals tab rule)
-      const key = `${s.name}|${s.team}`;
-      const t = byPlayer.get(key) ?? { name: s.name, team: s.team, goals: 0, penalties: 0, events: [] };
-      t.goals++;
-      if (s.penalty) t.penalties++;
-      const opponent = normName(s.team) === normName(m.home) ? m.away : m.home;
-      t.events.push({ opponent, dateIso: m.kickoffIso, minute: s.minute ?? "", penalty: !!s.penalty });
-      byPlayer.set(key, t);
-    }
-  }
-
-  const scorers: ScorerRow[] = Array.from(byPlayer.values())
-    .map((t) => ({
-      ...t,
-      events: [...t.events].sort((a, b) => (a.dateIso < b.dateIso ? -1 : a.dateIso > b.dateIso ? 1 : 0)),
-      priorWC: priorWorldCupGoals(t.name),
-    }))
-    .sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name));
+  // One row per player who has scored at least once, most goals first, each with
+  // its per-goal drill-down + curated prior-WC total. Shared with the per-country
+  // "All Goals by Player" panel so the two can't drift (own goals excluded there).
+  const scorers = buildScorerRows(played);
 
   const totalGoals = scorers.reduce((sum, s) => sum + s.goals, 0);
 

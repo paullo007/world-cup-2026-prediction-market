@@ -47,7 +47,16 @@ function groupByMatch(events: GoalEvent[]) {
  * lib/historicalWCGoals). The `<th>` cells are individually `position: sticky`;
  * the card uses `overflow-x: clip` so it isn't a scroll container.
  */
-export function GoalscorersTable({ scorers, totalGoals }: { scorers: ScorerRow[]; totalGoals: number }) {
+export function GoalscorersTable({
+  scorers,
+  totalGoals,
+  hideTeam = false,
+}: {
+  scorers: ScorerRow[];
+  totalGoals: number;
+  /** Hide the Team column (used on a single-country panel where it's redundant). */
+  hideTeam?: boolean;
+}) {
   const top = useTopbarHeight();
   const th = "sticky z-20 border-b border-surface-border bg-surface-raised py-2 font-semibold";
   const [expanded, setExpanded] = useState(false);
@@ -62,6 +71,9 @@ export function GoalscorersTable({ scorers, totalGoals }: { scorers: ScorerRow[]
 
   const collapsible = scorers.length > PREVIEW_COUNT;
   const shown = expanded || !collapsible ? scorers : scorers.slice(0, PREVIEW_COUNT);
+  // Total columns and the span the label/drill-down should stretch across.
+  const cols = hideTeam ? 3 : 4;
+  const spanRest = cols - 1;
 
   return (
     <div className="rounded-2xl border border-surface-border bg-surface-raised" style={{ overflowX: "clip" }}>
@@ -70,7 +82,7 @@ export function GoalscorersTable({ scorers, totalGoals }: { scorers: ScorerRow[]
           <tr className="text-[11px] uppercase tracking-wide text-slate-400">
             <th style={{ top }} className={cn(th, "px-4 text-left")}>#</th>
             <th style={{ top }} className={cn(th, "px-2 text-left")}>Player</th>
-            <th style={{ top }} className={cn(th, "px-2 text-left")}>Team</th>
+            {!hideTeam && <th style={{ top }} className={cn(th, "px-2 text-left")}>Team</th>}
             <th style={{ top }} className={cn(th, "px-4 text-right")}>Goals</th>
           </tr>
         </thead>
@@ -97,16 +109,18 @@ export function GoalscorersTable({ scorers, totalGoals }: { scorers: ScorerRow[]
                       <span className="ml-1.5 text-[11px] font-medium text-slate-400">({s.penalties} pen)</span>
                     )}
                   </td>
-                  <td className="px-2 py-2 text-slate-300">
-                    <span className="mr-1.5">{flag(s.team)}</span>
-                    <CountryLink name={s.team} />
-                  </td>
+                  {!hideTeam && (
+                    <td className="px-2 py-2 text-slate-300">
+                      <span className="mr-1.5">{flag(s.team)}</span>
+                      <CountryLink name={s.team} />
+                    </td>
+                  )}
                   <td className="px-4 py-2 text-right font-bold tabular-nums">{s.goals}</td>
                 </tr>
                 {isOpen && (
                   <tr className="border-t border-surface-border bg-surface/40">
                     <td />
-                    <td colSpan={3} className="px-2 pb-3 pt-1">
+                    <td colSpan={spanRest} className="px-2 pb-3 pt-1">
                       <div className="space-y-1 text-[13px]">
                         <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                           World Cup 2026 goals
@@ -147,7 +161,7 @@ export function GoalscorersTable({ scorers, totalGoals }: { scorers: ScorerRow[]
           })}
           {collapsible && (
             <tr className="border-t border-surface-border">
-              <td colSpan={4} className="px-2 py-2 text-center">
+              <td colSpan={cols} className="px-2 py-2 text-center">
                 <button
                   type="button"
                   onClick={() => setExpanded((v) => !v)}
@@ -162,7 +176,7 @@ export function GoalscorersTable({ scorers, totalGoals }: { scorers: ScorerRow[]
         <tfoot>
           <tr className="border-t-2 border-surface-border">
             <td
-              colSpan={3}
+              colSpan={spanRest}
               className="rounded-bl-2xl bg-surface px-2 py-3 text-right text-base font-bold uppercase tracking-wide text-slate-400"
             >
               Total Goals

@@ -11,6 +11,8 @@ import { ShootoutBox } from "@/components/ShootoutBox";
 import { CountryLink } from "@/components/CountryLink";
 import { SourceNote } from "@/components/SourceNote";
 import { SquadTable } from "@/components/SquadTable";
+import { CountryGoalsByPlayer } from "@/components/CountryGoalsByPlayer";
+import type { ScorerRow } from "@/components/GoalscorersTable";
 
 function Box({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -97,12 +99,15 @@ export function CountryDetail({
   assists = {},
   results = {},
   knockouts = [],
+  scorerRows = [],
 }: {
   data: CountryData;
   goals: Record<string, number>;
   assists?: Record<string, number>;
   results?: Record<string, MatchResult>;
   knockouts?: KnockoutMatchView[];
+  /** Every player who scored for this country (all games), GOALS-tab format. */
+  scorerRows?: ScorerRow[];
 }) {
   const { name, group, roster, coach, titles, matches, sources } = data;
   const countrySlug = slugifyCountry(name);
@@ -118,6 +123,10 @@ export function CountryDetail({
           </p>
         </div>
       </div>
+
+      {/* "ALL GOALS BY PLAYER" — collapsible bar listing every scorer for this
+          country (group + knockouts) in the GOALS-tab drill-down format. */}
+      <CountryGoalsByPlayer scorers={scorerRows} />
 
       {/* 1) Knockout rounds reached — most recent round first (Final → R32), shown
           ABOVE the group stage since those matches are the latest. */}

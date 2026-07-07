@@ -130,6 +130,69 @@ function CircleMatch({ num, teams, scores }: { num: number; teams: Record<string
   );
 }
 
+/** One inner-round advancement flag (R16→Final): the team's flag on the branch
+ *  midway to its feeder, PLUS a score badge for that round's match — same
+ *  live/final logic as the outer ring (green when decided, red-pulse when live,
+ *  loser dimmed). The score badge sits just OUTSIDE the flag (away from the
+ *  trophy) so it never collides with the connectors/center. */
+function InnerNode({ x, y, team, goals, won, live }: { x: number; y: number; team: string; goals: number | null; won: boolean; live: boolean }) {
+  const hasScore = goals != null;
+  const dx = x - CX, dy = y - CY;
+  const len = Math.hypot(dx, dy) || 1;
+  const sx = x + (dx / len) * 16, sy = y + (dy / len) * 16;
+  return (
+    <>
+      <div
+        className={cn(
+          "absolute flex h-[26px] w-[26px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 bg-white text-[13px] shadow",
+          live ? "animate-pulse border-red-500" : hasScore ? "border-emerald-500" : "border-sky-400",
+          hasScore && !won && "opacity-50"
+        )}
+        style={{ left: x, top: y }}
+        title={team}
+      >
+        {flag(team)}
+      </div>
+      {hasScore && (
+        <div
+          className="absolute flex h-[15px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-slate-900 px-[3px] text-[10px] font-bold text-white"
+          style={{ left: sx, top: sy }}
+        >
+          {goals}
+        </div>
+      )}
+    </>
+  );
+}
+
+/** An inner-round match (R16 89–96, QF 97–100, SF 101–102, Final 104): both
+ *  participants shown as InnerNodes with that match's score. Uses the SAME
+ *  useBracketScore + `scores` feed as the FIFA bracket, so scores fill in and
+ *  update live as each round is decided. */
+function InnerMatch({ id, teams, scores }: { id: number; teams: Record<string, string>; scores: ScoreMap }) {
+  const ch = CHILDREN[id];
+  const ta = teams[`${id}a`];
+  const tb = teams[`${id}b`];
+  const { aGoals, bGoals, isLive, hasScore } = useBracketScore(ta, tb, scores);
+  if (!ch) return null;
+  const pp = posOf(id);
+  const sides = [
+    { team: ta, goals: aGoals, won: hasScore && aGoals! > bGoals!, child: ch[0] },
+    { team: tb, goals: bGoals, won: hasScore && bGoals! > aGoals!, child: ch[1] },
+  ];
+  return (
+    <>
+      {sides.map((s, i) => {
+        if (!s.team) return null;
+        const cp = posOf(s.child);
+        const x = pp.x + (cp.x - pp.x) * 0.5;
+        const y = pp.y + (cp.y - pp.y) * 0.5;
+        return <InnerNode key={i} x={x} y={y} team={s.team} goals={s.goals} won={s.won} live={isLive} />;
+      })}
+    </>
+  );
+}
+
 export function BracketCircle({ teams, scores }: { teams: Record<string, string>; scores: ScoreMap }) {
   return (
     <FitToWidth className="pb-4">
@@ -148,32 +211,13 @@ export function BracketCircle({ teams, scores }: { teams: Record<string, string>
         {Array.from({ length: 16 }, (_, i) => 73 + i).map((num) => (
           <CircleMatch key={num} num={num} teams={teams} scores={scores} />
         ))}
-        {/* Advancement flags: when a team reaches a later round, show its flag on
+        {/* Advancement flags for the inner rounds (R16→Final): each team's flag on
             the branch (midway between the round node and the feeder it came from),
-            so wins visibly move one branch inward toward the trophy. */}
-        {([104, 101, 102, 97, 98, 99, 100, 89, 90, 91, 92, 93, 94, 95, 96] as const).flatMap((M) => {
-          const ch = CHILDREN[M];
-          if (!ch) return [];
-          const pp = posOf(M);
-          return ([0, 1] as const).map((i) => {
-            const slot = `${M}${i === 0 ? "a" : "b"}`;
-            const team = teams[slot];
-            if (!team) return null;
-            const cp = posOf(ch[i]);
-            const x = pp.x + (cp.x - pp.x) * 0.5;
-            const y = pp.y + (cp.y - pp.y) * 0.5;
-            return (
-              <div
-                key={slot}
-                className="absolute flex h-[26px] w-[26px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-sky-400 bg-white text-[13px] shadow"
-                style={{ left: x, top: y }}
-                title={team}
-              >
-                {flag(team)}
-              </div>
-            );
-          });
-        })}
+            so wins visibly move one branch inward toward the trophy — now WITH that
+            round's score, filled/updated live via the same feed as the FIFA bracket. */}
+        {([104, 101, 102, 97, 98, 99, 100, 89, 90, 91, 92, 93, 94, 95, 96] as const).map((id) => (
+          <InnerMatch key={id} id={id} teams={teams} scores={scores} />
+        ))}
       </div>
     </FitToWidth>
   );

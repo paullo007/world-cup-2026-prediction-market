@@ -18,6 +18,9 @@ export default async function AdminPage() {
     orderBy: [{ status: "asc" }, { closesAt: "asc" }],
   });
 
+  // How many user proposals are awaiting review (for the queue link badge).
+  const pendingProposals = await db.market.count({ where: { proposalStatus: "PENDING" } });
+
   // For a 3-way match, only show the HOME row — approving it resolves the whole
   // Home/Draw/Away group at once, so the Draw/Away rows would be redundant.
   const isSecondary = (m: (typeof markets)[number]) =>
@@ -53,6 +56,9 @@ export default async function AdminPage() {
           </Link>{" "}
           <Link href="/admin/sources" className="font-semibold text-accent hover:underline">
             Compare score sources →
+          </Link>{" "}
+          <Link href="/admin/proposals" className="font-semibold text-accent hover:underline">
+            Review proposals{pendingProposals > 0 ? ` (${pendingProposals} pending)` : ""} →
           </Link>
         </p>
       </div>

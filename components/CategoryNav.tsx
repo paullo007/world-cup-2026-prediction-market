@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
+import { PROPOSALS_ENABLED } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
 const CATEGORIES = [
@@ -18,6 +19,9 @@ const CATEGORIES = [
   "Scores",
   "Goals",
   "Crazy Predictions",
+  // "Propose a Prediction" — a standalone form tab, shown only when the feature
+  // flag is on (the pull-back switch also removes the pill).
+  ...(PROPOSALS_ENABLED ? ["Propose"] : []),
   "Results",
 ];
 
@@ -31,6 +35,7 @@ const TAB_ROUTES: Record<string, string> = {
   Rankings: "/rankings",
   Scores: "/scores",
   Goals: "/goals",
+  Propose: "/propose",
 };
 
 // Inverse of TAB_ROUTES, for highlighting the active pill on a standalone page.
@@ -45,6 +50,7 @@ const LABELS: Record<string, string> = {
   "Tournament Winner": "Predict World Cup Winner",
   Bracket: "Brackets",
   Results: "Prediction Results",
+  Propose: "➕ Propose a Prediction",
 };
 
 /**

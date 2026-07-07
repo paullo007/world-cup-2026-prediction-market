@@ -47,6 +47,15 @@ export default async function MarketPage({ params }: { params: { slug: string } 
   if (!market) notFound();
 
   const session = await auth();
+  // A user proposal that isn't APPROVED (PENDING/REJECTED) is hidden from
+  // everyone except an admin (who can preview it from the review queue).
+  if (
+    market.proposalStatus &&
+    market.proposalStatus !== "APPROVED" &&
+    session?.user?.role !== "ADMIN"
+  ) {
+    notFound();
+  }
   const position = session?.user?.id
     ? await db.position.findUnique({
         where: { userId_marketId: { userId: session.user.id, marketId: market.id } },

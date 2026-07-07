@@ -113,6 +113,15 @@ model Market {
   // only). [{ team, player, scored, order }] — see lib/results.ShootoutKick.
   shootout         Json?
 
+  // "Propose a Prediction" (user-submitted markets). NULL = a normal seeded /
+  // system market (the 379 baseline). "PENDING" = a user proposal awaiting admin
+  // review (hidden + untradeable); "APPROVED" = reviewed & live (tradeable);
+  // "REJECTED" = declined (hidden). proposedById = the submitting user. Purely
+  // additive — every proposed market is tagged, so the feature can be cleanly
+  // pulled back (hide/delete by these fields) without touching baseline data.
+  proposalStatus String? // null | "PENDING" | "APPROVED" | "REJECTED"
+  proposedById   String?
+
   // LMSR automated market maker state
   liquidity Float @default(1000) // LMSR "b" parameter
   qYes      Float @default(0) // outstanding YES shares

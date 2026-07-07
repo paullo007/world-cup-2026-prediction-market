@@ -1,4 +1,4 @@
-import type { Market } from "@prisma/client";
+import type { Market, Prisma } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
@@ -13,6 +13,7 @@ import { yesPrice } from "@/lib/amm";
 import { awaitingResult } from "@/lib/utils";
 import { getBracketTeams } from "@/lib/bracketSync";
 import { knockoutFixtures, type KnockoutFixture } from "@/lib/bracket";
+import { VISIBLE_PROPOSAL, PROPOSAL_CATEGORY } from "@/lib/proposals";
 
 export const dynamic = "force-dynamic";
 
@@ -67,21 +68,25 @@ export default async function HomePage({
   // Legacy per-team "Knockouts" markets are retired — the pill now points to the
   // static "AI Knockouts" prediction page — so keep them out of the grid/Results.
   const hideKnockouts = { category: { not: "Knockouts" as const } };
+  const baseWhere: Prisma.MarketWhereInput = isResults
+    ? { status: "RESOLVED" as const, ...hideSecondary, ...hideKnockouts }
+    : isMatches
+      ? // Include resolved fixtures so the day picker spans every match-day and
+        // past (played) days show their final results, not just upcoming games.
+        // KnockoutMatches = the tradeable R32→Final 2-way markets.
+        { category: { in: ["Matches", "KnockoutMatches"] } }
+      : isAll
+        ? // Include every outcome so match fixtures can render as 3-way cards
+          // (Home/Draw/Away) here too; they're grouped by matchKey below. Keep
+          // COMPLETED knockout/winner/crazy markets visible (badged) instead of
+          // vanishing — but exclude the finished group stage so it doesn't flood.
+          { ...hideKnockouts, NOT: { category: "Matches", status: "RESOLVED" } }
+        : { category, status: { not: "RESOLVED" as const }, ...hideSecondary };
+  // Global guard: never surface PENDING/REJECTED user proposals anywhere public —
+  // only normal markets (proposalStatus NULL) and APPROVED ones. AND-combined so
+  // it can't clash with a branch's own OR (and can't hit the NULL-outcome trap).
   const markets = await db.market.findMany({
-    where: isResults
-      ? { status: "RESOLVED", ...hideSecondary, ...hideKnockouts }
-      : isMatches
-        ? // Include resolved fixtures so the day picker spans every match-day and
-          // past (played) days show their final results, not just upcoming games.
-          // KnockoutMatches = the tradeable R32→Final 2-way markets.
-          { category: { in: ["Matches", "KnockoutMatches"] } }
-        : isAll
-          ? // Include every outcome so match fixtures can render as 3-way cards
-            // (Home/Draw/Away) here too; they're grouped by matchKey below. Keep
-            // COMPLETED knockout/winner/crazy markets visible (badged) instead of
-            // vanishing — but exclude the finished group stage so it doesn't flood.
-            { ...hideKnockouts, NOT: { category: "Matches", status: "RESOLVED" } }
-          : { category, status: { not: "RESOLVED" }, ...hideSecondary },
+    where: { AND: [baseWhere, VISIBLE_PROPOSAL] },
     orderBy: isResults ? [{ resolvedAt: "desc" }] : [{ closesAt: "asc" }],
   });
 
@@ -224,8 +229,15 @@ export default async function HomePage({
       .map(single);
     if (crazyCards.length) sections.push({ title: "Crazy Prediction Bets", start: 0, cards: crazyCards });
 
+    // Community (user-proposed) markets that an admin has approved live.
+    const communityCards = singles
+      .filter((m) => m.category === PROPOSAL_CATEGORY)
+      .sort((a, b) => a.closesAt.getTime() - b.closesAt.getTime())
+      .map(single);
+    if (communityCards.length) sections.push({ title: "Community Prediction Bets", start: 0, cards: communityCards });
+
     // Anything else (unexpected categories) goes last so nothing silently vanishes.
-    const known = new Set(["Tournament Winner", "Crazy Predictions"]);
+    const known = new Set(["Tournament Winner", "Crazy Predictions", PROPOSAL_CATEGORY]);
     const otherCards = singles.filter((m) => !known.has(m.category)).map(single);
     if (otherCards.length) sections.push({ title: "Other Prediction Bets", start: 0, cards: otherCards });
 

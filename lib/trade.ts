@@ -74,6 +74,10 @@ export async function executeTrade(params: {
   return withTxRetry(() => db.$transaction(async (tx) => {
     const market = await tx.market.findUnique({ where: { slug: marketSlug } });
     if (!market) throw new TradeError("Market not found");
+    // A user proposal is only tradeable once an admin has APPROVED it (PENDING /
+    // REJECTED proposals must never take a trade).
+    if (market.proposalStatus && market.proposalStatus !== "APPROVED")
+      throw new TradeError("This market isn't open for trading yet");
     if (market.status !== "OPEN" || market.closesAt < new Date())
       throw new TradeError("This market is closed for trading");
 

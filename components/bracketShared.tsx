@@ -60,28 +60,34 @@ export const THEMES: Record<string, Theme> = {
 export const FALLBACK: Theme = THEMES.r32;
 
 /**
- * Bracket box date stamp: "Jun28/Sun/3:00am #73" — nominal match date + the
- * kickoff in the VIEWER's local timezone + match number. The local time is added
- * only after mount (the first client render matches the server: date + #num with
- * no time), so there's no hydration mismatch.
+ * Bracket box date stamp: "Jun28/Sun/3:00am #73" — match DATE and kickoff TIME,
+ * both in the VIEWER's local timezone, + match number. Both the local date and
+ * time are derived from the same `kickoff` timestamp and swapped in only after
+ * mount; the first client render matches the server (the nominal `date` + #num,
+ * no time), so there's no hydration mismatch. Deriving the date from `kickoff`
+ * (not the nominal UTC-parsed `date`) keeps it consistent with the Matches tab
+ * (`MatchStartTime`): a 21:00 UTC kickoff is Jul12 5:00am in Singapore, so the
+ * bracket must read "Jul12/Sun" too — not the UTC calendar date "Jul11/Sat".
  */
 export function BoxDate({ date, kickoff, num }: { date: string; kickoff: string; num: number }) {
-  const [time, setTime] = useState<string | null>(null);
+  const [local, setLocal] = useState<{ date: string; time: string } | null>(null);
   useEffect(() => {
     const d = new Date(kickoff);
     if (isNaN(d.getTime())) return;
-    const t = d
+    const time = d
       .toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })
       .replace(/\s?AM$/i, "am")
       .replace(/\s?PM$/i, "pm");
-    setTime(t);
+    const mon = d.toLocaleString("en-US", { month: "short" });
+    const wd = d.toLocaleDateString("en-US", { weekday: "short" });
+    setLocal({ date: `${mon}${d.getDate()}/${wd}`, time }); // e.g. "Jul12/Sun"
   }, [kickoff]);
   return (
     <span>
-      {shortDate(date)}
-      {time ? (
+      {local ? local.date : shortDate(date)}
+      {local ? (
         <>
-          /<strong className="font-bold text-accent">{time}</strong>
+          /<strong className="font-bold text-accent">{local.time}</strong>
         </>
       ) : null}{" "}
       #{num}

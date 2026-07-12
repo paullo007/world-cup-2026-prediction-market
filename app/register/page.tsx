@@ -37,7 +37,7 @@ export default function RegisterPage() {
       <h1 className="text-2xl font-extrabold">Pick a nickname</h1>
       <p className="mt-1 text-sm text-slate-400">
         No email, no password, nothing to remember — just a nickname and you&apos;re in with{" "}
-        <span className="font-bold text-emerald-600">2,000 WC$</span>. Sign back in any time by
+        <span className="font-bold text-emerald-600">10,000 WC$</span>. Sign back in any time by
         typing the same nickname.
       </p>
       <form onSubmit={submit} className="mt-6 space-y-2">
@@ -58,7 +58,7 @@ export default function RegisterPage() {
           disabled={busy}
           className="mt-2 w-full rounded-lg bg-accent py-2.5 font-bold text-white hover:bg-accent-hover disabled:opacity-50"
         >
-          {busy ? "Creating…" : "Create nickname & get 2,000 WC$"}
+          {busy ? "Creating…" : "Create nickname & get 10,000 WC$"}
         </button>
       </form>
       <p className="mt-4 text-sm text-slate-400">

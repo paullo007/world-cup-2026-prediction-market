@@ -262,7 +262,7 @@ export default async function HomePage({
         <p className="mt-1 max-w-2xl text-slate-300">
           Buy YES or NO shares on real tournament outcomes with WC$. Prices move with the
           crowd — every share of the winning outcome pays 1.00 WC$. New accounts start with
-          2,000 WC$.
+          10,000 WC$.
         </p>
       </section>
 

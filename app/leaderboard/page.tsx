@@ -5,7 +5,7 @@ import { Medal } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-const STARTING_BALANCE = 2000;
+const STARTING_BALANCE = 10000;
 
 export default async function LeaderboardPage() {
   const users = await db.user.findMany({
@@ -38,7 +38,7 @@ export default async function LeaderboardPage() {
       <div>
         <h1 className="text-2xl font-extrabold">Leaderboard</h1>
         <p className="mt-1 text-sm text-slate-400">
-          Net worth = cash + market value of open positions. Everyone is given 2,000 WC$.
+          Net worth = cash + market value of open positions. Everyone is given 10,000 WC$.
         </p>
       </div>
 

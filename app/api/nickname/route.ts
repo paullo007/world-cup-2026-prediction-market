@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { validateNickname } from "@/lib/nickname";
 
-// Create a nickname account: instant 2000 WC$ (schema default). No password and
+// Create a nickname account: instant 10000 WC$ (schema default). No password and
 // no recovery code — sign-in is nickname-only (see lib/auth.ts). The client
 // signs in immediately after.
 export async function POST(req: Request) {
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   try {
     await db.user.create({
       data: { name: nickname, nickname, nicknameLower: lower },
-      // balance defaults to 2000 in the schema
+      // balance defaults to 10000 in the schema
     });
   } catch (e) {
     // Unique race: someone took the nickname between the check and the insert.

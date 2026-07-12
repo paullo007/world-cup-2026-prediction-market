@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { PROPOSALS_ENABLED } from "@/lib/config";
+import { useProposalsCount } from "@/components/useProposalsCount";
 import { cn } from "@/lib/utils";
 
 const CATEGORIES = [
@@ -137,6 +138,8 @@ function UpdateResultsButton() {
 /** Presentational pill bar. `active` is the currently-selected category, or null. */
 export function CategoryPills({ active }: { active: string | null }) {
   const navRef = useRef<HTMLDivElement>(null);
+  // Live count of proposals awaiting review → red badge on the Propose pill.
+  const pendingProposals = useProposalsCount();
 
   // Pixel-align the "Update Latest Results" button's right edge with the right
   // edge of the furthest category pill (e.g. "Crazy Predictions" at the end of
@@ -172,13 +175,24 @@ export function CategoryPills({ active }: { active: string | null }) {
           key={c}
           href={c === "All" ? "/" : TAB_ROUTES[c] ?? `/?category=${encodeURIComponent(c)}`}
           className={cn(
-            "rounded-full px-4 py-1.5 text-sm font-semibold transition",
+            "relative rounded-full px-4 py-1.5 text-sm font-semibold transition",
             c === active
               ? "bg-accent text-white"
               : "bg-surface-raised text-slate-300 hover:bg-surface-hover"
           )}
         >
           {LABELS[c] ?? c}
+          {/* Pending-proposals badge: red count pinned to the pill's top-right
+              corner. Public — everyone (even logged out) sees a waiting proposal,
+              which is how the admin (usually browsing as a player) gets alerted. */}
+          {c === "Propose" && pendingProposals > 0 && (
+            <span
+              aria-label={`${pendingProposals} proposal${pendingProposals === 1 ? "" : "s"} awaiting review`}
+              className="absolute -right-1.5 -top-1.5 flex h-5 min-w-[1.25rem] animate-pulse items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-bold leading-none text-white ring-2 ring-surface"
+            >
+              {pendingProposals}
+            </span>
+          )}
         </Link>
       ))}
       {/* Permanent last item; ml-auto pushes it to the far-right of its row so

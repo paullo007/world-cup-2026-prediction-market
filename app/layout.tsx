@@ -5,6 +5,7 @@ import { Providers } from "@/components/Providers";
 import { Navbar } from "@/components/Navbar";
 import { CategoryNav, CategoryPills } from "@/components/CategoryNav";
 import { AutoResolve } from "@/components/AutoResolve";
+import { ProposalAdminBanner } from "@/components/ProposalAdminBanner";
 
 export const metadata: Metadata = {
   title: "World Cup 2026 Prediction Market",
@@ -35,6 +36,8 @@ export default function RootLayout({
               </Suspense>
             </div>
           </div>
+          {/* Admin-only nudge to the review queue when proposals are waiting. */}
+          <ProposalAdminBanner />
           <main className="mx-auto max-w-6xl px-4 pb-20 pt-6">
             {children}
           </main>

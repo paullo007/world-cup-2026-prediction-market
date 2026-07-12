@@ -46,28 +46,51 @@ export default async function AdminProposalsPage() {
       </div>
 
       <section>
-        <h2 className="mb-3 text-lg font-bold text-amber-700">Awaiting review ({pending.length})</h2>
-        <ul className="space-y-3">
+        <h2 className="mb-4 flex items-center gap-2 text-xl font-extrabold text-amber-700">
+          Awaiting review
+          <span
+            className={
+              pending.length > 0
+                ? "inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-full bg-red-600 px-2 text-sm font-bold text-white"
+                : "inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-full bg-surface-raised px-2 text-sm font-bold text-slate-400"
+            }
+          >
+            {pending.length}
+          </span>
+        </h2>
+        <ul className="space-y-4">
           {pending.map((m) => (
-            <li key={m.id} className="rounded-xl border border-amber-600/40 bg-amber-600/5 px-5 py-4">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold">{m.question}</p>
-                  <p className="mt-1 text-sm text-slate-300">
-                    <span className="font-semibold text-slate-400">Resolves:</span> {m.description}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-400">
-                    Proposed by {m.proposedById ? nameById.get(m.proposedById) ?? "unknown" : "unknown"} ·
-                    closes {formatDate(m.closesAt)} · submitted {formatDate(m.createdAt)}
-                  </p>
+            <li
+              key={m.id}
+              className="rounded-2xl border-2 border-amber-500/50 bg-amber-500/5 p-5 shadow-sm"
+            >
+              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div className="min-w-0 flex-1 space-y-3">
+                  <p className="text-lg font-bold leading-snug">{m.question}</p>
+                  <div className="rounded-lg border border-surface-border bg-surface-raised px-4 py-3">
+                    <p className="text-xs font-bold uppercase tracking-wide text-amber-700">Resolves</p>
+                    <p className="mt-1 text-sm text-slate-200">{m.description}</p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400">
+                    <span>
+                      Proposed by{" "}
+                      <span className="font-semibold text-slate-200">
+                        {m.proposedById ? nameById.get(m.proposedById) ?? "unknown" : "unknown"}
+                      </span>
+                    </span>
+                    <span>Submitted: {formatDate(m.createdAt)}</span>
+                    <span>Closes: {formatDate(m.closesAt)}</span>
+                  </div>
                 </div>
-                <ProposalReviewButtons marketId={m.id} />
+                <div className="shrink-0 md:pt-1">
+                  <ProposalReviewButtons marketId={m.id} />
+                </div>
               </div>
             </li>
           ))}
           {pending.length === 0 && (
-            <li className="rounded-xl border border-surface-border bg-surface-raised px-5 py-4 text-sm text-slate-400">
-              No proposals awaiting review.
+            <li className="rounded-2xl border border-surface-border bg-surface-raised px-5 py-6 text-center text-sm text-slate-400">
+              🎉 No proposals awaiting review — you&apos;re all caught up.
             </li>
           )}
         </ul>

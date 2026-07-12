@@ -4,6 +4,7 @@ import { matchTeams } from "@/lib/flags";
 import { fetchAllSources, mergeForMarket, fetchEspnAssists, attachAssists, fetchEspnShootout } from "@/lib/results";
 import { resolveMarket, resolveMatchGroup } from "@/lib/trade";
 import { ensureKnockoutMarkets } from "@/lib/knockoutMarkets";
+import { computeEliminationSettlements } from "@/lib/eliminationSettlement";
 
 export interface IngestSummary {
   ok: boolean;
@@ -149,6 +150,29 @@ export async function ingestAndPublish(): Promise<IngestSummary> {
     }
   } catch (err) {
     console.warn(`[ingest] ensureKnockoutMarkets failed (will retry next cycle): ${err instanceof Error ? err.message : err}`);
+  }
+
+  // Cascade-settle DERIVED/AGGREGATE markets whose outcome just became certain
+  // from the knockout results above: a team that loses a knockout tie can no
+  // longer win the trophy / reach a later round, and a team that wins one has
+  // reached the next round. Without this, those markets sit OPEN at a stale LMSR
+  // price and show holders phantom mark-to-market gains until manual resolution.
+  // Deterministic + idempotent (skips already-RESOLVED markets); best-effort so
+  // it can never block or fail match settlement. See lib/eliminationSettlement.
+  try {
+    const decided = await computeEliminationSettlements();
+    let cascaded = 0;
+    for (const s of decided) {
+      try {
+        await resolveMarket(s.marketId, s.outcome);
+        cascaded++;
+      } catch (err) {
+        errors.push(`cascade ${s.question}: ${err instanceof Error ? err.message : err}`);
+      }
+    }
+    if (cascaded) console.log(`[ingest] cascade-settled ${cascaded} derived market(s) (eliminations/milestones)`);
+  } catch (err) {
+    console.warn(`[ingest] elimination cascade failed (will retry next cycle): ${err instanceof Error ? err.message : err}`);
   }
 
   return { ok: true, sources: sourceSummary, sourceErrors, published, conflicts, unmatched, failed, errors };

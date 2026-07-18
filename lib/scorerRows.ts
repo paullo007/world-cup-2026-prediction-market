@@ -57,8 +57,11 @@ export function buildScorerRows(played: PlayedMatch[], team?: string): ScorerRow
  * just-finished match already settled by the ingest pipeline (but still
  * showing "post" on ESPN's scoreboard) is never double-counted. Adds
  * `liveExtra` (unconfirmed goal count this session) + `liveOpponent` to
- * new/existing rows; never mutates `base`. Display-only — this never feeds
- * resolution/payouts, same as lib/liveScores.ts itself.
+ * new/existing rows, AND a `live: true` GoalEvent per goal so the per-match
+ * drill-down lists the in-progress fixture too (grouped under one shared
+ * timestamp per merge pass so a brace still collapses into one line); never
+ * mutates `base`. Display-only — this never feeds resolution/payouts, same as
+ * lib/liveScores.ts itself.
  */
 export function mergeLiveGoals(
   base: ScorerRow[],
@@ -66,6 +69,9 @@ export function mergeLiveGoals(
   playedKeys: Set<string>
 ): ScorerRow[] {
   const byKey = new Map(base.map((s) => [`${s.name}|${s.team}`, { ...s }]));
+  // One shared "now" for this pass so multiple goals in the same live match
+  // group into a single drill-down line (grouping key is opponent + dateIso).
+  const liveDateIso = new Date().toISOString();
 
   for (const m of live) {
     if (playedKeys.has(m.matchKey)) continue;
@@ -79,6 +85,10 @@ export function mergeLiveGoals(
         ({ name: s.name, team: s.team, goals: 0, penalties: 0, events: [] } as ScorerRow);
       row.liveExtra = (row.liveExtra ?? 0) + 1;
       row.liveOpponent = opponent;
+      row.events = [
+        ...row.events,
+        { opponent: opponent ?? "", dateIso: liveDateIso, minute: s.minute ?? "", penalty: !!s.penalty, live: true },
+      ];
       byKey.set(key, row);
     }
   }

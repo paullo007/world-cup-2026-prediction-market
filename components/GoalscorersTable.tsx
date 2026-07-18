@@ -12,6 +12,8 @@ export interface GoalEvent {
   dateIso: string;
   minute: string;
   penalty: boolean;
+  /** From a match currently in progress — unconfirmed until it resolves. */
+  live?: boolean;
 }
 
 export interface ScorerRow {
@@ -33,10 +35,14 @@ const PREVIEW_COUNT = 25;
 
 // Group a player's goals by the match they were scored in (opponent + date).
 function groupByMatch(events: GoalEvent[]) {
-  const map = new Map<string, { opponent: string; dateIso: string; mins: { minute: string; penalty: boolean }[] }>();
+  const map = new Map<
+    string,
+    { opponent: string; dateIso: string; live?: boolean; mins: { minute: string; penalty: boolean }[] }
+  >();
   for (const e of events) {
     const key = `${e.opponent}|${e.dateIso}`;
-    const g = map.get(key) ?? { opponent: e.opponent, dateIso: e.dateIso, mins: [] };
+    const g = map.get(key) ?? { opponent: e.opponent, dateIso: e.dateIso, live: e.live, mins: [] };
+    if (e.live) g.live = true;
     g.mins.push({ minute: e.minute, penalty: e.penalty });
     map.set(key, g);
   }
@@ -156,7 +162,14 @@ export function GoalscorersTable({
                               <span className="mr-1">{flag(g.opponent)}</span>
                               {g.opponent}
                             </span>
-                            <span className="text-slate-500">{formatDate(new Date(g.dateIso))}</span>
+                            {g.live ? (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-600">
+                                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-600" />
+                                LIVE
+                              </span>
+                            ) : (
+                              <span className="text-slate-500">{formatDate(new Date(g.dateIso))}</span>
+                            )}
                             <span className="ml-auto font-medium tabular-nums text-slate-200">
                               {g.mins.map((mn, k) => (
                                 <span key={k}>
@@ -172,8 +185,14 @@ export function GoalscorersTable({
                           <div className="mt-2 border-t border-surface-border pt-2 text-slate-400">
                             Prior World Cups:{" "}
                             <span className="font-semibold text-slate-200">{s.priorWC}</span> · WC 2026:{" "}
-                            <span className="font-semibold text-slate-200">{s.goals}</span> · Career WC:{" "}
-                            <span className="font-bold text-amber-600">{s.priorWC + s.goals}</span>
+                            <span className="font-semibold text-slate-200">{s.goals + (s.liveExtra ?? 0)}</span>
+                            {!!s.liveExtra && (
+                              <span className="ml-1 text-[10px] font-bold text-red-600">+{s.liveExtra} live</span>
+                            )}{" "}
+                            · Career WC:{" "}
+                            <span className="font-bold text-amber-600">
+                              {s.priorWC + s.goals + (s.liveExtra ?? 0)}
+                            </span>
                           </div>
                         )}
                       </div>

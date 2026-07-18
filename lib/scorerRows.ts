@@ -1,9 +1,11 @@
 import type { PlayedMatch } from "@/lib/playedMatches";
 import type { ScorerRow, GoalEvent } from "@/components/GoalscorersTable";
+import type { LiveMatch } from "@/lib/liveScores";
 import { priorWorldCupGoals } from "@/lib/historicalWCGoals";
 
 // Tolerant name match (strip accents/case/punct) — for crediting goals to a team.
-const normName = (s: string) =>
+// Exported so the Goals page and its live-merge overlay share one definition.
+export const normName = (s: string) =>
   s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z]/g, "");
 
 /**
@@ -45,4 +47,44 @@ export function buildScorerRows(played: PlayedMatch[], team?: string): ScorerRow
       priorWC: priorWorldCupGoals(t.name),
     }))
     .sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name));
+}
+
+/**
+ * Overlay PROVISIONAL goals from matches currently in progress onto the
+ * confirmed (resolved-match) Goals-tab rows — the goalscorer counterpart to
+ * how Standings shows provisional live points. A live match is skipped if its
+ * matchKey (either home/away orientation) is already in `playedKeys`, so a
+ * just-finished match already settled by the ingest pipeline (but still
+ * showing "post" on ESPN's scoreboard) is never double-counted. Adds
+ * `liveExtra` (unconfirmed goal count this session) + `liveOpponent` to
+ * new/existing rows; never mutates `base`. Display-only — this never feeds
+ * resolution/payouts, same as lib/liveScores.ts itself.
+ */
+export function mergeLiveGoals(
+  base: ScorerRow[],
+  live: LiveMatch[],
+  playedKeys: Set<string>
+): ScorerRow[] {
+  const byKey = new Map(base.map((s) => [`${s.name}|${s.team}`, { ...s }]));
+
+  for (const m of live) {
+    if (playedKeys.has(m.matchKey)) continue;
+    const [home, away] = m.matchKey.split(" vs ");
+    for (const s of m.scorers) {
+      if (s.ownGoal) continue;
+      const key = `${s.name}|${s.team}`;
+      const opponent = normName(s.team) === normName(home ?? "") ? away : home;
+      const row =
+        byKey.get(key) ??
+        ({ name: s.name, team: s.team, goals: 0, penalties: 0, events: [] } as ScorerRow);
+      row.liveExtra = (row.liveExtra ?? 0) + 1;
+      row.liveOpponent = opponent;
+      byKey.set(key, row);
+    }
+  }
+
+  return Array.from(byKey.values()).sort(
+    (a, b) =>
+      b.goals + (b.liveExtra ?? 0) - (a.goals + (a.liveExtra ?? 0)) || a.name.localeCompare(b.name)
+  );
 }

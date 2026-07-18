@@ -22,6 +22,10 @@ export interface ScorerRow {
   events: GoalEvent[];
   /** Curated prior (pre-2026) World Cup goals; null when unknown. */
   priorWC?: number | null;
+  /** Unconfirmed goal(s) from a match currently in progress (not yet resolved/paid out). */
+  liveExtra?: number;
+  /** Opponent in the live match contributing liveExtra, for the inline note. */
+  liveOpponent?: string;
 }
 
 // Long lists (every scorer in the tournament) collapse to the leaders by default.
@@ -74,6 +78,8 @@ export function GoalscorersTable({
   // Total columns and the span the label/drill-down should stretch across.
   const cols = hideTeam ? 3 : 4;
   const spanRest = cols - 1;
+  // Unconfirmed goals from matches currently in progress (display-only; never resolved/paid out).
+  const liveTotal = scorers.reduce((sum, s) => sum + (s.liveExtra ?? 0), 0);
 
   return (
     <div className="rounded-2xl border border-surface-border bg-surface-raised" style={{ overflowX: "clip" }}>
@@ -104,6 +110,12 @@ export function GoalscorersTable({
                         className={cn("h-3.5 w-3.5 shrink-0 text-slate-400 transition-transform", isOpen && "rotate-180")}
                       />
                       {s.name}
+                      {!!s.liveExtra && (
+                        <span
+                          className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-red-600"
+                          title="Includes a goal from a match in progress"
+                        />
+                      )}
                     </span>
                     {s.penalties > 0 && (
                       <span className="ml-1.5 text-[11px] font-medium text-slate-400">({s.penalties} pen)</span>
@@ -115,7 +127,19 @@ export function GoalscorersTable({
                       <CountryLink name={s.team} />
                     </td>
                   )}
-                  <td className="px-4 py-2 text-right font-bold tabular-nums">{s.goals}</td>
+                  <td className="px-4 py-2 text-right font-bold tabular-nums">
+                    {s.goals + (s.liveExtra ?? 0)}
+                    {!!s.liveExtra && (
+                      <span
+                        className="ml-1 text-[10px] font-bold text-red-600"
+                        title={`${s.liveExtra} unconfirmed goal${s.liveExtra > 1 ? "s" : ""}${
+                          s.liveOpponent ? ` vs ${s.liveOpponent}` : ""
+                        } — live, not yet resolved`}
+                      >
+                        +{s.liveExtra} live
+                      </span>
+                    )}
+                  </td>
                 </tr>
                 {isOpen && (
                   <tr className="border-t border-surface-border bg-surface/40">
@@ -182,7 +206,10 @@ export function GoalscorersTable({
               Total Goals
             </td>
             <td className="rounded-br-2xl bg-surface px-4 py-3 text-right text-2xl font-extrabold tabular-nums">
-              {totalGoals}
+              {totalGoals + liveTotal}
+              {liveTotal > 0 && (
+                <span className="ml-1.5 align-middle text-[10px] font-bold text-red-600">+{liveTotal} live</span>
+              )}
             </td>
           </tr>
         </tfoot>

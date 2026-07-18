@@ -1,7 +1,11 @@
+"use client";
+
+import { useMemo } from "react";
 import Link from "next/link";
 import { flag } from "@/lib/flags";
 import type { SluggedPlayer } from "@/lib/countries";
-import { slugifyCountry } from "@/lib/countries";
+import { slugifyCountry, goalsForRoster, assistsForRoster } from "@/lib/countries";
+import { useLiveScores } from "@/components/LiveScoreProvider";
 
 /** Age in whole years from an ISO birth date. */
 function ageFromDob(dob?: string): number | null {
@@ -43,22 +47,41 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
 /**
  * Player detail page body. Bio comes from ESPN, club/photo from TheSportsDB
  * (best-effort — fields are simply omitted when missing). WC2026 goals/assists
- * are computed from our own resolved-match data. Deep career stats aren't in the
- * free feeds, so we link out to the player's ESPN profile.
+ * are computed from our own resolved-match data, overlaid with a live "+N live"
+ * badge while this player's country has a match in progress (mirrors the Goals
+ * tab/Squad table — display-only, never affects settlement). Deep career stats
+ * aren't in the free feeds, so we link out to the player's ESPN profile.
  */
 export function PlayerDetail({
   player,
   country,
   goals,
   assists,
+  playedKeys = [],
 }: {
   player: SluggedPlayer;
   country: string;
   goals: number;
   assists: number;
+  /** "home vs away" keys (both orientations) of already-resolved matches. */
+  playedKeys?: string[];
 }) {
   const age = player.age ?? ageFromDob(player.dob);
   const countrySlug = slugifyCountry(country);
+
+  const live = useLiveScores();
+  const liveMatches = useMemo(() => {
+    const played = new Set(playedKeys);
+    return live.filter((m) => !played.has(m.matchKey));
+  }, [live, playedKeys]);
+  const liveGoals = useMemo(
+    () => goalsForRoster([player], liveMatches, country)[player.name] ?? 0,
+    [player, liveMatches, country]
+  );
+  const liveAssists = useMemo(
+    () => assistsForRoster([player], liveMatches, country)[player.name] ?? 0,
+    [player, liveMatches, country]
+  );
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -108,9 +131,27 @@ export function PlayerDetail({
           2026 World Cup
         </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <Stat label="Goals" value={goals} />
-          <Stat label="Assists" value={assists} />
-          <Stat label="G+A" value={goals + assists} />
+          <Stat
+            label="Goals"
+            value={
+              <>
+                {goals + liveGoals}
+                {liveGoals > 0 && <span className="ml-1 text-[10px] font-bold text-red-600">+{liveGoals} live</span>}
+              </>
+            }
+          />
+          <Stat
+            label="Assists"
+            value={
+              <>
+                {assists + liveAssists}
+                {liveAssists > 0 && (
+                  <span className="ml-1 text-[10px] font-bold text-red-600">+{liveAssists} live</span>
+                )}
+              </>
+            }
+          />
+          <Stat label="G+A" value={goals + liveGoals + assists + liveAssists} />
         </div>
       </section>
 

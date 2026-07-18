@@ -8,6 +8,7 @@ import {
   assistsForRoster,
 } from "@/lib/countries";
 import { PlayerDetail } from "@/components/PlayerDetail";
+import { LiveScoreProvider } from "@/components/LiveScoreProvider";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,13 @@ export default async function PlayerPage({
   const played = await getAllPlayedMatches();
   const goals = goalsForRoster(data.roster, played, name)[player.name] ?? 0;
   const assists = assistsForRoster(data.roster, played, name)[player.name] ?? 0;
+  // Both key orientations so a live-feed match already resolved (but still
+  // showing "post" on ESPN's own scoreboard) is never double-counted live.
+  const playedKeys = played.flatMap((m) => [`${m.home} vs ${m.away}`, `${m.away} vs ${m.home}`]);
 
-  return <PlayerDetail player={player} country={name} goals={goals} assists={assists} />;
+  return (
+    <LiveScoreProvider>
+      <PlayerDetail player={player} country={name} goals={goals} assists={assists} playedKeys={playedKeys} />
+    </LiveScoreProvider>
+  );
 }

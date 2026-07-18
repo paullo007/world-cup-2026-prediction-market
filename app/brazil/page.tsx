@@ -3,6 +3,7 @@ import { getCountry, goalsForRoster, assistsForRoster, resultsForCountry } from 
 import { knockoutsForCountry } from "@/lib/countryKnockouts";
 import { buildScorerRows } from "@/lib/scorerRows";
 import { CountryDetail } from "@/components/CountryDetail";
+import { LiveScoreProvider } from "@/components/LiveScoreProvider";
 
 export const dynamic = "force-dynamic";
 
@@ -15,14 +16,20 @@ export default async function BrazilPage() {
   const results = resultsForCountry(data.matches, groupPlayed, "Brazil");
   const knockouts = await knockoutsForCountry("Brazil");
   const scorerRows = buildScorerRows(played, "Brazil");
+  // Both key orientations so a live-feed match already resolved (but still
+  // showing "post" on ESPN's own scoreboard) is never double-counted live.
+  const playedKeys = played.flatMap((m) => [`${m.home} vs ${m.away}`, `${m.away} vs ${m.home}`]);
   return (
-    <CountryDetail
-      data={data}
-      goals={goals}
-      assists={assists}
-      results={results}
-      knockouts={knockouts}
-      scorerRows={scorerRows}
-    />
+    <LiveScoreProvider>
+      <CountryDetail
+        data={data}
+        goals={goals}
+        assists={assists}
+        results={results}
+        knockouts={knockouts}
+        scorerRows={scorerRows}
+        playedKeys={playedKeys}
+      />
+    </LiveScoreProvider>
   );
 }

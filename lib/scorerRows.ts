@@ -61,13 +61,17 @@ export function buildScorerRows(played: PlayedMatch[], team?: string): ScorerRow
  * drill-down lists the in-progress fixture too (grouped under one shared
  * timestamp per merge pass so a brace still collapses into one line); never
  * mutates `base`. Display-only — this never feeds resolution/payouts, same as
- * lib/liveScores.ts itself.
+ * lib/liveScores.ts itself. Pass `team` to restrict the overlay to one
+ * country's scorers (the per-country "All Goals by Player" panel); omit it
+ * for the tournament-wide Goals tab.
  */
 export function mergeLiveGoals(
   base: ScorerRow[],
   live: LiveMatch[],
-  playedKeys: Set<string>
+  playedKeys: Set<string>,
+  team?: string
 ): ScorerRow[] {
+  const wantTeam = team ? normName(team) : null;
   const byKey = new Map(base.map((s) => [`${s.name}|${s.team}`, { ...s }]));
   // One shared "now" for this pass so multiple goals in the same live match
   // group into a single drill-down line (grouping key is opponent + dateIso).
@@ -78,6 +82,7 @@ export function mergeLiveGoals(
     const [home, away] = m.matchKey.split(" vs ");
     for (const s of m.scorers) {
       if (s.ownGoal) continue;
+      if (wantTeam && normName(s.team) !== wantTeam) continue;
       const key = `${s.name}|${s.team}`;
       const opponent = normName(s.team) === normName(home ?? "") ? away : home;
       const row =

@@ -1,0 +1,17 @@
+{
+  "worktree": { "bgIsolation": "none" },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/check-remote-sync.sh\"",
+            "timeout": 25,
+            "statusMessage": "Checking for changes from another device…"
+          }
+        ]
+      }
+    ]
+  }
+}
